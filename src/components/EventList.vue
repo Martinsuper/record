@@ -23,7 +23,7 @@
   </view>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
