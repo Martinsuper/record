@@ -1,3 +1,17 @@
+/* uView UI 样式变量 */
+@import 'uview-plus/theme.scss';
+
+/* 自定义变量 */
+$primary-color: #2979ff;
+$bg-color: #ffffff;
+$card-bg: #f8f8f8;
+$text-main: #333333;
+$text-secondary: #999999;
+$border-color: #e4e7ed;
+$radius-card: 8px;
+$radius-btn: 4px;
+$spacing-base: 16px;
+
 /**
  * 这里是uni-app内置的常用样式变量
  *
