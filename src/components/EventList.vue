@@ -1,25 +1,47 @@
 <template>
   <view class="event-list">
     <!-- Empty state -->
-    <u-empty v-if="filteredEvents.length === 0" text="暂无事件记录" mode="list" />
-
-    <!-- Event cards with swipe action -->
-    <u-swipe-action
-      v-for="event in filteredEvents"
-      :key="event.id"
-      :options="swipeOptions"
-      @click="handleSwipeClick($event, event.id)"
-    >
-      <view class="event-card">
-        <view class="event-header">
-          <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-            {{ getTypeName(event.typeId) }}
-          </view>
-          <text class="event-name">{{ event.name }}</text>
-        </view>
-        <view class="event-time">{{ formatTime(event.time) }}</view>
+    <view v-if="filteredEvents.length === 0" class="empty-state">
+      <view class="empty-icon">
+        <u-icon name="calendar" size="80" color="#99F6E4" />
       </view>
-    </u-swipe-action>
+      <text class="empty-title">暂无事件记录</text>
+      <text class="empty-subtitle">点击右下角按钮添加新事件</text>
+    </view>
+
+    <!-- Event cards -->
+    <view v-else class="event-cards">
+      <u-swipe-action
+        v-for="event in filteredEvents"
+        :key="event.id"
+        :options="swipeOptions"
+        @click="handleSwipeClick($event, event.id)"
+      >
+        <view class="event-card">
+          <view class="event-card-inner">
+            <!-- Type indicator -->
+            <view class="type-indicator" :style="{ backgroundColor: getTypeColor(event.typeId) }" />
+
+            <!-- Content -->
+            <view class="event-content">
+              <view class="event-header">
+                <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
+                  <u-icon name="tag" size="12" color="#ffffff" />
+                  <text class="type-name">{{ getTypeName(event.typeId) }}</text>
+                </view>
+              </view>
+
+              <text class="event-name">{{ event.name }}</text>
+
+              <view class="event-time">
+                <u-icon name="clock" size="14" color="#5EEAD4" />
+                <text class="time-text">{{ formatTime(event.time) }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </u-swipe-action>
+    </view>
   </view>
 </template>
 
@@ -43,7 +65,7 @@ const swipeOptions = [
   {
     text: '删除',
     style: {
-      backgroundColor: '#f56c6c'
+      backgroundColor: '#EF4444'
     }
   }
 ]
@@ -54,9 +76,14 @@ const handleSwipeClick = (index: number, eventId: string) => {
     uni.showModal({
       title: '确认删除',
       content: '确定要删除这个事件吗？',
+      confirmColor: '#EF4444',
       success: (res) => {
         if (res.confirm) {
           eventStore.deleteEvent(eventId)
+          uni.showToast({
+            title: '已删除',
+            icon: 'success'
+          })
         }
       }
     })
@@ -66,38 +93,101 @@ const handleSwipeClick = (index: number, eventId: string) => {
 
 <style lang="scss" scoped>
 .event-list {
-  padding: 16px;
-}
+  min-height: 60vh;
 
-.event-card {
-  background-color: #f8f8f8;
-  border-radius: 8px;
-  padding: 12px 16px;
-}
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120rpx 48rpx;
 
-.event-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
+    .empty-icon {
+      width: 160rpx;
+      height: 160rpx;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #E6FFFA 0%, #CCFBF1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32rpx;
+    }
 
-.type-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 12px;
-  color: #ffffff;
-  margin-right: 8px;
-}
+    .empty-title {
+      font-size: 32rpx;
+      font-weight: 600;
+      color: #134E4A;
+      margin-bottom: 12rpx;
+    }
 
-.event-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333333;
-}
+    .empty-subtitle {
+      font-size: 26rpx;
+      color: #5EEAD4;
+    }
+  }
 
-.event-time {
-  font-size: 14px;
-  color: #999999;
+  .event-cards {
+    .event-card {
+      background: #ffffff;
+      border-radius: 16rpx;
+      margin-bottom: 20rpx;
+      overflow: hidden;
+      box-shadow: 0 2rpx 12rpx rgba(13, 148, 136, 0.08);
+
+      .event-card-inner {
+        display: flex;
+        padding: 24rpx;
+
+        .type-indicator {
+          width: 6rpx;
+          border-radius: 6rpx;
+          margin-right: 20rpx;
+          flex-shrink: 0;
+        }
+
+        .event-content {
+          flex: 1;
+
+          .event-header {
+            margin-bottom: 12rpx;
+
+            .type-tag {
+              display: inline-flex;
+              align-items: center;
+              gap: 6rpx;
+              padding: 6rpx 16rpx;
+              border-radius: 20rpx;
+
+              .type-name {
+                font-size: 22rpx;
+                color: #ffffff;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .event-name {
+            font-size: 32rpx;
+            font-weight: 600;
+            color: #134E4A;
+            line-height: 1.4;
+            display: block;
+            margin-bottom: 12rpx;
+          }
+
+          .event-time {
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+
+            .time-text {
+              font-size: 24rpx;
+              color: #5EEAD4;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 </style>
