@@ -1,5 +1,6 @@
 import { createSSRApp } from "vue";
 import { createPinia } from "pinia";
+// @ts-ignore
 import uView from "uview-plus";
 import App from "./App.vue";
 
