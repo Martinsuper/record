@@ -64,7 +64,7 @@ export function clearAllStorage(): void {
 // 事件类型定义
 export interface TimelineEvent {
   id: string
-  title: string
+  name: string
   description?: string
   time: string
   typeId?: string

@@ -103,7 +103,7 @@ export const useEventStore = defineStore('event', {
       const storedEvents = getEvents()
       this.events = storedEvents.map((event) => ({
         id: event.id,
-        name: event.title || event.name || '',
+        name: event.name || '',
         typeId: event.typeId || '',
         time: typeof event.time === 'number' ? event.time : new Date(event.time).getTime(),
         createdAt: event.createdAt || Date.now()
@@ -117,7 +117,7 @@ export const useEventStore = defineStore('event', {
       // 转换为存储格式
       const storageData = this.events.map(event => ({
         id: event.id,
-        title: event.name,
+        name: event.name,
         typeId: event.typeId,
         time: String(event.time),
         createdAt: String(event.createdAt),
