@@ -25,7 +25,7 @@
 
     <!-- Event list -->
     <view class="list-section">
-      <EventList />
+      <EventList @edit="onEditEvent" />
     </view>
 
     <!-- Floating gradient add button -->
@@ -37,6 +37,15 @@
     <EventForm
       :visible="showEventForm"
       @close="showEventForm = false"
+      @save="onEventSaved"
+    />
+
+    <!-- Edit event form popup -->
+    <EventForm
+      :visible="showEditForm"
+      :isEditMode="true"
+      :editData="editingEvent"
+      @close="showEditForm = false"
       @save="onEventSaved"
     />
 
@@ -58,9 +67,18 @@ const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 
 const showEventForm = ref(false)
+const showEditForm = ref(false)
+const editingEvent = ref<{ id: string; name: string; typeId: string; time: number } | null>(null)
 
 function onEventSaved() {
   showEventForm.value = false
+  showEditForm.value = false
+  editingEvent.value = null
+}
+
+function onEditEvent(event: { id: string; name: string; typeId: string; time: number }) {
+  editingEvent.value = event
+  showEditForm.value = true
 }
 </script>
 

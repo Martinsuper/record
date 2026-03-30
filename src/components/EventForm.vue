@@ -4,9 +4,9 @@
       <!-- Header -->
       <view class="form-header">
         <view class="header-icon">
-          <text class="fa-solid fa-plus"></text>
+          <text class="fa-solid" :class="isEditMode ? 'fa-pen-to-square' : 'fa-plus'"></text>
         </view>
-        <text class="form-title gradient-text">添加事件</text>
+        <text class="form-title gradient-text">{{ isEditMode ? '编辑事件' : '添加事件' }}</text>
         <view class="close-btn" @click="onClose">
           <text class="fa-solid fa-times"></text>
         </view>
@@ -84,8 +84,17 @@ import { ref, watch, computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import TypePicker from './TypePicker.vue'
 
+interface EditData {
+  id: string
+  name: string
+  typeId: string
+  time: number
+}
+
 const props = defineProps({
-  visible: Boolean
+  visible: Boolean,
+  isEditMode: Boolean,
+  editData: Object as () => EditData | null
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -113,6 +122,13 @@ watch(() => props.visible, (val) => {
     eventName.value = ''
     eventTypeId.value = null
     eventTime.value = Date.now()
+
+    // 如果是编辑模式，填充现有数据
+    if (props.isEditMode && props.editData) {
+      eventName.value = props.editData.name
+      eventTypeId.value = props.editData.typeId
+      eventTime.value = props.editData.time
+    }
   }
 })
 
@@ -132,15 +148,26 @@ function onSave() {
     return
   }
 
-  eventStore.addEvent({
-    name: eventName.value.trim(),
-    typeId: eventTypeId.value,
-    time: eventTime.value
-  })
+  if (props.isEditMode && props.editData) {
+    // 更新现有事件
+    eventStore.updateEvent(props.editData.id, {
+      name: eventName.value.trim(),
+      typeId: eventTypeId.value,
+      time: eventTime.value
+    })
+    uni.showToast({ title: '事件已更新', icon: 'success' })
+  } else {
+    // 添加新事件
+    eventStore.addEvent({
+      name: eventName.value.trim(),
+      typeId: eventTypeId.value,
+      time: eventTime.value
+    })
+    uni.showToast({ title: '事件已添加', icon: 'success' })
+  }
 
   emit('save')
   emit('close')
-  uni.showToast({ title: '事件已添加', icon: 'success' })
 }
 
 function onClose() {

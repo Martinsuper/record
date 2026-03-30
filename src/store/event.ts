@@ -184,6 +184,19 @@ export const useEventStore = defineStore('event', {
     },
 
     /**
+     * 更新事件
+     * @param id 事件 ID
+     * @param event 更新的事件数据
+     */
+    updateEvent(id: string, event: Partial<Omit<EventData, 'id' | 'createdAt'>>): void {
+      const target = this.events.find(e => e.id === id)
+      if (target) {
+        Object.assign(target, event)
+        this.saveToStorage()
+      }
+    },
+
+    /**
      * 设置类型过滤
      * @param typeId 类型ID（null 表示不过滤）
      */

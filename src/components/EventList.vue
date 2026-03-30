@@ -31,34 +31,36 @@
           class="event-card glass-card"
           :style="{ position: 'absolute', top: getEventOffset(event._index) + 'px', width: '100%' }"
         >
-          <u-swipe-action
-            :options="swipeOptions"
-            @click="handleSwipeClick($event, event.id)"
-          >
-            <view class="event-card-inner">
-              <!-- Type indicator with gradient -->
-              <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
+          <u-swipe-action>
+            <u-swipe-action-item
+              :options="swipeOptions"
+              @click="(e: { index: number }) => handleSwipeClick(e.index, event.id)"
+            >
+              <view class="event-card-inner">
+                <!-- Type indicator with gradient -->
+                <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
 
-              <!-- Content -->
-              <view class="event-content">
-                <view class="event-header">
-                  <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-                    <text class="fa-solid fa-star"></text>
-                    <text class="type-name">{{ getTypeName(event.typeId) }}</text>
+                <!-- Content -->
+                <view class="event-content">
+                  <view class="event-header">
+                    <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
+                      <text class="fa-solid fa-star"></text>
+                      <text class="type-name">{{ getTypeName(event.typeId) }}</text>
+                    </view>
+                  </view>
+
+                  <text class="event-name">{{ event.name }}</text>
+
+                  <view class="event-time">
+                    <text class="fa-solid fa-clock"></text>
+                    <text class="time-text">{{ formatTime(event.time) }}</text>
                   </view>
                 </view>
-
-                <text class="event-name">{{ event.name }}</text>
-
-                <view class="event-time">
-                  <text class="fa-solid fa-clock"></text>
-                  <text class="time-text">{{ formatTime(event.time) }}</text>
-                </view>
               </view>
-            </view>
 
-            <!-- Card decoration -->
-            <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
+              <!-- Card decoration -->
+              <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
+            </u-swipe-action-item>
           </u-swipe-action>
         </view>
       </view>
@@ -157,8 +159,14 @@ onMounted(() => {
   containerHeight.value = systemInfo.windowHeight - 200
 })
 
-// Swipe action options
+// Swipe action options - 编辑和删除按钮
 const swipeOptions = [
+  {
+    text: '编辑',
+    style: {
+      backgroundColor: '#3B82F6'
+    }
+  },
   {
     text: '删除',
     style: {
@@ -167,9 +175,23 @@ const swipeOptions = [
   }
 ]
 
-// Handle swipe delete with confirmation
+const emit = defineEmits(['edit'])
+
+// Handle swipe action clicks
 const handleSwipeClick = (index: number, eventId: string) => {
+  const event = eventStore.events.find(e => e.id === eventId)
+  if (!event) return
+
   if (index === 0) {
+    // 编辑按钮
+    emit('edit', {
+      id: event.id,
+      name: event.name,
+      typeId: event.typeId,
+      time: event.time
+    })
+  } else if (index === 1) {
+    // 删除按钮
     uni.showModal({
       title: '确认删除',
       content: '确定要删除这个事件吗？',
