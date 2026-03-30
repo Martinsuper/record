@@ -1,18 +1,18 @@
 import { defineConfig } from "vite";
 import uni from "@dcloudio/vite-plugin-uni";
-import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    uni(),
-    // Bundle 分析器（仅在需要时启用）
-    visualizer({
-      filename: 'stats.html',
-      gzipSize: true,
-      brotliSize: true,
-      open: false // 设置为 true 可在构建后自动打开
-    })
+    uni()
+    // Bundle 分析器：运行 npm run build:h5 后会在项目根目录生成 stats.html
+    // 如需启用，取消下方注释并确保在构建模式下运行
+    // visualizer({
+    //   filename: 'stats.html',
+    //   gzipSize: true,
+    //   brotliSize: true,
+    //   open: false
+    // })
   ],
   // uview-plus 需要配置 transpileDependencies
   build: {
