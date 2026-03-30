@@ -20,6 +20,13 @@ export default {
 
     // 小程序环境：使用 wx.loadFontFace 加载网络字体
     // #ifdef MP-WEIXIN
+    // 计算导航栏高度（胶囊按钮底部 + 胶囊按钮距状态栏的间距）
+    const menuButton = uni.getMenuButtonBoundingClientRect()
+    const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
+    const navBarHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
+    console.log('导航栏高度:', navBarHeight)
+    uni.setStorageSync('navBarHeight', navBarHeight)
+
     wx.loadFontFace({
       family: 'Font Awesome 6 Free',
       source: `url("${FA_FONT_URLS.solid}")`,
@@ -68,6 +75,7 @@ export default {
 
 /* Base page styles - Gradient background */
 page {
+  --nav-bar-height: 88px; // 默认值，页面会动态覆盖
   background: linear-gradient(180deg, $bg-primary 0%, $bg-secondary 50%, #F0F9FF 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   -webkit-font-smoothing: antialiased;

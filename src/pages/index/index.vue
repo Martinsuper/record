@@ -1,5 +1,5 @@
 <template>
-  <view class="page-index">
+  <view class="page-index" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
     <!-- Glassmorphism Header -->
     <view class="header glass-card">
       <view class="header-content">
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import FilterBar from '@/components/FilterBar.vue'
@@ -65,6 +65,12 @@ import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
+
+// 动态计算导航栏高度
+const navBarHeight = computed(() => {
+  const height = uni.getStorageSync('navBarHeight')
+  return height || 88 // 默认值
+})
 
 const showEventForm = ref(false)
 const showEditForm = ref(false)
@@ -89,7 +95,7 @@ function onEditEvent(event: { id: string; name: string; typeId: string; time: nu
 
   .header {
     margin: $spacing-lg $spacing-md;
-    margin-top: calc(var(--status-bar-height) + $spacing-lg);
+    margin-top: calc(var(--nav-bar-height) + $spacing-lg);
     padding: $spacing-xl $spacing-lg;
     position: relative;
     overflow: hidden;

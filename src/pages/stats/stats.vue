@@ -1,5 +1,5 @@
 <template>
-  <view class="page-stats">
+  <view class="page-stats" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
     <!-- Gradient header -->
     <view class="header">
       <view class="header-bg"></view>
@@ -101,13 +101,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
+
+// 动态计算导航栏高度
+const navBarHeight = computed(() => {
+  const height = uni.getStorageSync('navBarHeight')
+  return height || 88 // 默认值
+})
 
 const totalCount = computed(() => eventStore.totalCount)
 const monthCount = computed(() => eventStore.monthCount)
@@ -151,14 +157,14 @@ function getBarHeight(count: number): number {
   .header {
     position: relative;
     padding: $spacing-xl $spacing-md;
-    padding-top: calc(var(--status-bar-height) + $spacing-xl);
+    padding-top: calc(var(--nav-bar-height) + $spacing-xl);
 
     .header-bg {
       position: absolute;
       left: 0;
       right: 0;
       top: 0;
-      height: calc(var(--status-bar-height) + 200rpx);
+      height: calc(var(--nav-bar-height) + 200rpx);
       background: $gradient-primary;
       opacity: 0.15;
       border-radius: 0 0 $radius-xl $radius-xl;
