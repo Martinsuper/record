@@ -14,47 +14,60 @@
       </view>
     </view>
 
-    <!-- Event cards -->
-    <view v-else class="event-cards">
-      <u-swipe-action
-        v-for="(event, index) in filteredEvents"
-        :key="event.id"
-        :options="swipeOptions"
-        @click="handleSwipeClick($event, event.id)"
-      >
-        <view class="event-card glass-card fade-in-up" :style="{ animationDelay: (index * 0.05) + 's' }">
-          <view class="event-card-inner">
-            <!-- Type indicator with gradient -->
-            <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
+    <!-- Virtual scroll container -->
+    <scroll-view
+      v-else
+      scroll-y
+      :style="{ height: containerHeight + 'px' }"
+      @scroll="onScroll"
+      class="virtual-scroll-container"
+    >
+      <!-- 占位容器，撑开真实高度 -->
+      <view :style="{ height: totalHeight + 'px', position: 'relative' }">
+        <!-- 仅渲染可视区域项目 -->
+        <view
+          v-for="event in visibleEvents"
+          :key="event.id"
+          class="event-card glass-card"
+          :style="{ position: 'absolute', top: getEventOffset(event._index) + 'px', width: '100%' }"
+        >
+          <u-swipe-action
+            :options="swipeOptions"
+            @click="handleSwipeClick($event, event.id)"
+          >
+            <view class="event-card-inner">
+              <!-- Type indicator with gradient -->
+              <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
 
-            <!-- Content -->
-            <view class="event-content">
-              <view class="event-header">
-                <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-                  <text class="fa-solid fa-star"></text>
-                  <text class="type-name">{{ getTypeName(event.typeId) }}</text>
+              <!-- Content -->
+              <view class="event-content">
+                <view class="event-header">
+                  <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
+                    <text class="fa-solid fa-star"></text>
+                    <text class="type-name">{{ getTypeName(event.typeId) }}</text>
+                  </view>
+                </view>
+
+                <text class="event-name">{{ event.name }}</text>
+
+                <view class="event-time">
+                  <text class="fa-solid fa-clock"></text>
+                  <text class="time-text">{{ formatTime(event.time) }}</text>
                 </view>
               </view>
-
-              <text class="event-name">{{ event.name }}</text>
-
-              <view class="event-time">
-                <text class="fa-solid fa-clock"></text>
-                <text class="time-text">{{ formatTime(event.time) }}</text>
-              </view>
             </view>
-          </view>
 
-          <!-- Card decoration -->
-          <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
+            <!-- Card decoration -->
+            <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
+          </u-swipe-action>
         </view>
-      </u-swipe-action>
-    </view>
+      </view>
+    </scroll-view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { formatTime } from '@/utils/time'
@@ -83,6 +96,50 @@ function adjustColor(color: string, amount: number): string {
   const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount))
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
+
+// 虚拟滚动配置
+const ITEM_HEIGHT = 140 // 卡片高度 + 间距（rpx 转 px 约 70px，使用 140px 确保安全）
+const BUFFER_SIZE = 5   // 缓冲区项目数
+
+const scrollTop = ref(0)
+const containerHeight = ref(500) // 默认容器高度，后续会计算
+
+// 计算可视范围
+const visibleRange = computed(() => {
+  const startIndex = Math.max(0, Math.floor(scrollTop.value / ITEM_HEIGHT) - BUFFER_SIZE)
+  const visibleCount = Math.ceil(containerHeight.value / ITEM_HEIGHT) + 2 * BUFFER_SIZE
+  const endIndex = Math.min(filteredEvents.value.length, startIndex + visibleCount)
+  return { startIndex, endIndex }
+})
+
+// 仅渲染可视区域的事件
+const visibleEvents = computed(() => {
+  const { startIndex, endIndex } = visibleRange.value
+  return filteredEvents.value.slice(startIndex, endIndex).map((event, i) => ({
+    ...event,
+    _index: startIndex + i
+  }))
+})
+
+// 总高度（用于撑开滚动容器）
+const totalHeight = computed(() => filteredEvents.value.length * ITEM_HEIGHT)
+
+// 计算每个项目的偏移位置
+function getEventOffset(index: number): number {
+  return index * ITEM_HEIGHT
+}
+
+// 滚动事件处理
+function onScroll(e: { detail: { scrollTop: number } }): void {
+  scrollTop.value = e.detail.scrollTop
+}
+
+// 初始化时计算容器高度
+onMounted(() => {
+  const systemInfo = uni.getSystemInfoSync()
+  // 减去 header + filter + tabbar 大约 200px
+  containerHeight.value = systemInfo.windowHeight - 200
+})
 
 // Swipe action options
 const swipeOptions = [
@@ -117,8 +174,6 @@ const handleSwipeClick = (index: number, eventId: string) => {
 
 <style lang="scss" scoped>
 .event-list {
-  min-height: 60vh;
-
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -188,9 +243,13 @@ const handleSwipeClick = (index: number, eventId: string) => {
     }
   }
 
-  .event-cards {
+  .virtual-scroll-container {
+    overflow: hidden;
+
     .event-card {
-      margin-bottom: $spacing-md;
+      margin-bottom: 0;
+      padding-bottom: $spacing-md;
+      box-sizing: border-box;
       overflow: hidden;
       position: relative;
 
