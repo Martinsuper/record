@@ -99,17 +99,25 @@ export const useEventStore = defineStore('event', {
      */
     recentDaysStats: (state): { date: string; count: number; timestamp: number }[] => {
       const recentDays = getRecentDays(7)
-      return recentDays.map(day => {
-        const dayEnd = day.timestamp + 24 * 60 * 60 * 1000
-        const count = state.events.filter(
-          event => event.time >= day.timestamp && event.time < dayEnd
-        ).length
-        return {
-          date: day.label,
-          count,
-          timestamp: day.timestamp
+      const counts = new Map<number, number>()
+
+      // 单次遍历所有事件，统计每个天数的事件数
+      state.events.forEach(event => {
+        for (const day of recentDays) {
+          const dayEnd = day.timestamp + 24 * 60 * 60 * 1000
+          if (event.time >= day.timestamp && event.time < dayEnd) {
+            counts.set(day.timestamp, (counts.get(day.timestamp) || 0) + 1)
+            break // 找到匹配的天数后跳出
+          }
         }
       })
+
+      // 构建返回结果
+      return recentDays.map(day => ({
+        date: day.label,
+        count: counts.get(day.timestamp) || 0,
+        timestamp: day.timestamp
+      }))
     }
   },
 
