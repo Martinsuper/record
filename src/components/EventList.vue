@@ -75,28 +75,13 @@ import { formatTime } from '@/utils/time'
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 
-const filteredEvents = computed(() => eventStore.filteredEvents)
+// 监听事件类型变化，确保组件能响应类型变更
+const typeVersion = computed(() => eventTypeStore.types.length)
 
-// 颜色计算缓存 - 避免每次渲染重复计算
-const typeColorMap = computed(() => {
-  const map = new Map<string, { gradient: string; baseColor: string }>()
-
-  // 预计算所有类型的颜色
-  eventTypeStore.types.forEach(type => {
-    const gradient = `linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 100%)`
-    map.set(type.id, {
-      gradient,
-      baseColor: type.color
-    })
-  })
-
-  // 添加默认类型（未分类）的颜色
-  map.set('', {
-    gradient: 'linear-gradient(135deg, #999999 0%, #7a7a7a 100%)',
-    baseColor: '#999999'
-  })
-
-  return map
+const filteredEvents = computed(() => {
+  // 访问 typeVersion 以建立响应式依赖
+  void typeVersion.value
+  return eventStore.filteredEvents
 })
 
 // Helper to adjust color brightness
@@ -109,13 +94,19 @@ function adjustColor(color: string, amount: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
-// 使用缓存的颜色映射
+// 直接从 store 获取类型信息，确保响应式更新
 function getTypeGradient(typeId: string): string {
-  return typeColorMap.value.get(typeId)?.gradient || typeColorMap.value.get('')!.gradient
+  const type = eventTypeStore.getTypeById(typeId)
+  if (type) {
+    return `linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 100%)`
+  }
+  // 默认类型（未分类）的颜色
+  return 'linear-gradient(135deg, #999999 0%, #7a7a7a 100%)'
 }
 
 function getTypeColor(typeId: string): string {
-  return typeColorMap.value.get(typeId)?.baseColor || '#999999'
+  const type = eventTypeStore.getTypeById(typeId)
+  return type?.color || '#999999'
 }
 
 function getTypeName(typeId: string): string {
