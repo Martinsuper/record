@@ -28,7 +28,8 @@ export const useEventStore = defineStore('event', {
     filterTimeRange: 'all' as TimeRangeFilter,
     // 新增：缓存状态
     _filteredEventsCache: null as EventData[] | null,
-    _cacheKey: ''
+    _cacheKey: '',
+    isLoaded: false
   }),
 
   getters: {
@@ -126,6 +127,9 @@ export const useEventStore = defineStore('event', {
      * 从存储加载事件
      */
     loadFromStorage(): void {
+      // 防止重复加载
+      if (this.isLoaded) return
+
       const storedEvents = getEvents()
       this.events = storedEvents.map((event) => ({
         id: event.id,
@@ -134,6 +138,7 @@ export const useEventStore = defineStore('event', {
         time: typeof event.time === 'number' ? event.time : new Date(event.time).getTime(),
         createdAt: event.createdAt || Date.now()
       }))
+      this.isLoaded = true
     },
 
     /**

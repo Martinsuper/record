@@ -19,7 +19,8 @@ function generateTypeId(): string {
 
 export const useEventTypeStore = defineStore('eventType', {
   state: () => ({
-    types: [] as EventTypeData[]
+    types: [] as EventTypeData[],
+    isLoaded: false
   }),
 
   getters: {
@@ -78,6 +79,9 @@ export const useEventTypeStore = defineStore('eventType', {
      * 从存储加载事件类型
      */
     loadFromStorage(): void {
+      // 防止重复加载
+      if (this.isLoaded) return
+
       const storedTypes = getEventTypes()
       // 转换为 EventTypeData 格式（添加 createdAt 字段）
       this.types = storedTypes.map((type) => ({
@@ -86,6 +90,7 @@ export const useEventTypeStore = defineStore('eventType', {
         color: type.color,
         createdAt: type.createdAt || Date.now()
       }))
+      this.isLoaded = true
     },
 
     /**
