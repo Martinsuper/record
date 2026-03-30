@@ -7,9 +7,9 @@
         :class="{ active: eventStore.filterType }"
         @click="showTypePicker = true"
       >
-        <text class="fa-solid fa-tags" :class="{ active: eventStore.filterType }"></text>
+        <text class="fa-solid" :class="{ active: eventStore.filterType }">&#xf02c;</text>
         <text class="chip-text">{{ typeTitle }}</text>
-        <text class="fa-solid fa-chevron-down"></text>
+        <text class="fa-solid">&#xf078;</text>
       </view>
 
       <!-- Time range filter -->
@@ -18,9 +18,9 @@
         :class="{ active: eventStore.filterTimeRange !== 'all' }"
         @click="showTimePicker = true"
       >
-        <text class="fa-solid fa-clock" :class="{ active: eventStore.filterTimeRange !== 'all' }"></text>
+        <text class="fa-solid" :class="{ active: eventStore.filterTimeRange !== 'all' }">&#xf017;</text>
         <text class="chip-text">{{ timeRangeTitle }}</text>
-        <text class="fa-solid fa-chevron-down"></text>
+        <text class="fa-solid">&#xf078;</text>
       </view>
 
       <!-- Clear filters -->
@@ -29,7 +29,7 @@
         class="clear-btn"
         @click="clearFilters"
       >
-        <text class="fa-solid fa-times"></text>
+        <text class="fa-solid">&#xf00d;</text>
         <text class="clear-text">清除</text>
       </view>
     </view>
@@ -40,7 +40,7 @@
         <view class="picker-header">
           <text class="picker-title">选择类型</text>
           <view class="close-btn" @click="showTypePicker = false">
-            <text class="fa-solid fa-times"></text>
+            <text class="fa-solid">&#xf00d;</text>
           </view>
         </view>
         <scroll-view scroll-y class="picker-list">
@@ -51,7 +51,7 @@
           >
             <view class="type-color" style="background: $gradient-primary"></view>
             <text class="picker-item-text">全部类型</text>
-            <text v-if="!eventStore.filterType" class="fa-solid fa-check"></text>
+            <text v-if="!eventStore.filterType" class="fa-solid">&#xf00c;</text>
           </view>
           <view
             v-for="type in eventTypeStore.types"
@@ -62,7 +62,7 @@
           >
             <view class="type-color" :style="{ backgroundColor: type.color }"></view>
             <text class="picker-item-text">{{ type.name }}</text>
-            <text v-if="eventStore.filterType === type.id" class="fa-solid fa-check"></text>
+            <text v-if="eventStore.filterType === type.id" class="fa-solid">&#xf00c;</text>
           </view>
         </scroll-view>
       </view>
@@ -74,7 +74,7 @@
         <view class="picker-header">
           <text class="picker-title">选择时间范围</text>
           <view class="close-btn" @click="showTimePicker = false">
-            <text class="fa-solid fa-times"></text>
+            <text class="fa-solid">&#xf00d;</text>
           </view>
         </view>
         <view class="picker-list">
@@ -85,9 +85,9 @@
             :class="{ selected: eventStore.filterTimeRange === option.value }"
             @click="selectTimeRange(option.value)"
           >
-            <text class="fa-solid" :class="option.icon"></text>
+            <text class="fa-solid">{{ option.iconUnicode }}</text>
             <text class="picker-item-text">{{ option.label }}</text>
-            <text v-if="eventStore.filterTimeRange === option.value" class="fa-solid fa-check"></text>
+            <text v-if="eventStore.filterTimeRange === option.value" class="fa-solid">&#xf00c;</text>
           </view>
         </view>
       </view>
@@ -106,12 +106,12 @@ const eventStore = useEventStore()
 const showTypePicker = ref(false)
 const showTimePicker = ref(false)
 
-// Time range options with icons
+// Time range options with Unicode icons
 const timeRangeOptions = [
-  { value: 'all', label: '全部', icon: 'fa-calendar' },
-  { value: 'today', label: '今天', icon: 'fa-sun' },
-  { value: 'week', label: '本周', icon: 'fa-calendar-week' },
-  { value: 'month', label: '本月', icon: 'fa-calendar-days' }
+  { value: 'all', label: '全部', iconUnicode: '\uf133' },
+  { value: 'today', label: '今天', iconUnicode: '\uf185' },
+  { value: 'week', label: '本周', iconUnicode: '\uf784' },
+  { value: 'month', label: '本月', iconUnicode: '\uf073' }
 ]
 
 // Time range display mapping

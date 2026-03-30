@@ -4,17 +4,17 @@
     <view class="picker-trigger glass-card" @click="openPicker">
       <view v-if="selectedTypeData" class="selected-type">
         <view class="type-badge" :style="{ backgroundColor: selectedTypeData.color }">
-          <text class="fa-solid fa-star"></text>
+          <text class="fa-solid">&#xf005;</text>
         </view>
         <text class="type-name">{{ selectedTypeData.name }}</text>
       </view>
       <text v-else class="placeholder">请选择类型</text>
-      <text class="fa-solid fa-chevron-down"></text>
+      <text class="fa-solid">&#xf078;</text>
     </view>
 
     <!-- New type button -->
     <view class="new-type-btn" @click="openNewTypePopup">
-      <text class="fa-solid fa-plus"></text>
+      <text class="fa-solid">&#xf067;</text>
     </view>
 
     <!-- Type picker popup -->
@@ -23,7 +23,7 @@
         <view class="picker-header">
           <text class="picker-title gradient-text">选择类型</text>
           <view class="close-btn" @click="closePicker">
-            <text class="fa-solid fa-times"></text>
+            <text class="fa-solid">&#xf00d;</text>
           </view>
         </view>
         <scroll-view class="picker-content" scroll-y>
@@ -35,19 +35,19 @@
             @click="selectType(type.id)"
           >
             <view class="type-badge" :style="{ backgroundColor: type.color }">
-              <text class="fa-solid fa-star"></text>
+              <text class="fa-solid">&#xf005;</text>
             </view>
             <text class="type-name">{{ type.name }}</text>
-            <text v-if="modelValue === type.id" class="fa-solid fa-check"></text>
+            <text v-if="modelValue === type.id" class="fa-solid">&#xf00c;</text>
           </view>
           <view v-if="eventTypeStore.types.length === 0" class="empty-tip">
-            <text class="fa-solid fa-inbox"></text>
+            <text class="fa-solid">&#xf01c;</text>
             <text>暂无类型，请新建</text>
           </view>
         </scroll-view>
         <view class="picker-footer">
           <view class="add-new-btn" @click="openNewTypePopup">
-            <text class="fa-solid fa-plus"></text>
+            <text class="fa-solid">&#xf067;</text>
             <text>新建类型</text>
           </view>
         </view>
@@ -59,11 +59,11 @@
       <view class="new-type-popup glass-card">
         <view class="popup-header">
           <view class="header-icon">
-            <text class="fa-solid fa-plus"></text>
+            <text class="fa-solid">&#xf067;</text>
           </view>
           <text class="popup-title gradient-text">新建类型</text>
           <view class="close-btn" @click="closeNewTypePopup">
-            <text class="fa-solid fa-times"></text>
+            <text class="fa-solid">&#xf00d;</text>
           </view>
         </view>
 
@@ -93,7 +93,7 @@
                 :style="{ backgroundColor: color.value }"
                 @click="selectColor(color.value)"
               >
-                <text v-if="newTypeColor === color.value" class="fa-solid fa-check"></text>
+                <text v-if="newTypeColor === color.value" class="fa-solid">&#xf00c;</text>
               </view>
             </view>
           </view>
@@ -103,7 +103,7 @@
             <text class="form-label">预览效果</text>
             <view class="preview-card">
               <view class="type-tag" :style="{ backgroundColor: newTypeColor }">
-                <text class="fa-solid fa-star"></text>
+                <text class="fa-solid">&#xf005;</text>
                 <text class="tag-name">{{ newTypeName || '类型名称' }}</text>
               </view>
             </view>
@@ -115,7 +115,7 @@
             <text>取消</text>
           </view>
           <view class="btn-save" :class="{ disabled: !newTypeName.trim() }" @click="saveNewType">
-            <text class="fa-solid fa-check"></text>
+            <text class="fa-solid">&#xf00c;</text>
             <text>保存</text>
           </view>
         </view>

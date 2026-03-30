@@ -4,7 +4,7 @@
     <view class="header glass-card">
       <view class="header-content">
         <view class="header-icon-wrap">
-          <text class="fa-solid fa-sparkles"></text>
+          <text class="fa-solid">&#xf896;</text>
         </view>
         <view class="header-text">
           <text class="header-title gradient-text">记录时光</text>
@@ -30,7 +30,7 @@
 
     <!-- Floating gradient add button -->
     <view class="add-btn pulse-glow" @click="showEventForm = true">
-      <text class="fa-solid fa-plus"></text>
+      <text class="fa-solid">&#xf067;</text>
     </view>
 
     <!-- Event form popup -->

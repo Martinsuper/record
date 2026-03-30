@@ -5,7 +5,7 @@
       :class="{ active: currentIndex === 0 }"
       @click="switchTab(0)"
     >
-      <text class="fa-solid fa-list-check"></text>
+      <text class="fa-solid">&#xf0ae;</text>
       <text class="tab-text">事件</text>
     </view>
     <view
@@ -13,7 +13,7 @@
       :class="{ active: currentIndex === 1 }"
       @click="switchTab(1)"
     >
-      <text class="fa-solid fa-chart-pie"></text>
+      <text class="fa-solid">&#xf200;</text>
       <text class="tab-text">统计</text>
     </view>
   </view>

@@ -3,7 +3,7 @@
     <!-- Empty state -->
     <view v-if="filteredEvents.length === 0" class="empty-state glass-card">
       <view class="empty-icon-wrap">
-        <text class="fa-solid fa-inbox"></text>
+        <text class="fa-solid">&#xf01c;</text>
       </view>
       <text class="empty-title">暂无事件记录</text>
       <text class="empty-subtitle">点击右下角按钮添加新事件</text>
@@ -44,7 +44,7 @@
                 <view class="event-content">
                   <view class="event-header">
                     <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-                      <text class="fa-solid fa-star"></text>
+                      <text class="fa-solid">&#xf005;</text>
                       <text class="type-name">{{ getTypeName(event.typeId) }}</text>
                     </view>
                   </view>
@@ -52,7 +52,7 @@
                   <text class="event-name">{{ event.name }}</text>
 
                   <view class="event-time">
-                    <text class="fa-solid fa-clock"></text>
+                    <text class="fa-solid">&#xf017;</text>
                     <text class="time-text">{{ formatTime(event.time) }}</text>
                   </view>
                 </view>

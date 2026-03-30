@@ -4,11 +4,12 @@
       <!-- Header -->
       <view class="form-header">
         <view class="header-icon">
-          <text class="fa-solid" :class="isEditMode ? 'fa-pen-to-square' : 'fa-plus'"></text>
+          <text v-if="isEditMode" class="fa-solid">&#xf044;</text>
+          <text v-else class="fa-solid">&#xf067;</text>
         </view>
         <text class="form-title gradient-text">{{ isEditMode ? '编辑事件' : '添加事件' }}</text>
         <view class="close-btn" @click="onClose">
-          <text class="fa-solid fa-times"></text>
+          <text class="fa-solid">&#xf00d;</text>
         </view>
       </view>
 
@@ -17,7 +18,7 @@
         <!-- Event name -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid fa-pen"></text>
+            <text class="fa-solid">&#xf304;</text>
             <text>事件名称</text>
           </view>
           <view class="input-wrapper">
@@ -34,7 +35,7 @@
         <!-- Type picker -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid fa-tags"></text>
+            <text class="fa-solid">&#xf02c;</text>
             <text>事件类型</text>
           </view>
           <TypePicker v-model="eventTypeId" />
@@ -43,7 +44,7 @@
         <!-- Time picker -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid fa-clock"></text>
+            <text class="fa-solid">&#xf017;</text>
             <text>事件时间</text>
           </view>
           <view class="time-picker-row">
@@ -57,9 +58,9 @@
               @close="showTimePicker = false"
             />
             <view class="time-display" @click="showTimePicker = true">
-              <text class="fa-solid fa-calendar"></text>
+              <text class="fa-solid">&#xf133;</text>
               <text class="time-text">{{ formattedTime }}</text>
-              <text class="fa-solid fa-chevron-right"></text>
+              <text class="fa-solid">&#xf054;</text>
             </view>
           </view>
         </view>
@@ -71,7 +72,7 @@
           <text>取消</text>
         </view>
         <view class="btn-save" @click="onSave">
-          <text class="fa-solid fa-check"></text>
+          <text class="fa-solid">&#xf00c;</text>
           <text>保存</text>
         </view>
       </view>

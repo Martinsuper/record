@@ -4,7 +4,7 @@
     <view class="header">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid fa-chart-pie"></text>
+        <text class="fa-solid">&#xf200;</text>
         <text class="header-title">统计概览</text>
       </view>
     </view>
@@ -13,7 +13,7 @@
     <view class="overview-section">
       <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.1s">
         <view class="stat-icon">
-          <text class="fa-solid fa-layer-group"></text>
+          <text class="fa-solid">&#xf5fd;</text>
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ totalCount }}</text>
@@ -24,7 +24,7 @@
 
       <view class="stat-card gradient-cool fade-in-up" style="animation-delay: 0.2s">
         <view class="stat-icon">
-          <text class="fa-solid fa-calendar-check"></text>
+          <text class="fa-solid">&#xf274;</text>
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ monthCount }}</text>
@@ -37,12 +37,12 @@
     <!-- Type distribution -->
     <view class="section-card glass-card fade-in-up" style="animation-delay: 0.3s">
       <view class="section-header">
-        <text class="fa-solid fa-tags"></text>
+        <text class="fa-solid">&#xf02c;</text>
         <text class="section-title">类型分布</text>
       </view>
 
       <view v-if="typeStats.length === 0" class="empty-state">
-        <text class="fa-solid fa-inbox"></text>
+        <text class="fa-solid">&#xf01c;</text>
         <text class="empty-text">暂无数据</text>
       </view>
 
@@ -50,7 +50,7 @@
         <view v-for="(stat, index) in typeStats" :key="stat.typeId" class="type-stat-item">
           <view class="type-header">
             <view class="type-badge" :style="{ backgroundColor: stat.color }">
-              <text class="fa-solid fa-star"></text>
+              <text class="fa-solid">&#xf005;</text>
             </view>
             <text class="type-name">{{ stat.name }}</text>
             <text class="type-count">{{ stat.count }}</text>
@@ -66,12 +66,12 @@
     <!-- Recent 7 days trend -->
     <view class="section-card glass-card fade-in-up" style="animation-delay: 0.4s">
       <view class="section-header">
-        <text class="fa-solid fa-chart-line"></text>
+        <text class="fa-solid">&#xf201;</text>
         <text class="section-title">近7天趋势</text>
       </view>
 
       <view v-if="recentStats.length === 0" class="empty-state">
-        <text class="fa-solid fa-inbox"></text>
+        <text class="fa-solid">&#xf01c;</text>
         <text class="empty-text">暂无数据</text>
       </view>
 
