@@ -25,7 +25,10 @@ export const useEventStore = defineStore('event', {
   state: () => ({
     events: [] as EventData[],
     filterType: null as string | null,
-    filterTimeRange: 'all' as TimeRangeFilter
+    filterTimeRange: 'all' as TimeRangeFilter,
+    // 新增：缓存状态
+    _filteredEventsCache: null as EventData[] | null,
+    _cacheKey: ''
   }),
 
   getters: {
@@ -33,6 +36,16 @@ export const useEventStore = defineStore('event', {
      * 过滤后的事件列表（按时间倒序）
      */
     filteredEvents: (state): EventData[] => {
+      // 生成缓存 key：包含过滤条件和数据变化标识
+      const lastEventTime = state.events.length > 0 ? state.events[state.events.length - 1].time : 0
+      const cacheKey = `${state.filterType}-${state.filterTimeRange}-${state.events.length}-${lastEventTime}`
+
+      // 缓存命中时直接返回
+      if (state._cacheKey === cacheKey && state._filteredEventsCache) {
+        return state._filteredEventsCache
+      }
+
+      // 计算过滤结果
       let result = [...state.events]
 
       // 按类型过滤
@@ -45,6 +58,10 @@ export const useEventStore = defineStore('event', {
 
       // 按时间倒序排序
       result.sort((a, b) => b.time - a.time)
+
+      // 更新缓存
+      state._filteredEventsCache = result
+      state._cacheKey = cacheKey
 
       return result
     },
