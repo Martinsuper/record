@@ -2,6 +2,13 @@
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 
+// FontAwesome CDN 字体 URL
+const FA_FONT_URLS = {
+  solid: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.ttf',
+  regular: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.ttf',
+  brands: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-brands-400.ttf'
+}
+
 export default {
   onLaunch() {
     console.log('App Launch')
@@ -10,6 +17,36 @@ export default {
     const eventTypeStore = useEventTypeStore()
     eventStore.loadFromStorage()
     eventTypeStore.loadFromStorage()
+
+    // 小程序环境：使用 wx.loadFontFace 加载网络字体
+    // #ifdef MP-WEIXIN
+    wx.loadFontFace({
+      family: 'Font Awesome 6 Free',
+      source: `url("${FA_FONT_URLS.solid}")`,
+      weight: '900',
+      global: true,
+      scopes: ['webview', 'native'],
+      success: () => console.log('FontAwesome Solid 加载成功'),
+      fail: (err) => console.error('FontAwesome Solid 加载失败', err)
+    })
+    wx.loadFontFace({
+      family: 'Font Awesome 6 Free',
+      source: `url("${FA_FONT_URLS.regular}")`,
+      weight: '400',
+      global: true,
+      scopes: ['webview', 'native'],
+      success: () => console.log('FontAwesome Regular 加载成功'),
+      fail: (err) => console.error('FontAwesome Regular 加载失败', err)
+    })
+    wx.loadFontFace({
+      family: 'Font Awesome 6 Brands',
+      source: `url("${FA_FONT_URLS.brands}")`,
+      global: true,
+      scopes: ['webview', 'native'],
+      success: () => console.log('FontAwesome Brands 加载成功'),
+      fail: (err) => console.error('FontAwesome Brands 加载失败', err)
+    })
+    // #endif
   },
   onShow() {
     console.log('App Show')
@@ -63,6 +100,25 @@ text {
   font-family: 'Font Awesome 6 Brands' !important;
   font-weight: 400;
 }
+
+/* FontAwesome 图标 Unicode 映射（小程序必需） */
+.fa-plus::before { content: '\f067'; }
+.fa-list-check::before { content: '\f0ae'; }
+.fa-chart-pie::before { content: '\f200'; }
+.fa-inbox::before { content: '\f01c'; }
+.fa-star::before { content: '\f005'; }
+.fa-clock::before { content: '\f017'; }
+.fa-layer-group::before { content: '\f5fd'; }
+.fa-calendar-check::before { content: '\f274'; }
+.fa-tags::before { content: '\f02c'; }
+.fa-chart-line::before { content: '\f201'; }
+.fa-chevron-down::before { content: '\f078'; }
+.fa-chevron-right::before { content: '\f054'; }
+.fa-times::before { content: '\f00d'; }
+.fa-check::before { content: '\f00c'; }
+.fa-pen::before { content: '\f304'; }
+.fa-calendar::before { content: '\f133'; }
+.fa-sparkles::before { content: '\f896'; }
 
 /* Glass card component */
 .glass-card {
