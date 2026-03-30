@@ -77,15 +77,27 @@ const eventTypeStore = useEventTypeStore()
 
 const filteredEvents = computed(() => eventStore.filteredEvents)
 
-// Get type name and color from store
-const getTypeName = (typeId: string) => eventTypeStore.getTypeName(typeId)
-const getTypeColor = (typeId: string) => eventTypeStore.getTypeColor(typeId)
+// 颜色计算缓存 - 避免每次渲染重复计算
+const typeColorMap = computed(() => {
+  const map = new Map<string, { gradient: string; baseColor: string }>()
 
-// Get gradient for type indicator
-const getTypeGradient = (typeId: string) => {
-  const color = eventTypeStore.getTypeColor(typeId)
-  return `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -20)} 100%)`
-}
+  // 预计算所有类型的颜色
+  eventTypeStore.types.forEach(type => {
+    const gradient = `linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 100%)`
+    map.set(type.id, {
+      gradient,
+      baseColor: type.color
+    })
+  })
+
+  // 添加默认类型（未分类）的颜色
+  map.set('', {
+    gradient: 'linear-gradient(135deg, #999999 0%, #7a7a7a 100%)',
+    baseColor: '#999999'
+  })
+
+  return map
+})
 
 // Helper to adjust color brightness
 function adjustColor(color: string, amount: number): string {
@@ -95,6 +107,19 @@ function adjustColor(color: string, amount: number): string {
   const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount))
   const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount))
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
+}
+
+// 使用缓存的颜色映射
+function getTypeGradient(typeId: string): string {
+  return typeColorMap.value.get(typeId)?.gradient || typeColorMap.value.get('')!.gradient
+}
+
+function getTypeColor(typeId: string): string {
+  return typeColorMap.value.get(typeId)?.baseColor || '#999999'
+}
+
+function getTypeName(typeId: string): string {
+  return eventTypeStore.getTypeName(typeId)
 }
 
 // 虚拟滚动配置
