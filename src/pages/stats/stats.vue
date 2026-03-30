@@ -109,11 +109,6 @@ import CustomTabBar from '@/components/CustomTabBar.vue'
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 
-onMounted(() => {
-  eventStore.loadFromStorage()
-  eventTypeStore.loadFromStorage()
-})
-
 const totalCount = computed(() => eventStore.totalCount)
 const monthCount = computed(() => eventStore.monthCount)
 

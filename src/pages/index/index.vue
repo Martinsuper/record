@@ -59,12 +59,6 @@ const eventTypeStore = useEventTypeStore()
 
 const showEventForm = ref(false)
 
-// Load data on mount
-onMounted(() => {
-  eventStore.loadFromStorage()
-  eventTypeStore.loadFromStorage()
-})
-
 function onEventSaved() {
   showEventForm.value = false
 }

@@ -1,7 +1,15 @@
 <script>
+import { useEventStore } from '@/store/event'
+import { useEventTypeStore } from '@/store/eventType'
+
 export default {
   onLaunch() {
     console.log('App Launch')
+    // 集中初始化 store 数据
+    const eventStore = useEventStore()
+    const eventTypeStore = useEventTypeStore()
+    eventStore.loadFromStorage()
+    eventTypeStore.loadFromStorage()
   },
   onShow() {
     console.log('App Show')
