@@ -1,14 +1,14 @@
 <template>
   <u-popup :show="visible" mode="bottom" round="24" @close="onClose">
-    <view class="event-form">
+    <view class="event-form glass-card">
       <!-- Header -->
       <view class="form-header">
         <view class="header-icon">
-          <u-icon name="plus-circle" size="32" color="#0D9488" />
+          <text class="fa-solid fa-plus"></text>
         </view>
-        <text class="form-title">添加事件</text>
+        <text class="form-title gradient-text">添加事件</text>
         <view class="close-btn" @click="onClose">
-          <u-icon name="close" size="20" color="#5EEAD4" />
+          <text class="fa-solid fa-times"></text>
         </view>
       </view>
 
@@ -17,7 +17,7 @@
         <!-- Event name -->
         <view class="form-item">
           <view class="form-label">
-            <u-icon name="edit-pen" size="16" color="#0D9488" />
+            <text class="fa-solid fa-pen"></text>
             <text>事件名称</text>
           </view>
           <view class="input-wrapper">
@@ -25,8 +25,8 @@
               v-model="eventName"
               placeholder="请输入事件名称"
               border="none"
-              :customStyle="{ fontSize: '32rpx', color: '#134E4A' }"
-              :placeholderStyle="{ color: '#99F6E4' }"
+              :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
+              :placeholderStyle="{ color: '#9CA3AF' }"
             />
           </view>
         </view>
@@ -34,7 +34,7 @@
         <!-- Type picker -->
         <view class="form-item">
           <view class="form-label">
-            <u-icon name="tags" size="16" color="#0D9488" />
+            <text class="fa-solid fa-tags"></text>
             <text>事件类型</text>
           </view>
           <TypePicker v-model="eventTypeId" />
@@ -43,7 +43,7 @@
         <!-- Time picker -->
         <view class="form-item">
           <view class="form-label">
-            <u-icon name="clock" size="16" color="#0D9488" />
+            <text class="fa-solid fa-clock"></text>
             <text>事件时间</text>
           </view>
           <view class="time-picker-row">
@@ -57,9 +57,9 @@
               @close="showTimePicker = false"
             />
             <view class="time-display" @click="showTimePicker = true">
-              <u-icon name="calendar" size="20" color="#0D9488" />
+              <text class="fa-solid fa-calendar"></text>
               <text class="time-text">{{ formattedTime }}</text>
-              <u-icon name="arrow-right" size="16" color="#5EEAD4" />
+              <text class="fa-solid fa-chevron-right"></text>
             </view>
           </view>
         </view>
@@ -71,7 +71,7 @@
           <text>取消</text>
         </view>
         <view class="btn-save" @click="onSave">
-          <u-icon name="checkmark" size="20" color="#ffffff" />
+          <text class="fa-solid fa-check"></text>
           <text>保存</text>
         </view>
       </view>
@@ -150,71 +150,85 @@ function onClose() {
 
 <style lang="scss" scoped>
 .event-form {
-  background: #ffffff;
-  border-radius: 48rpx 48rpx 0 0;
-  padding: 32rpx;
-  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-lg;
+  padding-bottom: calc($spacing-lg + env(safe-area-inset-bottom));
 
   .form-header {
     display: flex;
     align-items: center;
-    margin-bottom: 32rpx;
+    margin-bottom: $spacing-xl;
 
     .header-icon {
       width: 64rpx;
       height: 64rpx;
-      border-radius: 16rpx;
-      background: #E6FFFA;
+      border-radius: $radius-lg;
+      background: $gradient-aurora;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 16rpx;
+      margin-right: $spacing-md;
+
+      .fa-solid {
+        font-size: 28rpx;
+        color: #ffffff;
+      }
     }
 
     .form-title {
       flex: 1;
       font-size: 36rpx;
       font-weight: 700;
-      color: #134E4A;
     }
 
     .close-btn {
-      width: 64rpx;
-      height: 64rpx;
-      border-radius: 50%;
-      background: #F0FDFA;
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: $radius-full;
+      background: rgba(99, 102, 241, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+
+      .fa-solid {
+        font-size: 18rpx;
+        color: $text-secondary;
+      }
     }
   }
 
   .form-body {
     .form-item {
-      margin-bottom: 32rpx;
+      margin-bottom: $spacing-xl;
 
       .form-label {
         display: flex;
         align-items: center;
-        gap: 8rpx;
-        margin-bottom: 16rpx;
+        gap: $spacing-xs;
+        margin-bottom: $spacing-md;
+
+        .fa-solid {
+          font-size: 16rpx;
+          color: $accent-indigo;
+        }
 
         text {
           font-size: 28rpx;
           font-weight: 600;
-          color: #134E4A;
+          color: $text-primary;
         }
       }
 
       .input-wrapper {
-        background: #F0FDFA;
-        border-radius: 16rpx;
-        padding: 24rpx;
-        border: 2rpx solid #D1E7E4;
-        transition: border-color 0.2s ease;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: $radius-lg;
+        padding: $spacing-md;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        transition: all $transition-fast;
 
         &:focus-within {
-          border-color: #0D9488;
+          border-color: $accent-indigo;
+          background: rgba(99, 102, 241, 0.08);
         }
       }
 
@@ -222,16 +236,21 @@ function onClose() {
         .time-display {
           display: flex;
           align-items: center;
-          background: #F0FDFA;
-          border-radius: 16rpx;
-          padding: 24rpx;
-          border: 2rpx solid #D1E7E4;
-          gap: 16rpx;
+          background: rgba(99, 102, 241, 0.05);
+          border-radius: $radius-lg;
+          padding: $spacing-md;
+          border: 1px solid rgba(99, 102, 241, 0.1);
+          gap: $spacing-md;
+
+          .fa-solid {
+            font-size: 20rpx;
+            color: $accent-indigo;
+          }
 
           .time-text {
             flex: 1;
             font-size: 32rpx;
-            color: #134E4A;
+            color: $text-primary;
             font-weight: 500;
           }
         }
@@ -241,14 +260,14 @@ function onClose() {
 
   .form-footer {
     display: flex;
-    gap: 20rpx;
-    margin-top: 40rpx;
+    gap: $spacing-md;
+    margin-top: $spacing-xl;
 
     .btn-cancel {
       flex: 1;
-      height: 96rpx;
-      border-radius: 16rpx;
-      background: #F0FDFA;
+      height: 88rpx;
+      border-radius: $radius-lg;
+      background: rgba(99, 102, 241, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -256,20 +275,25 @@ function onClose() {
       text {
         font-size: 32rpx;
         font-weight: 600;
-        color: #5EEAD4;
+        color: $text-secondary;
       }
     }
 
     .btn-save {
       flex: 2;
-      height: 96rpx;
-      border-radius: 16rpx;
-      background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+      height: 88rpx;
+      border-radius: $radius-lg;
+      background: $gradient-primary;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8rpx;
-      box-shadow: 0 8rpx 24rpx rgba(13, 148, 136, 0.3);
+      gap: $spacing-sm;
+      box-shadow: $shadow-glow;
+
+      .fa-solid {
+        font-size: 20rpx;
+        color: #ffffff;
+      }
 
       text {
         font-size: 32rpx;

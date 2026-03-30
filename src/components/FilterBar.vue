@@ -7,9 +7,9 @@
         :class="{ active: eventStore.filterType }"
         @click="showTypePicker = true"
       >
-        <u-icon name="tags" size="16" :color="eventStore.filterType ? '#ffffff' : '#0D9488'" />
+        <text class="fa-solid fa-tags" :class="{ active: eventStore.filterType }"></text>
         <text class="chip-text">{{ typeTitle }}</text>
-        <u-icon name="arrow-down" size="14" :color="eventStore.filterType ? '#ffffff' : '#5EEAD4'" />
+        <text class="fa-solid fa-chevron-down"></text>
       </view>
 
       <!-- Time range filter -->
@@ -18,9 +18,9 @@
         :class="{ active: eventStore.filterTimeRange !== 'all' }"
         @click="showTimePicker = true"
       >
-        <u-icon name="clock" size="16" :color="eventStore.filterTimeRange !== 'all' ? '#ffffff' : '#0D9488'" />
+        <text class="fa-solid fa-clock" :class="{ active: eventStore.filterTimeRange !== 'all' }"></text>
         <text class="chip-text">{{ timeRangeTitle }}</text>
-        <u-icon name="arrow-down" size="14" :color="eventStore.filterTimeRange !== 'all' ? '#ffffff' : '#5EEAD4'" />
+        <text class="fa-solid fa-chevron-down"></text>
       </view>
 
       <!-- Clear filters -->
@@ -29,18 +29,18 @@
         class="clear-btn"
         @click="clearFilters"
       >
-        <u-icon name="close" size="16" color="#EF4444" />
+        <text class="fa-solid fa-times"></text>
         <text class="clear-text">清除</text>
       </view>
     </view>
 
     <!-- Type picker popup -->
-    <u-popup :show="showTypePicker" mode="bottom" round="16" @close="showTypePicker = false">
-      <view class="picker-popup">
+    <u-popup :show="showTypePicker" mode="bottom" round="24" @close="showTypePicker = false">
+      <view class="picker-popup glass-card">
         <view class="picker-header">
           <text class="picker-title">选择类型</text>
           <view class="close-btn" @click="showTypePicker = false">
-            <u-icon name="close" size="20" color="#5EEAD4" />
+            <text class="fa-solid fa-times"></text>
           </view>
         </view>
         <scroll-view scroll-y class="picker-list">
@@ -49,9 +49,9 @@
             :class="{ selected: !eventStore.filterType }"
             @click="selectType(null)"
           >
-            <view class="type-color" style="background-color: #0D9488" />
+            <view class="type-color" style="background: $gradient-primary"></view>
             <text class="picker-item-text">全部类型</text>
-            <u-icon v-if="!eventStore.filterType" name="checkmark" size="20" color="#0D9488" />
+            <text v-if="!eventStore.filterType" class="fa-solid fa-check"></text>
           </view>
           <view
             v-for="type in eventTypeStore.types"
@@ -60,21 +60,21 @@
             :class="{ selected: eventStore.filterType === type.id }"
             @click="selectType(type.id)"
           >
-            <view class="type-color" :style="{ backgroundColor: type.color }" />
+            <view class="type-color" :style="{ backgroundColor: type.color }"></view>
             <text class="picker-item-text">{{ type.name }}</text>
-            <u-icon v-if="eventStore.filterType === type.id" name="checkmark" size="20" color="#0D9488" />
+            <text v-if="eventStore.filterType === type.id" class="fa-solid fa-check"></text>
           </view>
         </scroll-view>
       </view>
     </u-popup>
 
     <!-- Time range picker popup -->
-    <u-popup :show="showTimePicker" mode="bottom" round="16" @close="showTimePicker = false">
-      <view class="picker-popup">
+    <u-popup :show="showTimePicker" mode="bottom" round="24" @close="showTimePicker = false">
+      <view class="picker-popup glass-card">
         <view class="picker-header">
           <text class="picker-title">选择时间范围</text>
           <view class="close-btn" @click="showTimePicker = false">
-            <u-icon name="close" size="20" color="#5EEAD4" />
+            <text class="fa-solid fa-times"></text>
           </view>
         </view>
         <view class="picker-list">
@@ -85,9 +85,9 @@
             :class="{ selected: eventStore.filterTimeRange === option.value }"
             @click="selectTimeRange(option.value)"
           >
-            <u-icon :name="option.icon" size="20" :color="eventStore.filterTimeRange === option.value ? '#0D9488' : '#5EEAD4'" />
+            <text class="fa-solid" :class="option.icon"></text>
             <text class="picker-item-text">{{ option.label }}</text>
-            <u-icon v-if="eventStore.filterTimeRange === option.value" name="checkmark" size="20" color="#0D9488" />
+            <text v-if="eventStore.filterTimeRange === option.value" class="fa-solid fa-check"></text>
           </view>
         </view>
       </view>
@@ -108,10 +108,10 @@ const showTimePicker = ref(false)
 
 // Time range options with icons
 const timeRangeOptions = [
-  { value: 'all', label: '全部', icon: 'calendar' },
-  { value: 'today', label: '今天', icon: 'sun' },
-  { value: 'week', label: '本周', icon: 'calendar-fill' },
-  { value: 'month', label: '本月', icon: 'list' }
+  { value: 'all', label: '全部', icon: 'fa-calendar' },
+  { value: 'today', label: '今天', icon: 'fa-sun' },
+  { value: 'week', label: '本周', icon: 'fa-calendar-week' },
+  { value: 'month', label: '本月', icon: 'fa-calendar-days' }
 ]
 
 // Time range display mapping
@@ -155,31 +155,45 @@ function clearFilters() {
 .filter-bar {
   .filter-chips {
     display: flex;
-    gap: 16rpx;
-    padding: 0 8rpx;
+    gap: $spacing-md;
+    flex-wrap: wrap;
 
     .filter-chip {
       display: flex;
       align-items: center;
-      gap: 8rpx;
-      padding: 16rpx 24rpx;
-      background: #ffffff;
-      border-radius: 40rpx;
-      border: 2rpx solid #D1E7E4;
-      transition: all 0.2s ease;
+      gap: $spacing-xs;
+      padding: $spacing-sm $spacing-md;
+      background: $glass-bg;
+      backdrop-filter: blur(10px);
+      border-radius: $radius-full;
+      border: 1px solid $glass-border;
+      transition: all $transition-normal;
 
       &.active {
-        background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        background: $gradient-primary;
         border-color: transparent;
+
+        .fa-solid {
+          color: #ffffff;
+        }
 
         .chip-text {
           color: #ffffff;
         }
       }
 
+      .fa-solid {
+        font-size: 16rpx;
+        color: $text-secondary;
+
+        &.active {
+          color: #ffffff;
+        }
+      }
+
       .chip-text {
         font-size: 26rpx;
-        color: #134E4A;
+        color: $text-primary;
         font-weight: 500;
       }
     }
@@ -187,76 +201,100 @@ function clearFilters() {
     .clear-btn {
       display: flex;
       align-items: center;
-      gap: 6rpx;
-      padding: 16rpx 20rpx;
+      gap: $spacing-xs;
+      padding: $spacing-sm $spacing-md;
+
+      .fa-solid {
+        font-size: 16rpx;
+        color: $uni-color-error;
+      }
 
       .clear-text {
         font-size: 24rpx;
-        color: #EF4444;
+        color: $uni-color-error;
         font-weight: 500;
       }
     }
   }
 
   .picker-popup {
-    background: #ffffff;
-    border-radius: 32rpx 32rpx 0 0;
+    border-radius: $radius-xl $radius-xl 0 0;
+    padding: $spacing-lg;
+    padding-bottom: calc($spacing-lg + env(safe-area-inset-bottom));
 
     .picker-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 32rpx;
-      border-bottom: 2rpx solid #E6FFFA;
+      margin-bottom: $spacing-lg;
 
       .picker-title {
         font-size: 32rpx;
-        font-weight: 600;
-        color: #134E4A;
+        font-weight: 700;
+        color: $text-primary;
       }
 
       .close-btn {
-        width: 64rpx;
-        height: 64rpx;
-        border-radius: 50%;
-        background: #F0FDFA;
+        width: 56rpx;
+        height: 56rpx;
+        border-radius: $radius-full;
+        background: rgba(99, 102, 241, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .fa-solid {
+          font-size: 18rpx;
+          color: $text-secondary;
+        }
       }
     }
 
     .picker-list {
       max-height: 600rpx;
-      padding: 16rpx 32rpx;
 
       .picker-item {
         display: flex;
         align-items: center;
-        padding: 24rpx 16rpx;
-        border-radius: 12rpx;
-        transition: background 0.2s ease;
+        padding: $spacing-md;
+        border-radius: $radius-md;
+        transition: background $transition-fast;
 
         &:active {
-          background: #F0FDFA;
+          background: rgba(99, 102, 241, 0.05);
         }
 
         &.selected {
-          background: #E6FFFA;
+          background: rgba(99, 102, 241, 0.1);
+
+          .picker-item-text {
+            color: $accent-indigo;
+            font-weight: 600;
+          }
         }
 
         .type-color {
-          width: 32rpx;
-          height: 32rpx;
-          border-radius: 8rpx;
-          margin-right: 20rpx;
+          width: 36rpx;
+          height: 36rpx;
+          border-radius: $radius-sm;
+          margin-right: $spacing-md;
+        }
+
+        .fa-solid {
+          font-size: 18rpx;
+          color: $text-secondary;
+          margin-right: $spacing-md;
         }
 
         .picker-item-text {
           flex: 1;
           font-size: 30rpx;
-          color: #134E4A;
-          font-weight: 500;
+          color: $text-primary;
+        }
+
+        .fa-check {
+          font-size: 18rpx;
+          color: $accent-indigo;
         }
       }
     }

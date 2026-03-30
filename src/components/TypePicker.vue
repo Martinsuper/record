@@ -1,29 +1,29 @@
 <template>
   <view class="type-picker">
     <!-- Current selection display + picker -->
-    <view class="picker-trigger" @click="openPicker">
+    <view class="picker-trigger glass-card" @click="openPicker">
       <view v-if="selectedTypeData" class="selected-type">
         <view class="type-badge" :style="{ backgroundColor: selectedTypeData.color }">
-          <u-icon name="star-fill" size="12" color="#ffffff" />
+          <text class="fa-solid fa-star"></text>
         </view>
         <text class="type-name">{{ selectedTypeData.name }}</text>
       </view>
       <text v-else class="placeholder">请选择类型</text>
-      <u-icon name="arrow-down" size="16" color="#5EEAD4"></u-icon>
+      <text class="fa-solid fa-chevron-down"></text>
     </view>
 
     <!-- New type button -->
     <view class="new-type-btn" @click="openNewTypePopup">
-      <u-icon name="plus" size="16" color="#ffffff"></u-icon>
+      <text class="fa-solid fa-plus"></text>
     </view>
 
     <!-- Type picker popup -->
     <u-popup :show="showPicker" mode="bottom" round="24" @close="closePicker">
-      <view class="picker-popup">
+      <view class="picker-popup glass-card">
         <view class="picker-header">
-          <text class="picker-title">选择类型</text>
+          <text class="picker-title gradient-text">选择类型</text>
           <view class="close-btn" @click="closePicker">
-            <u-icon name="close" size="20" color="#5EEAD4"></u-icon>
+            <text class="fa-solid fa-times"></text>
           </view>
         </view>
         <scroll-view class="picker-content" scroll-y>
@@ -35,19 +35,19 @@
             @click="selectType(type.id)"
           >
             <view class="type-badge" :style="{ backgroundColor: type.color }">
-              <u-icon name="star-fill" size="12" color="#ffffff" />
+              <text class="fa-solid fa-star"></text>
             </view>
             <text class="type-name">{{ type.name }}</text>
-            <u-icon v-if="modelValue === type.id" name="checkmark" size="20" color="#0D9488"></u-icon>
+            <text v-if="modelValue === type.id" class="fa-solid fa-check"></text>
           </view>
           <view v-if="eventTypeStore.types.length === 0" class="empty-tip">
-            <u-icon name="info-circle" size="24" color="#99F6E4" />
+            <text class="fa-solid fa-inbox"></text>
             <text>暂无类型，请新建</text>
           </view>
         </scroll-view>
         <view class="picker-footer">
           <view class="add-new-btn" @click="openNewTypePopup">
-            <u-icon name="plus-circle" size="20" color="#0D9488" />
+            <text class="fa-solid fa-plus"></text>
             <text>新建类型</text>
           </view>
         </view>
@@ -56,14 +56,14 @@
 
     <!-- New type popup -->
     <u-popup :show="showNewTypePopup" mode="bottom" round="24" @close="closeNewTypePopup">
-      <view class="new-type-popup">
+      <view class="new-type-popup glass-card">
         <view class="popup-header">
           <view class="header-icon">
-            <u-icon name="plus-circle" size="28" color="#0D9488" />
+            <text class="fa-solid fa-plus"></text>
           </view>
-          <text class="popup-title">新建类型</text>
+          <text class="popup-title gradient-text">新建类型</text>
           <view class="close-btn" @click="closeNewTypePopup">
-            <u-icon name="close" size="20" color="#5EEAD4"></u-icon>
+            <text class="fa-solid fa-times"></text>
           </view>
         </view>
 
@@ -76,7 +76,7 @@
                 v-model="newTypeName"
                 placeholder="请输入类型名称"
                 border="none"
-                :customStyle="{ fontSize: '32rpx', color: '#134E4A' }"
+                :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
               />
             </view>
           </view>
@@ -93,7 +93,7 @@
                 :style="{ backgroundColor: color.value }"
                 @click="selectColor(color.value)"
               >
-                <u-icon v-if="newTypeColor === color.value" name="checkmark" size="20" color="#ffffff"></u-icon>
+                <text v-if="newTypeColor === color.value" class="fa-solid fa-check"></text>
               </view>
             </view>
           </view>
@@ -103,7 +103,7 @@
             <text class="form-label">预览效果</text>
             <view class="preview-card">
               <view class="type-tag" :style="{ backgroundColor: newTypeColor }">
-                <u-icon name="star-fill" size="12" color="#ffffff" />
+                <text class="fa-solid fa-star"></text>
                 <text class="tag-name">{{ newTypeName || '类型名称' }}</text>
               </view>
             </view>
@@ -115,7 +115,7 @@
             <text>取消</text>
           </view>
           <view class="btn-save" :class="{ disabled: !newTypeName.trim() }" @click="saveNewType">
-            <u-icon name="checkmark" size="20" color="#ffffff" />
+            <text class="fa-solid fa-check"></text>
             <text>保存</text>
           </view>
         </view>
@@ -143,9 +143,9 @@ const eventTypeStore = useEventTypeStore()
 const colorOptions = [
   { value: '#EF4444', label: '红色' },
   { value: '#F97316', label: '橙色' },
-  { value: '#F59E0B', label: '黄色' },
+  { value: '#FBBF24', label: '黄色' },
   { value: '#10B981', label: '绿色' },
-  { value: '#0D9488', label: '青色' },
+  { value: '#06B6D4', label: '青色' },
   { value: '#3B82F6', label: '蓝色' },
   { value: '#6366F1', label: '靛蓝' },
   { value: '#8B5CF6', label: '紫色' },
@@ -159,7 +159,7 @@ const showNewTypePopup = ref(false)
 
 // New type form
 const newTypeName = ref('')
-const newTypeColor = ref('#0D9488')
+const newTypeColor = ref('#3B82F6')
 
 // Get selected type data
 const selectedTypeData = computed(() => {
@@ -186,7 +186,7 @@ function selectType(typeId: string) {
 // Open new type popup
 function openNewTypePopup() {
   newTypeName.value = ''
-  newTypeColor.value = '#0D9488'
+  newTypeColor.value = '#3B82F6'
   showNewTypePopup.value = true
   closePicker()
 }
@@ -227,83 +227,99 @@ function saveNewType() {
 .type-picker {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: $spacing-md;
 
   .picker-trigger {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20rpx 24rpx;
-    background: #F0FDFA;
-    border-radius: 16rpx;
-    border: 2rpx solid #D1E7E4;
+    padding: $spacing-md;
     min-height: 80rpx;
 
     .selected-type {
       display: flex;
       align-items: center;
-      gap: 12rpx;
+      gap: $spacing-sm;
 
       .type-badge {
         width: 36rpx;
         height: 36rpx;
-        border-radius: 10rpx;
+        border-radius: $radius-sm;
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .fa-solid {
+          font-size: 16rpx;
+          color: #ffffff;
+        }
       }
 
       .type-name {
         font-size: 30rpx;
         font-weight: 500;
-        color: #134E4A;
+        color: $text-primary;
       }
     }
 
     .placeholder {
       font-size: 30rpx;
-      color: #99F6E4;
+      color: $text-muted;
+    }
+
+    .fa-solid {
+      font-size: 16rpx;
+      color: $text-secondary;
     }
   }
 
   .new-type-btn {
     width: 80rpx;
     height: 80rpx;
-    border-radius: 16rpx;
-    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+    border-radius: $radius-lg;
+    background: $gradient-aurora;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4rpx 12rpx rgba(13, 148, 136, 0.3);
+    box-shadow: $shadow-medium;
+
+    .fa-solid {
+      font-size: 26rpx;
+      color: #ffffff;
+    }
   }
 }
 
 .picker-popup {
-  background: #ffffff;
-  border-radius: 48rpx 48rpx 0 0;
-  padding: 32rpx;
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-lg;
+  padding-bottom: calc($spacing-lg + env(safe-area-inset-bottom));
 
   .picker-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24rpx;
+    margin-bottom: $spacing-lg;
 
     .picker-title {
       font-size: 36rpx;
       font-weight: 700;
-      color: #134E4A;
     }
 
     .close-btn {
-      width: 64rpx;
-      height: 64rpx;
-      border-radius: 50%;
-      background: #F0FDFA;
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: $radius-full;
+      background: rgba(99, 102, 241, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+
+      .fa-solid {
+        font-size: 18rpx;
+        color: $text-secondary;
+      }
     }
   }
 
@@ -313,33 +329,48 @@ function saveNewType() {
     .type-option {
       display: flex;
       align-items: center;
-      gap: 16rpx;
-      padding: 24rpx 16rpx;
-      border-radius: 12rpx;
-      transition: background 0.2s ease;
+      gap: $spacing-md;
+      padding: $spacing-md;
+      border-radius: $radius-md;
+      transition: background $transition-fast;
 
       &:active {
-        background: #F0FDFA;
+        background: rgba(99, 102, 241, 0.05);
       }
 
       &.selected {
-        background: #E6FFFA;
+        background: rgba(99, 102, 241, 0.1);
+
+        .type-name {
+          color: $accent-indigo;
+          font-weight: 600;
+        }
       }
 
       .type-badge {
         width: 40rpx;
         height: 40rpx;
-        border-radius: 12rpx;
+        border-radius: $radius-sm;
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .fa-solid {
+          font-size: 18rpx;
+          color: #ffffff;
+        }
       }
 
       .type-name {
         flex: 1;
         font-size: 30rpx;
         font-weight: 500;
-        color: #134E4A;
+        color: $text-primary;
+      }
+
+      .fa-check {
+        font-size: 18rpx;
+        color: $accent-indigo;
       }
     }
 
@@ -348,127 +379,155 @@ function saveNewType() {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16rpx;
-      padding: 60rpx;
-      color: #5EEAD4;
+      gap: $spacing-md;
+      padding: $spacing-xl;
+      color: $text-secondary;
       font-size: 28rpx;
+
+      .fa-solid {
+        font-size: 28rpx;
+      }
     }
   }
 
   .picker-footer {
-    margin-top: 24rpx;
-    padding-top: 24rpx;
-    border-top: 2rpx solid #E6FFFA;
+    margin-top: $spacing-lg;
+    padding-top: $spacing-lg;
+    border-top: 1px solid rgba(99, 102, 241, 0.1);
 
     .add-new-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12rpx;
-      padding: 24rpx;
-      background: #F0FDFA;
-      border-radius: 16rpx;
-      border: 2rpx dashed #0D9488;
+      gap: $spacing-sm;
+      padding: $spacing-md;
+      background: rgba(99, 102, 241, 0.05);
+      border-radius: $radius-lg;
+      border: 1px dashed $accent-indigo;
+
+      .fa-solid {
+        font-size: 18rpx;
+        color: $accent-indigo;
+      }
 
       text {
         font-size: 30rpx;
         font-weight: 600;
-        color: #0D9488;
+        color: $accent-indigo;
       }
     }
   }
 }
 
 .new-type-popup {
-  background: #ffffff;
-  border-radius: 48rpx 48rpx 0 0;
-  padding: 32rpx;
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-lg;
+  padding-bottom: calc($spacing-lg + env(safe-area-inset-bottom));
 
   .popup-header {
     display: flex;
     align-items: center;
-    margin-bottom: 32rpx;
+    margin-bottom: $spacing-xl;
 
     .header-icon {
       width: 64rpx;
       height: 64rpx;
-      border-radius: 16rpx;
-      background: #E6FFFA;
+      border-radius: $radius-lg;
+      background: $gradient-cool;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-right: 16rpx;
+      margin-right: $spacing-md;
+
+      .fa-solid {
+        font-size: 28rpx;
+        color: #ffffff;
+      }
     }
 
     .popup-title {
       flex: 1;
       font-size: 36rpx;
       font-weight: 700;
-      color: #134E4A;
     }
 
     .close-btn {
-      width: 64rpx;
-      height: 64rpx;
-      border-radius: 50%;
-      background: #F0FDFA;
+      width: 56rpx;
+      height: 56rpx;
+      border-radius: $radius-full;
+      background: rgba(99, 102, 241, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
+
+      .fa-solid {
+        font-size: 18rpx;
+        color: $text-secondary;
+      }
     }
   }
 
   .popup-content {
     .form-item {
-      margin-bottom: 32rpx;
+      margin-bottom: $spacing-xl;
 
       .form-label {
         display: block;
         font-size: 28rpx;
         font-weight: 600;
-        color: #134E4A;
-        margin-bottom: 16rpx;
+        color: $text-primary;
+        margin-bottom: $spacing-md;
       }
 
       .input-wrapper {
-        background: #F0FDFA;
-        border-radius: 16rpx;
-        padding: 24rpx;
-        border: 2rpx solid #D1E7E4;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: $radius-lg;
+        padding: $spacing-md;
+        border: 1px solid rgba(99, 102, 241, 0.1);
       }
 
       .color-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 20rpx;
+        gap: $spacing-md;
 
         .color-option {
-          width: 72rpx;
-          height: 72rpx;
-          border-radius: 16rpx;
+          width: 64rpx;
+          height: 64rpx;
+          border-radius: $radius-md;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: all $transition-fast;
 
           &.selected {
-            transform: scale(1.1);
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+            transform: scale(1.15);
+            box-shadow: $shadow-medium;
+
+            .fa-solid {
+              font-size: 22rpx;
+              color: #ffffff;
+            }
           }
         }
       }
 
       .preview-card {
-        background: #F0FDFA;
-        border-radius: 16rpx;
-        padding: 24rpx;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: $radius-lg;
+        padding: $spacing-lg;
 
         .type-tag {
           display: inline-flex;
           align-items: center;
-          gap: 8rpx;
-          padding: 10rpx 20rpx;
-          border-radius: 20rpx;
+          gap: $spacing-xs;
+          padding: $spacing-sm $spacing-md;
+          border-radius: $radius-full;
+
+          .fa-solid {
+            font-size: 14rpx;
+            color: #ffffff;
+          }
 
           .tag-name {
             font-size: 26rpx;
@@ -482,14 +541,14 @@ function saveNewType() {
 
   .popup-footer {
     display: flex;
-    gap: 20rpx;
-    margin-top: 16rpx;
+    gap: $spacing-md;
+    margin-top: $spacing-xl;
 
     .btn-cancel {
       flex: 1;
-      height: 96rpx;
-      border-radius: 16rpx;
-      background: #F0FDFA;
+      height: 88rpx;
+      border-radius: $radius-lg;
+      background: rgba(99, 102, 241, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -497,20 +556,25 @@ function saveNewType() {
       text {
         font-size: 32rpx;
         font-weight: 600;
-        color: #5EEAD4;
+        color: $text-secondary;
       }
     }
 
     .btn-save {
       flex: 2;
-      height: 96rpx;
-      border-radius: 16rpx;
-      background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+      height: 88rpx;
+      border-radius: $radius-lg;
+      background: $gradient-primary;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8rpx;
-      box-shadow: 0 8rpx 24rpx rgba(13, 148, 136, 0.3);
+      gap: $spacing-sm;
+      box-shadow: $shadow-glow;
+
+      .fa-solid {
+        font-size: 20rpx;
+        color: #ffffff;
+      }
 
       text {
         font-size: 32rpx;

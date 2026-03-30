@@ -1,10 +1,20 @@
 <template>
   <view class="page-index">
-    <!-- Header -->
-    <view class="header">
+    <!-- Glassmorphism Header -->
+    <view class="header glass-card">
       <view class="header-content">
-        <text class="header-title">事件记录</text>
-        <text class="header-subtitle">记录生活点滴</text>
+        <view class="header-icon-wrap">
+          <text class="fa-solid fa-sparkles"></text>
+        </view>
+        <view class="header-text">
+          <text class="header-title gradient-text">记录时光</text>
+          <text class="header-subtitle">捕捉每一个精彩瞬间</text>
+        </view>
+      </view>
+      <view class="header-decoration">
+        <view class="deco-circle c1"></view>
+        <view class="deco-circle c2"></view>
+        <view class="deco-circle c3"></view>
       </view>
     </view>
 
@@ -18,9 +28,9 @@
       <EventList />
     </view>
 
-    <!-- Floating add button -->
-    <view class="add-btn" @click="showEventForm = true">
-      <u-icon name="plus" color="#ffffff" size="28" />
+    <!-- Floating gradient add button -->
+    <view class="add-btn pulse-glow" @click="showEventForm = true">
+      <text class="fa-solid fa-plus"></text>
     </view>
 
     <!-- Event form popup -->
@@ -29,6 +39,9 @@
       @close="showEventForm = false"
       @save="onEventSaved"
     />
+
+    <!-- Custom TabBar -->
+    <CustomTabBar :current="0" />
   </view>
 </template>
 
@@ -39,6 +52,7 @@ import { useEventTypeStore } from '@/store/eventType'
 import FilterBar from '@/components/FilterBar.vue'
 import EventList from '@/components/EventList.vue'
 import EventForm from '@/components/EventForm.vue'
+import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
@@ -59,60 +73,121 @@ function onEventSaved() {
 <style lang="scss" scoped>
 .page-index {
   min-height: 100vh;
-  background: linear-gradient(180deg, #E6FFFA 0%, #F0FDFA 100%);
-  padding-bottom: 120rpx;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-lg);
 
   .header {
-    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
-    padding: 60rpx 32rpx 40rpx;
-    border-radius: 0 0 48rpx 48rpx;
-    box-shadow: 0 8rpx 32rpx rgba(13, 148, 136, 0.2);
+    margin: $spacing-lg $spacing-md;
+    padding: $spacing-xl $spacing-lg;
+    position: relative;
+    overflow: hidden;
 
     .header-content {
       display: flex;
-      flex-direction: column;
       align-items: center;
+      gap: $spacing-md;
 
-      .header-title {
-        font-size: 48rpx;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: 4rpx;
+      .header-icon-wrap {
+        width: 80rpx;
+        height: 80rpx;
+        border-radius: $radius-lg;
+        background: $gradient-warm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.3);
+
+        .fa-solid {
+          font-size: 36rpx;
+          color: #ffffff;
+        }
       }
 
-      .header-subtitle {
-        font-size: 24rpx;
-        color: rgba(255, 255, 255, 0.8);
-        margin-top: 8rpx;
+      .header-text {
+        flex: 1;
+
+        .header-title {
+          font-size: 44rpx;
+          font-weight: 700;
+          letter-spacing: 2rpx;
+          display: block;
+        }
+
+        .header-subtitle {
+          font-size: 24rpx;
+          color: $text-secondary;
+          margin-top: $spacing-xs;
+        }
+      }
+    }
+
+    .header-decoration {
+      position: absolute;
+      right: -40rpx;
+      top: -40rpx;
+
+      .deco-circle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.4;
+
+        &.c1 {
+          width: 120rpx;
+          height: 120rpx;
+          background: $gradient-sunset;
+          right: 40rpx;
+          top: 40rpx;
+        }
+
+        &.c2 {
+          width: 80rpx;
+          height: 80rpx;
+          background: $gradient-cool;
+          right: 100rpx;
+          top: 80rpx;
+        }
+
+        &.c3 {
+          width: 60rpx;
+          height: 60rpx;
+          background: $gradient-aurora;
+          right: 60rpx;
+          top: 120rpx;
+        }
       }
     }
   }
 
   .filter-section {
-    padding: 24rpx 24rpx 0;
+    padding: $spacing-sm $spacing-md;
   }
 
   .list-section {
-    padding: 16rpx 24rpx;
+    padding: $spacing-md;
   }
 
   .add-btn {
     position: fixed;
-    right: 40rpx;
-    bottom: calc(var(--window-bottom) + 40rpx);
-    width: 112rpx;
-    height: 112rpx;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+    right: $spacing-xl;
+    bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-xl);
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: $radius-full;
+    background: $gradient-primary;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8rpx 24rpx rgba(13, 148, 136, 0.35);
-    transition: all 0.2s ease;
+    box-shadow: $shadow-glow;
+    transition: all $transition-normal;
+    z-index: 1000;
+
+    .fa-solid {
+      font-size: 44rpx;
+      color: #ffffff;
+    }
 
     &:active {
-      transform: scale(0.95);
-      box-shadow: 0 4rpx 12rpx rgba(13, 148, 136, 0.25);
+      transform: scale(0.92);
+      box-shadow: 0 0 30rpx rgba(255, 107, 107, 0.4);
     }
   }
 }

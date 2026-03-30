@@ -3,92 +3,121 @@
 
 /* ========================================
    Event Record App Design System
-   Pattern: Minimal Single Column
-   Style: Flat Design
+   Style: Soft Glassmorphism + Vibrant Gradient
+   Aesthetic: Modern, Fluid, Playful
    ======================================== */
 
-/* Primary Colors - Teal Focus */
-$primary-color: #0D9488;
-$primary-light: #14B8A6;
-$primary-dark: #0F766E;
+/* Primary Gradient - Coral to Indigo */
+$gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #C44CE2 50%, #6366F1 100%);
+$gradient-warm: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FBBF24 100%);
+$gradient-cool: linear-gradient(135deg, #06B6D4 0%, #3B82F6 50%, #8B5CF6 100%);
+$gradient-sunset: linear-gradient(135deg, #EC4899 0%, #F97316 50%, #FBBF24 100%);
+$gradient-aurora: linear-gradient(135deg, #10B981 0%, #06B6D4 50%, #6366F1 100%);
+$gradient-soft: linear-gradient(135deg, #FDE68A 0%, #FCA5A5 50%, #F9A8D4 100%);
+
+/* Primary Colors - Coral Focus */
+$primary-color: #FF6B6B;
+$primary-light: #FCA5A5;
+$primary-dark: #E11D48;
 
 /* Accent Colors */
-$accent-color: #F97316;
-$accent-light: #FB923C;
+$accent-purple: #C44CE2;
+$accent-indigo: #6366F1;
+$accent-cyan: #06B6D4;
+$accent-amber: #FBBF24;
+$accent-rose: #EC4899;
+$accent-coral: #FF6B6B;
+
+/* Glassmorphism Colors */
+$glass-bg: rgba(255, 255, 255, 0.85);
+$glass-bg-dark: rgba(255, 255, 255, 0.6);
+$glass-border: rgba(255, 255, 255, 0.3);
+$glass-shadow: 0 8rpx 32rpx rgba(99, 102, 241, 0.12);
 
 /* Background Colors */
-$bg-color: #F0FDFA;
+$bg-primary: #FDF4FF;
+$bg-secondary: #FFF7ED;
+$bg-card: rgba(255, 255, 255, 0.9);
 $bg-white: #FFFFFF;
-$card-bg: #FFFFFF;
 
 /* Text Colors */
-$text-main: #134E4A;
-$text-secondary: #5EEAD4;
-$text-muted: #99F6E4;
-$text-dark: #042F2E;
+$text-primary: #1E1B4B;
+$text-secondary: #6B7280;
+$text-muted: #9CA3AF;
+$text-light: #D1D5DB;
+$text-on-gradient: #FFFFFF;
 
 /* Border & Shadow */
-$border-color: #D1E7E4;
-$border-light: #E2E8F0;
-$shadow-sm: 0 1px 2px rgba(13, 148, 136, 0.05);
-$shadow-md: 0 4px 6px rgba(13, 148, 136, 0.07);
-$shadow-lg: 0 10px 15px rgba(13, 148, 136, 0.1);
+$border-color: rgba(99, 102, 241, 0.15);
+$border-light: rgba(255, 255, 255, 0.2);
+$shadow-soft: 0 4rpx 24rpx rgba(99, 102, 241, 0.08);
+$shadow-medium: 0 8rpx 40rpx rgba(99, 102, 241, 0.12);
+$shadow-strong: 0 16rpx 64rpx rgba(99, 102, 241, 0.16);
+$shadow-glow: 0 0 40rpx rgba(255, 107, 107, 0.3);
 
 /* Border Radius */
-$radius-sm: 4px;
-$radius-card: 12px;
-$radius-btn: 8px;
-$radius-lg: 16px;
+$radius-xs: 8rpx;
+$radius-sm: 12rpx;
+$radius-md: 20rpx;
+$radius-lg: 32rpx;
+$radius-xl: 48rpx;
+$radius-full: 9999rpx;
 
 /* Spacing */
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 24px;
-$spacing-xl: 32px;
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-md: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 48rpx;
+$spacing-2xl: 64rpx;
 
 /* Type Colors (for event types) */
 $type-work: #3B82F6;
 $type-study: #8B5CF6;
 $type-life: #10B981;
- $type-health: #EF4444;
+$type-health: #EF4444;
 $type-other: #F59E0B;
+$type-creative: #EC4899;
+$type-social: #06B6D4;
+$type-travel: #F97316;
 
 /* Animation */
-$transition-fast: 150ms ease;
-$transition-normal: 200ms ease;
-$transition-slow: 300ms ease;
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
 /* ========================================
    uni-app Built-in Variables
    ======================================== */
 
 /* 行为相关颜色 */
-$uni-color-primary: #0D9488;
+$uni-color-primary: #FF6B6B;
 $uni-color-success: #10B981;
-$uni-color-warning: #F59E0B;
+$uni-color-warning: #FBBF24;
 $uni-color-error: #EF4444;
 
 /* 文字基本颜色 */
-$uni-text-color: #134E4A;
+$uni-text-color: #1E1B4B;
 $uni-text-color-inverse: #fff;
-$uni-text-color-grey: #5EEAD4;
-$uni-text-color-placeholder: #99F6E4;
-$uni-text-color-disable: #c0c0c0;
+$uni-text-color-grey: #6B7280;
+$uni-text-color-placeholder: #9CA3AF;
+$uni-text-color-disable: #D1D5DB;
 
 /* 背景颜色 */
-$uni-bg-color: #F0FDFA;
-$uni-bg-color-grey: #F0FDFA;
-$uni-bg-color-hover: #E6FFFA;
-$uni-bg-color-mask: rgba(4, 47, 46, 0.4);
+$uni-bg-color: #FDF4FF;
+$uni-bg-color-grey: #F3F4F6;
+$uni-bg-color-hover: rgba(99, 102, 241, 0.05);
+$uni-bg-color-mask: rgba(30, 27, 75, 0.5);
 
 /* 边框颜色 */
-$uni-border-color: #D1E7E4;
+$uni-border-color: rgba(99, 102, 241, 0.15);
 
 /* 尺寸变量 */
 $uni-font-size-sm: 12px;
 $uni-font-size-base: 14px;
 $uni-font-size-lg: 16px;
+$uni-font-size-xl: 18px;
 
 /* 图片尺寸 */
 $uni-img-size-sm: 20px;
@@ -96,20 +125,20 @@ $uni-img-size-base: 26px;
 $uni-img-size-lg: 40px;
 
 /* Border Radius */
-$uni-border-radius-sm: 4px;
-$uni-border-radius-base: 8px;
-$uni-border-radius-lg: 12px;
+$uni-border-radius-sm: 12rpx;
+$uni-border-radius-base: 20rpx;
+$uni-border-radius-lg: 32rpx;
 $uni-border-radius-circle: 50%;
 
 /* 水平间距 */
-$uni-spacing-row-sm: 5px;
-$uni-spacing-row-base: 10px;
-$uni-spacing-row-lg: 15px;
+$uni-spacing-row-sm: 8px;
+$uni-spacing-row-base: 16px;
+$uni-spacing-row-lg: 24px;
 
 /* 垂直间距 */
-$uni-spacing-col-sm: 4px;
-$uni-spacing-col-base: 8px;
-$uni-spacing-col-lg: 12px;
+$uni-spacing-col-sm: 8px;
+$uni-spacing-col-base: 16px;
+$uni-spacing-col-lg: 24px;
 
 /* 透明度 */
-$uni-opacity-disabled: 0.3;
+$uni-opacity-disabled: 0.4;

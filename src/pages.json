@@ -10,42 +10,41 @@
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "我的事件记录",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/stats/stats",
 			"style": {
 				"navigationBarTitleText": "统计概览",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "事件记录",
-		"navigationBarBackgroundColor": "#ffffff",
-		"backgroundColor": "#f8f8f8"
+		"navigationBarTitleText": "记录时光",
+		"navigationBarBackgroundColor": "#FDF4FF",
+		"backgroundColor": "#FDF4FF"
 	},
 	"tabBar": {
-		"color": "#999999",
-		"selectedColor": "#2979ff",
-		"borderStyle": "black",
-		"backgroundColor": "#ffffff",
+		"custom": true,
+		"color": "#9CA3AF",
+		"selectedColor": "#6366F1",
+		"borderStyle": "white",
+		"backgroundColor": "#FFFFFF",
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"text": "事件列表",
-				"iconPath": "static/images/list.png",
-				"selectedIconPath": "static/images/list-active.png"
+				"text": "事件"
 			},
 			{
 				"pagePath": "pages/stats/stats",
-				"text": "统计",
-				"iconPath": "static/images/stats.png",
-				"selectedIconPath": "static/images/stats-active.png"
+				"text": "统计"
 			}
 		]
 	}

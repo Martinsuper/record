@@ -7,5 +7,13 @@ export default defineConfig({
   // uview-plus 需要配置 transpileDependencies
   build: {
     transpile: ['uview-plus']
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        silenceDeprecations: ['import', 'legacy-js-api']
+      }
+    }
   }
 });

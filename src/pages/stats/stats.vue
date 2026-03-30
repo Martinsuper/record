@@ -1,53 +1,56 @@
 <template>
   <view class="page-stats">
-    <!-- Header -->
+    <!-- Gradient header -->
     <view class="header">
-      <view class="header-content">
-        <u-icon name="chart-pie-fill" size="40" color="#ffffff" />
+      <view class="header-bg"></view>
+      <view class="header-content glass-card">
+        <text class="fa-solid fa-chart-pie"></text>
         <text class="header-title">统计概览</text>
       </view>
     </view>
 
-    <!-- Overview cards -->
+    <!-- Overview cards with gradients -->
     <view class="overview-section">
-      <view class="stat-card">
-        <view class="stat-icon total">
-          <u-icon name="file-text" size="28" color="#ffffff" />
+      <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.1s">
+        <view class="stat-icon">
+          <text class="fa-solid fa-layer-group"></text>
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ totalCount }}</text>
           <text class="stat-label">总事件数</text>
         </view>
+        <view class="stat-glow"></view>
       </view>
 
-      <view class="stat-card">
-        <view class="stat-icon month">
-          <u-icon name="calendar-fill" size="28" color="#ffffff" />
+      <view class="stat-card gradient-cool fade-in-up" style="animation-delay: 0.2s">
+        <view class="stat-icon">
+          <text class="fa-solid fa-calendar-check"></text>
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ monthCount }}</text>
           <text class="stat-label">本月新增</text>
         </view>
+        <view class="stat-glow"></view>
       </view>
     </view>
 
     <!-- Type distribution -->
-    <view class="section-card">
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.3s">
       <view class="section-header">
-        <u-icon name="tags" size="20" color="#0D9488" />
-        <text class="section-title">按类型分布</text>
+        <text class="fa-solid fa-tags"></text>
+        <text class="section-title">类型分布</text>
       </view>
 
-      <view v-if="typeStats.length === 0" class="empty-tip">
-        <u-icon name="info-circle" size="24" color="#99F6E4" />
+      <view v-if="typeStats.length === 0" class="empty-state">
+        <text class="fa-solid fa-inbox"></text>
         <text class="empty-text">暂无数据</text>
       </view>
 
       <view v-else class="type-stats">
-        <view v-for="stat in typeStats" :key="stat.typeId" class="type-stat-item">
+        <view v-for="(stat, index) in typeStats" :key="stat.typeId" class="type-stat-item">
           <view class="type-header">
             <view class="type-badge" :style="{ backgroundColor: stat.color }">
-              <u-icon name="star-fill" size="12" color="#ffffff" />
+              <text class="fa-solid fa-star"></text>
             </view>
             <text class="type-name">{{ stat.name }}</text>
             <text class="type-count">{{ stat.count }}</text>
@@ -61,14 +64,14 @@
     </view>
 
     <!-- Recent 7 days trend -->
-    <view class="section-card">
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.4s">
       <view class="section-header">
-        <u-icon name="trending-up" size="20" color="#0D9488" />
+        <text class="fa-solid fa-chart-line"></text>
         <text class="section-title">近7天趋势</text>
       </view>
 
-      <view v-if="recentStats.length === 0" class="empty-tip">
-        <u-icon name="info-circle" size="24" color="#99F6E4" />
+      <view v-if="recentStats.length === 0" class="empty-state">
+        <text class="fa-solid fa-inbox"></text>
         <text class="empty-text">暂无数据</text>
       </view>
 
@@ -91,6 +94,9 @@
         </view>
       </view>
     </view>
+
+    <!-- Custom TabBar -->
+    <CustomTabBar :current="1" />
   </view>
 </template>
 
@@ -98,6 +104,7 @@
 import { computed, onMounted } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
+import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
@@ -137,121 +144,159 @@ const maxCount = computed(() => Math.max(...recentStats.value.map(d => d.count),
 
 function getBarHeight(count: number): number {
   if (maxCount.value === 0) return 0
-  return Math.round((count / maxCount.value) * 120)
+  return Math.round((count / maxCount.value) * 140)
 }
 </script>
 
 <style lang="scss" scoped>
 .page-stats {
   min-height: 100vh;
-  background: linear-gradient(180deg, #E6FFFA 0%, #F0FDFA 100%);
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-lg);
 
   .header {
-    background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
-    padding: 60rpx 32rpx 40rpx;
-    border-radius: 0 0 48rpx 48rpx;
-    box-shadow: 0 8rpx 32rpx rgba(13, 148, 136, 0.2);
+    position: relative;
+    padding: $spacing-xl $spacing-md;
+
+    .header-bg {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 200rpx;
+      background: $gradient-primary;
+      opacity: 0.15;
+      border-radius: 0 0 $radius-xl $radius-xl;
+    }
 
     .header-content {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16rpx;
+      gap: $spacing-md;
+      padding: $spacing-lg;
+
+      .fa-solid {
+        font-size: 32rpx;
+        color: $accent-purple;
+      }
 
       .header-title {
-        font-size: 40rpx;
+        font-size: 36rpx;
         font-weight: 700;
-        color: #ffffff;
+        color: $text-primary;
       }
     }
   }
 
   .overview-section {
     display: flex;
-    gap: 20rpx;
-    padding: 24rpx;
+    gap: $spacing-md;
+    padding: $spacing-md;
 
     .stat-card {
       flex: 1;
-      background: #ffffff;
-      border-radius: 20rpx;
-      padding: 24rpx;
+      position: relative;
+      padding: $spacing-lg;
+      border-radius: $radius-lg;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      gap: 16rpx;
-      box-shadow: 0 4rpx 16rpx rgba(13, 148, 136, 0.08);
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      &.gradient-warm {
+        background: $gradient-warm;
+        color: #ffffff;
+      }
+
+      &.gradient-cool {
+        background: $gradient-cool;
+        color: #ffffff;
+      }
 
       .stat-icon {
-        width: 80rpx;
-        height: 80rpx;
-        border-radius: 16rpx;
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: $radius-md;
+        background: rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
 
-        &.total {
-          background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
-        }
-
-        &.month {
-          background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+        .fa-solid {
+          font-size: 28rpx;
+          color: #ffffff;
         }
       }
 
       .stat-content {
-        flex: 1;
-
         .stat-value {
-          font-size: 44rpx;
+          font-size: 48rpx;
           font-weight: 700;
-          color: #134E4A;
           display: block;
         }
 
         .stat-label {
           font-size: 24rpx;
-          color: #5EEAD4;
+          opacity: 0.9;
         }
+      }
+
+      .stat-glow {
+        position: absolute;
+        right: -20rpx;
+        bottom: -20rpx;
+        width: 100rpx;
+        height: 100rpx;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
       }
     }
   }
 
   .section-card {
-    background: #ffffff;
-    border-radius: 20rpx;
-    margin: 0 24rpx 20rpx;
-    padding: 24rpx;
-    box-shadow: 0 4rpx 16rpx rgba(13, 148, 136, 0.08);
+    margin: $spacing-md;
+    padding: $spacing-lg;
 
     .section-header {
       display: flex;
       align-items: center;
-      gap: 12rpx;
-      margin-bottom: 24rpx;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-lg;
+
+      .fa-solid {
+        font-size: 20rpx;
+        color: $accent-indigo;
+      }
 
       .section-title {
-        font-size: 32rpx;
+        font-size: 30rpx;
         font-weight: 600;
-        color: #134E4A;
+        color: $text-primary;
       }
     }
 
-    .empty-tip {
+    .empty-state {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12rpx;
-      padding: 40rpx;
+      gap: $spacing-md;
+      padding: $spacing-xl;
+
+      .fa-solid {
+        font-size: 40rpx;
+        color: $text-muted;
+      }
 
       .empty-text {
         font-size: 26rpx;
-        color: #5EEAD4;
+        color: $text-secondary;
       }
     }
 
     .type-stats {
       .type-stat-item {
-        margin-bottom: 24rpx;
+        margin-bottom: $spacing-lg;
 
         &:last-child {
           margin-bottom: 0;
@@ -260,42 +305,47 @@ function getBarHeight(count: number): number {
         .type-header {
           display: flex;
           align-items: center;
-          margin-bottom: 12rpx;
+          margin-bottom: $spacing-sm;
 
           .type-badge {
             width: 36rpx;
             height: 36rpx;
-            border-radius: 10rpx;
+            border-radius: $radius-sm;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12rpx;
+            margin-right: $spacing-sm;
+
+            .fa-solid {
+              font-size: 16rpx;
+              color: #ffffff;
+            }
           }
 
           .type-name {
             flex: 1;
             font-size: 28rpx;
             font-weight: 500;
-            color: #134E4A;
+            color: $text-primary;
           }
 
           .type-count {
             font-size: 28rpx;
-            font-weight: 600;
-            color: #0D9488;
+            font-weight: 700;
+            color: $accent-indigo;
           }
         }
 
         .stat-bar-track {
-          height: 12rpx;
-          background: #E6FFFA;
-          border-radius: 6rpx;
+          height: 16rpx;
+          background: rgba(99, 102, 241, 0.1);
+          border-radius: $radius-full;
           overflow: hidden;
 
           .stat-bar {
             height: 100%;
-            border-radius: 6rpx;
-            transition: width 0.3s ease;
+            border-radius: $radius-full;
+            transition: width $transition-slow;
           }
         }
 
@@ -303,26 +353,26 @@ function getBarHeight(count: number): number {
           display: block;
           text-align: right;
           font-size: 22rpx;
-          color: #5EEAD4;
-          margin-top: 8rpx;
+          color: $text-secondary;
+          margin-top: $spacing-xs;
         }
       }
     }
 
     .trend-chart {
       display: flex;
-      gap: 16rpx;
-      padding-top: 16rpx;
+      gap: $spacing-md;
+      padding-top: $spacing-sm;
 
       .chart-y-axis {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: 24rpx 0;
+        padding: $spacing-lg 0;
 
         .y-label {
-          font-size: 20rpx;
-          color: #99F6E4;
+          font-size: 22rpx;
+          color: $text-muted;
         }
       }
 
@@ -339,30 +389,31 @@ function getBarHeight(count: number): number {
           align-items: center;
 
           .bar-value {
-            font-size: 22rpx;
+            font-size: 24rpx;
             font-weight: 600;
-            color: #134E4A;
-            margin-bottom: 8rpx;
+            color: $text-primary;
+            margin-top: $spacing-xs;
           }
 
           .bar-container {
             width: 48rpx;
-            height: 140rpx;
+            height: 160rpx;
             display: flex;
             align-items: flex-end;
 
             .bar-visual {
               width: 100%;
               min-height: 8rpx;
-              background: linear-gradient(180deg, #14B8A6 0%, #0D9488 100%);
-              border-radius: 8rpx 8rpx 0 0;
+              background: $gradient-cool;
+              border-radius: $radius-sm $radius-sm 0 0;
+              transition: height $transition-slow;
             }
           }
 
           .bar-label {
-            font-size: 20rpx;
-            color: #5EEAD4;
-            margin-top: 12rpx;
+            font-size: 22rpx;
+            color: $text-secondary;
+            margin-top: $spacing-sm;
             text-align: center;
           }
         }
