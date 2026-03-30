@@ -298,6 +298,10 @@ const handleSwipeClick = (index: number, eventId: string) => {
             line-height: 1.5;
             display: block;
             margin-bottom: $spacing-sm;
+            // Ensure fixed height for virtual scroll
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
 
           .event-time {
