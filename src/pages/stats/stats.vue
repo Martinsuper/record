@@ -151,13 +151,14 @@ function getBarHeight(count: number): number {
   .header {
     position: relative;
     padding: $spacing-xl $spacing-md;
+    padding-top: calc(var(--status-bar-height) + $spacing-xl);
 
     .header-bg {
       position: absolute;
       left: 0;
       right: 0;
       top: 0;
-      height: 200rpx;
+      height: calc(var(--status-bar-height) + 200rpx);
       background: $gradient-primary;
       opacity: 0.15;
       border-radius: 0 0 $radius-xl $radius-xl;

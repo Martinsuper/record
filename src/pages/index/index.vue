@@ -89,6 +89,7 @@ function onEditEvent(event: { id: string; name: string; typeId: string; time: nu
 
   .header {
     margin: $spacing-lg $spacing-md;
+    margin-top: calc(var(--status-bar-height) + $spacing-lg);
     padding: $spacing-xl $spacing-lg;
     position: relative;
     overflow: hidden;
