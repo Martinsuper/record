@@ -37,8 +37,9 @@ export const useEventStore = defineStore('event', {
      */
     filteredEvents: (state): EventData[] => {
       // 生成缓存 key：包含过滤条件和数据变化标识
-      const lastEventTime = state.events.length > 0 ? state.events[state.events.length - 1].time : 0
-      const cacheKey = `${state.filterType}-${state.filterTimeRange}-${state.events.length}-${lastEventTime}`
+      // 使用所有事件时间戳的总和作为数据变化标识，确保任何事件的增删改都能触发缓存失效
+      const totalEventTime = state.events.reduce((sum, e) => sum + e.time, 0)
+      const cacheKey = `${state.filterType}|${state.filterTimeRange}|${state.events.length}|${totalEventTime}`
 
       // 缓存命中时直接返回
       if (state._cacheKey === cacheKey && state._filteredEventsCache) {
