@@ -41,7 +41,7 @@
     />
 
     <!-- Custom TabBar -->
-    <CustomTabBar :current="0" />
+    <CustomTabBar />
   </view>
 </template>
 

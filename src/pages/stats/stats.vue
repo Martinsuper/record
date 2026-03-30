@@ -96,7 +96,7 @@
     </view>
 
     <!-- Custom TabBar -->
-    <CustomTabBar :current="1" />
+    <CustomTabBar />
   </view>
 </template>
 

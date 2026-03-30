@@ -20,32 +20,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 
-const props = defineProps<{
-  current?: number
-}>()
-
-const currentIndex = ref(props.current || 0)
+const currentIndex = ref(0)
 
 const pages = [
   '/pages/index/index',
   '/pages/stats/stats'
 ]
 
+function getCurrentPageIndex(): number {
+  const pageStack = getCurrentPages()
+  if (pageStack.length === 0) return 0
+  const currentPage = pageStack[pageStack.length - 1]
+  // 使用完整的 route 路径判断
+  const route = currentPage.route || ''
+  // 统计页面返回 1，事件页面返回 0
+  if (route === 'pages/stats/stats') return 1
+  return 0
+}
+
+// 初始化时获取当前页面索引
+currentIndex.value = getCurrentPageIndex()
+
+// 每次页面显示时更新高亮状态
+onShow(() => {
+  currentIndex.value = getCurrentPageIndex()
+})
+
 function switchTab(index: number) {
-  if (currentIndex.value === index) return
   currentIndex.value = index
   uni.switchTab({
     url: pages[index]
   })
 }
-
-watch(() => props.current, (val) => {
-  if (val !== undefined) {
-    currentIndex.value = val
-  }
-})
 </script>
 
 <style lang="scss" scoped>
