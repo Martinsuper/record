@@ -120,6 +120,17 @@ function getTypeName(typeId: string): string {
 const ITEM_HEIGHT = 140 // 卡片高度 + 间距（rpx 转 px 约 70px，使用 140px 确保安全）
 const BUFFER_SIZE = 5   // 缓冲区项目数
 
+// 长按相关状态
+const LONG_PRESS_DURATION = 800 // 长按时长 ms
+const CANCEL_DISTANCE = 20 // 取消滑动距离 px
+
+const isLongPressing = ref(false)
+const menuVisible = ref(false)
+const menuPosition = ref({ x: 0, y: 0 })
+const longPressTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const touchStartPos = ref({ x: 0, y: 0 })
+const selectedEventId = ref<string | null>(null)
+
 const scrollTop = ref(0)
 const containerHeight = ref(500) // 默认容器高度，后续会计算
 
