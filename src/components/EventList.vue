@@ -65,6 +65,33 @@
         </view>
       </view>
     </scroll-view>
+
+    <!-- 气泡菜单 -->
+    <view
+      v-if="menuVisible"
+      class="bubble-menu"
+      :style="{
+        left: menuPosition.x + 'px',
+        top: menuPosition.y + 'px'
+      }"
+      @click.stop
+    >
+      <view class="menu-item edit" @click="handleMenuEdit">
+        <text class="fa-solid">&#xf044;</text>
+        <text class="menu-text">编辑</text>
+      </view>
+      <view class="menu-item delete" @click="handleMenuDelete">
+        <text class="fa-solid">&#xf1f8;</text>
+        <text class="menu-text">删除</text>
+      </view>
+    </view>
+
+    <!-- 点击外部关闭菜单的遮罩 -->
+    <view
+      v-if="menuVisible"
+      class="menu-mask"
+      @click="closeMenu"
+    ></view>
   </view>
 </template>
 
@@ -226,6 +253,49 @@ function onTouchMove(e: any) {
       longPressTimer.value = null
     }
   }
+}
+
+// 关闭菜单
+function closeMenu() {
+  menuVisible.value = false
+}
+
+// 处理编辑
+function handleMenuEdit() {
+  if (!selectedEventId.value) return
+  const event = eventStore.events.find(e => e.id === selectedEventId.value)
+  if (event) {
+    emit('edit', {
+      id: event.id,
+      name: event.name,
+      typeId: event.typeId,
+      time: event.time
+    })
+  }
+  closeMenu()
+}
+
+// 处理删除
+function handleMenuDelete() {
+  if (!selectedEventId.value) return
+  const event = eventStore.events.find(e => e.id === selectedEventId.value)
+  if (!event) return
+
+  uni.showModal({
+    title: '确认删除',
+    content: '确定要删除这个事件吗？',
+    confirmColor: '#EF4444',
+    success: (res) => {
+      if (res.confirm) {
+        eventStore.deleteEvent(event.id)
+        uni.showToast({
+          title: '已删除',
+          icon: 'success'
+        })
+      }
+    }
+  })
+  closeMenu()
 }
 </script>
 
@@ -390,5 +460,50 @@ function onTouchMove(e: any) {
       }
     }
   }
+}
+
+.bubble-menu {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+  padding: 20rpx 32rpx;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(-50%);
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+
+    .fa-solid {
+      font-size: 28rpx;
+    }
+
+    .menu-text {
+      font-size: 26rpx;
+      font-weight: 500;
+    }
+
+    &.edit {
+      color: #3B82F6;
+    }
+
+    &.delete {
+      color: #EF4444;
+    }
+  }
+}
+
+.menu-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9998;
 }
 </style>
