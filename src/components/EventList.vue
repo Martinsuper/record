@@ -20,24 +20,23 @@
       scroll-y
       :scroll-top="scrollTop"
       :style="{ height: containerHeight + 'px' }"
+      :show-scrollbar="false"
       @scroll="onScroll"
       class="virtual-scroll-container"
     >
       <!-- 占位容器，撑开真实高度 -->
-      <view :style="{ height: totalHeight + 'px', position: 'relative' }">
+      <view :style="{ height: totalHeight + 'px' }">
         <!-- 仅渲染可视区域项目 -->
         <view
           v-for="event in visibleEvents"
           :key="event.id"
           class="event-card glass-card"
-          :style="{ position: 'absolute', top: getEventOffset(event._index) + 'px', width: '100%' }"
+          :class="{ 'expanded': expandedEventId === event.id }"
+          :style="getCardStyle(event._index)"
         >
           <view
             class="event-card-inner"
-            @touchstart="(e: any) => onTouchStart(e, event.id)"
-            @touchend="onTouchEnd"
-            @touchmove="onTouchMove"
-            @touchcancel="onTouchEnd"
+            @click="toggleExpand(event.id)"
           >
             <!-- Type indicator with gradient -->
             <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
@@ -49,6 +48,7 @@
                   <text class="fa-solid">&#xf005;</text>
                   <text class="type-name">{{ getTypeName(event.typeId) }}</text>
                 </view>
+                <text class="expand-icon" :class="{ 'rotated': expandedEventId === event.id }">&#xf107;</text>
               </view>
 
               <text class="event-name">{{ event.name }}</text>
@@ -56,6 +56,21 @@
               <view class="event-time">
                 <text class="fa-solid">&#xf017;</text>
                 <text class="time-text">{{ formatTime(event.time) }}</text>
+              </view>
+
+              <!-- 展开后的详情区域 -->
+              <view v-if="expandedEventId === event.id" class="event-detail">
+                <view class="detail-divider"></view>
+                <view class="detail-actions">
+                  <view class="action-btn edit" @click.stop="handleEdit(event)">
+                    <text class="fa-solid">&#xf044;</text>
+                    <text class="action-text">编辑</text>
+                  </view>
+                  <view class="action-btn delete" @click.stop="handleDelete(event)">
+                    <text class="fa-solid">&#xf1f8;</text>
+                    <text class="action-text">删除</text>
+                  </view>
+                </view>
               </view>
             </view>
           </view>
@@ -66,33 +81,7 @@
       </view>
     </scroll-view>
 
-    <!-- 气泡菜单 -->
-    <view
-      v-if="menuVisible"
-      class="bubble-menu"
-      :style="{
-        left: menuPosition.x + 'px',
-        top: menuPosition.y + 'px'
-      }"
-      @click.stop
-    >
-      <view class="menu-item edit" @click="handleMenuEdit">
-        <text class="fa-solid">&#xf044;</text>
-        <text class="menu-text">编辑</text>
-      </view>
-      <view class="menu-divider"></view>
-      <view class="menu-item delete" @click="handleMenuDelete">
-        <text class="fa-solid">&#xf1f8;</text>
-        <text class="menu-text">删除</text>
-      </view>
-    </view>
-
-    <!-- 点击外部关闭菜单的遮罩 -->
-    <view
-      v-if="menuVisible"
-      class="menu-mask"
-      @click="closeMenu"
-    ></view>
+    <!-- 移除气泡菜单 -->
   </view>
 </template>
 
@@ -144,27 +133,23 @@ function getTypeName(typeId: string): string {
 }
 
 // 虚拟滚动配置
-const ITEM_HEIGHT = 140 // 卡片高度 + 间距（rpx 转 px 约 70px，使用 140px 确保安全）
+const ITEM_HEIGHT = 120 // 卡片基础高度（rpx 转 px，包含间距）
 const BUFFER_SIZE = 5   // 缓冲区项目数
+const CARD_GAP = 16 // 卡片间距 px
 
-// 长按相关状态
-const LONG_PRESS_DURATION = 800 // 长按时长 ms
-const CANCEL_DISTANCE = 20 // 取消滑动距离 px
-
-const isLongPressing = ref(false)
-const menuVisible = ref(false)
-const menuPosition = ref({ x: 0, y: 0 })
-const longPressTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const touchStartPos = ref({ x: 0, y: 0 })
-const selectedEventId = ref<string | null>(null)
+// 展开状态
+const expandedEventId = ref<string | null>(null)
+// 展开后额外增加的高度 (与 .event-detail 高度匹配)
+const EXPANDED_EXTRA_HEIGHT = 100
 
 const scrollTop = ref(0)
 const containerHeight = ref(500) // 默认容器高度，后续会计算
 
 // 计算可视范围
 const visibleRange = computed(() => {
-  const startIndex = Math.max(0, Math.floor(scrollTop.value / ITEM_HEIGHT) - BUFFER_SIZE)
-  const visibleCount = Math.ceil(containerHeight.value / ITEM_HEIGHT) + 2 * BUFFER_SIZE
+  const itemTotalHeight = ITEM_HEIGHT + CARD_GAP
+  const startIndex = Math.max(0, Math.floor(scrollTop.value / itemTotalHeight) - BUFFER_SIZE)
+  const visibleCount = Math.ceil(containerHeight.value / itemTotalHeight) + 2 * BUFFER_SIZE
   const endIndex = Math.min(filteredEvents.value.length, startIndex + visibleCount)
   return { startIndex, endIndex }
 })
@@ -178,26 +163,72 @@ const visibleEvents = computed(() => {
   }))
 })
 
-// 总高度（用于撑开滚动容器）
-const totalHeight = computed(() => filteredEvents.value.length * ITEM_HEIGHT)
+// 总高度（用于撑开滚动容器，考虑展开状态）
+const totalHeight = computed(() => {
+  let height = 0
+  for (let i = 0; i < filteredEvents.value.length; i++) {
+    height += ITEM_HEIGHT
+    const isExpanded = expandedEventId.value !== null && filteredEvents.value[i]?.id === expandedEventId.value
+    if (!isExpanded) {
+      height += CARD_GAP
+    }
+  }
+  // 如果有展开的卡片，增加额外高度
+  if (expandedEventId.value !== null) {
+    height += EXPANDED_EXTRA_HEIGHT
+  }
+  return height
+})
 
 // 计算每个项目的偏移位置
 function getEventOffset(index: number): number {
-  return index * ITEM_HEIGHT
+  let offset = 0
+  for (let i = 0; i < index; i++) {
+    // 每张卡片的基础高度
+    offset += ITEM_HEIGHT
+    // 如果这张卡片是展开的，增加额外高度且没有 margin-bottom
+    const isExpanded = expandedEventId.value !== null && filteredEvents.value[i]?.id === expandedEventId.value
+    if (isExpanded) {
+      offset += EXPANDED_EXTRA_HEIGHT
+    } else {
+      offset += CARD_GAP
+    }
+  }
+  return offset
+}
+
+// 获取卡片样式（支持展开状态）
+function getCardStyle(index: number) {
+  const event = filteredEvents.value[index]
+  const isExpanded = expandedEventId.value === event?.id
+  // 展开卡片高度增加，非展开卡片保持基础高度
+  const height = isExpanded ? (ITEM_HEIGHT + EXPANDED_EXTRA_HEIGHT) : ITEM_HEIGHT
+  return {
+    position: 'absolute' as const,
+    top: getEventOffset(index) + 'px',
+    width: '100%',
+    height: height + 'px'
+  }
+}
+
+// 切换展开/收起状态
+function toggleExpand(eventId: string) {
+  expandedEventId.value = expandedEventId.value === eventId ? null : eventId
 }
 
 // 滚动事件处理
 function onScroll(e: { detail: { scrollTop: number } }): void {
   scrollTop.value = e.detail.scrollTop
-  // 滚动时关闭菜单
-  if (menuVisible.value) {
-    closeMenu()
+  // 滚动时收起展开的卡片
+  if (expandedEventId.value !== null) {
+    expandedEventId.value = null
   }
 }
 
 // 重置滚动位置（用于新增事件后）
 function resetScroll() {
   scrollTop.value = 0
+  expandedEventId.value = null
 }
 
 // 初始化时计算容器高度
@@ -214,97 +245,18 @@ defineExpose({
 
 const emit = defineEmits(['edit'])
 
-// 触摸开始
-function onTouchStart(e: any, eventId: string) {
-  const touch = e.touches[0]
-  touchStartPos.value = { x: touch.clientX, y: touch.clientY }
-  selectedEventId.value = eventId
-  isLongPressing.value = true
-
-  // 开始长按计时
-  longPressTimer.value = setTimeout(() => {
-    if (isLongPressing.value) {
-      // 长按触发，显示菜单
-      const adjustedPos = adjustMenuPosition(touchStartPos.value.x, touchStartPos.value.y - 60)
-      menuPosition.value = adjustedPos
-      menuVisible.value = true
-    }
-  }, LONG_PRESS_DURATION)
-}
-
-// 触摸结束
-function onTouchEnd() {
-  isLongPressing.value = false
-  if (longPressTimer.value) {
-    clearTimeout(longPressTimer.value)
-    longPressTimer.value = null
-  }
-}
-
-// 触摸移动（取消长按）
-function onTouchMove(e: any) {
-  const touch = e.touches[0]
-  const distance = Math.sqrt(
-    Math.pow(touch.clientX - touchStartPos.value.x, 2) +
-    Math.pow(touch.clientY - touchStartPos.value.y, 2)
-  )
-  if (distance > CANCEL_DISTANCE) {
-    // 移动超过阈值，取消长按
-    isLongPressing.value = false
-    if (longPressTimer.value) {
-      clearTimeout(longPressTimer.value)
-      longPressTimer.value = null
-    }
-  }
-}
-
-// 调整菜单位置以避免超出屏幕边界
-function adjustMenuPosition(x: number, y: number) {
-  const systemInfo = uni.getSystemInfoSync()
-  const menuWidth = 200 // 约等于 rpx 转 px
-  const menuHeight = 60
-
-  // 水平边界检测
-  if (x - menuWidth / 2 < 0) {
-    x = menuWidth / 2 + 10
-  } else if (x + menuWidth / 2 > systemInfo.windowWidth) {
-    x = systemInfo.windowWidth - menuWidth / 2 - 10
-  }
-
-  // 垂直边界检测 - 如果上方空间不够，显示在下方
-  if (y < 0) {
-    y = touchStartPos.value.y + 60
-  }
-
-  return { x, y }
-}
-
-// 关闭菜单
-function closeMenu() {
-  menuVisible.value = false
-}
-
 // 处理编辑
-function handleMenuEdit() {
-  if (!selectedEventId.value) return
-  const event = eventStore.events.find(e => e.id === selectedEventId.value)
-  if (event) {
-    emit('edit', {
-      id: event.id,
-      name: event.name,
-      typeId: event.typeId,
-      time: event.time
-    })
-  }
-  closeMenu()
+function handleEdit(event: typeof filteredEvents.value[number]) {
+  emit('edit', {
+    id: event.id,
+    name: event.name,
+    typeId: event.typeId,
+    time: event.time
+  })
 }
 
 // 处理删除
-function handleMenuDelete() {
-  if (!selectedEventId.value) return
-  const event = eventStore.events.find(e => e.id === selectedEventId.value)
-  if (!event) return
-
+function handleDelete(event: typeof filteredEvents.value[number]) {
   uni.showModal({
     title: '确认删除',
     content: '确定要删除这个事件吗？',
@@ -312,6 +264,7 @@ function handleMenuDelete() {
     success: (res) => {
       if (res.confirm) {
         eventStore.deleteEvent(event.id)
+        expandedEventId.value = null
         uni.showToast({
           title: '已删除',
           icon: 'success'
@@ -319,7 +272,6 @@ function handleMenuDelete() {
       }
     }
   })
-  closeMenu()
 }
 </script>
 
@@ -398,11 +350,22 @@ function handleMenuDelete() {
     overflow: hidden;
 
     .event-card {
-      margin-bottom: 0;
-      padding-bottom: $spacing-md;
+      margin-bottom: $spacing-md;
+      padding-bottom: 0;
       box-sizing: border-box;
-      overflow: hidden;
+      overflow: visible;
       position: relative;
+      transition: all 0.3s ease;
+
+      &.expanded {
+        margin-bottom: 0;
+        z-index: 10;
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+
+        .event-card-inner {
+          background: rgba(#ffffff, 0.95);
+        }
+      }
 
       .event-card-inner {
         display: flex;
@@ -420,6 +383,9 @@ function handleMenuDelete() {
           flex: 1;
 
           .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: $spacing-sm;
 
             .type-tag {
@@ -438,6 +404,16 @@ function handleMenuDelete() {
                 font-size: 22rpx;
                 color: #ffffff;
                 font-weight: 500;
+              }
+            }
+
+            .expand-icon {
+              font-size: 24rpx;
+              color: $text-secondary;
+              transition: transform 0.3s ease;
+
+              &.rotated {
+                transform: rotate(180deg);
               }
             }
           }
@@ -470,6 +446,62 @@ function handleMenuDelete() {
               color: $text-secondary;
             }
           }
+
+          // 展开后的详情区域
+          .event-detail {
+            margin-top: $spacing-md;
+            padding-top: $spacing-md;
+            animation: slide-down 0.3s ease;
+
+            .detail-divider {
+              height: 1rpx;
+              background: linear-gradient(90deg, transparent, rgba($primary-color, 0.3), transparent);
+              margin-bottom: $spacing-md;
+            }
+
+            .detail-actions {
+              display: flex;
+              gap: $spacing-md;
+
+              .action-btn {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: $spacing-xs;
+                padding: $spacing-sm $spacing-md;
+                border-radius: $radius-md;
+                transition: background 0.15s ease;
+
+                .fa-solid {
+                  font-size: 28rpx;
+                }
+
+                .action-text {
+                  font-size: 26rpx;
+                  font-weight: 500;
+                }
+
+                &.edit {
+                  background: rgba($primary-color, 0.1);
+                  color: $primary-color;
+
+                  &:active {
+                    background: rgba($primary-color, 0.2);
+                  }
+                }
+
+                &.delete {
+                  background: rgba(#EF4444, 0.1);
+                  color: #EF4444;
+
+                  &:active {
+                    background: rgba(#EF4444, 0.2);
+                  }
+                }
+              }
+            }
+          }
         }
       }
 
@@ -486,89 +518,14 @@ function handleMenuDelete() {
   }
 }
 
-.bubble-menu {
-  position: fixed;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  padding: 0 $spacing-lg;
-  height: 88rpx;
-  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-  border-radius: 20rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12), 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
-  transform: translateX(-50%) translateY(10rpx);
-  opacity: 0;
-  animation: menu-appear 0.2s ease-out forwards;
-
-  // 小三角指示器
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -12rpx;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 12rpx solid transparent;
-    border-right: 12rpx solid transparent;
-    border-top: 12rpx solid #FFFFFF;
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10rpx);
   }
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-sm $spacing-md;
-    border-radius: 12rpx;
-    transition: background 0.15s ease;
-
-    .fa-solid {
-      font-size: 30rpx;
-    }
-
-    .menu-text {
-      font-size: 28rpx;
-      font-weight: 600;
-    }
-
-    &.edit {
-      color: $primary-color;
-
-      &:active {
-        background: rgba($primary-color, 0.1);
-      }
-    }
-
-    &.delete {
-      color: #EF4444;
-
-      &:active {
-        background: rgba(#EF4444, 0.1);
-      }
-    }
-  }
-
-  .menu-divider {
-    width: 2rpx;
-    height: 40rpx;
-    background: #E5E7EB;
-    margin: 0 $spacing-sm;
-  }
-}
-
-@keyframes menu-appear {
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
-}
-
-.menu-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9998;
 }
 </style>
