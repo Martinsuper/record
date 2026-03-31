@@ -18,6 +18,7 @@
     <scroll-view
       v-else
       scroll-y
+      :scroll-top="scrollTop"
       :style="{ height: containerHeight + 'px' }"
       @scroll="onScroll"
       class="virtual-scroll-container"
@@ -152,11 +153,21 @@ function onScroll(e: { detail: { scrollTop: number } }): void {
   scrollTop.value = e.detail.scrollTop
 }
 
+// 重置滚动位置（用于新增事件后）
+function resetScroll() {
+  scrollTop.value = 0
+}
+
 // 初始化时计算容器高度
 onMounted(() => {
   const systemInfo = uni.getSystemInfoSync()
   // 减去 header + filter + tabbar 大约 200px
   containerHeight.value = systemInfo.windowHeight - 200
+})
+
+// 暴露方法给父组件
+defineExpose({
+  resetScroll
 })
 
 // Swipe action options - 编辑和删除按钮

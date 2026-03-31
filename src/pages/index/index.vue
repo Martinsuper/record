@@ -25,7 +25,7 @@
 
     <!-- Event list -->
     <view class="list-section">
-      <EventList @edit="onEditEvent" />
+      <EventList ref="eventListRef" @edit="onEditEvent" />
     </view>
 
     <!-- Floating gradient add button -->
@@ -72,6 +72,8 @@ const navBarHeight = computed(() => {
   return height || 88 // 默认值
 })
 
+const eventListRef = ref<InstanceType<typeof EventList> | null>(null)
+
 const showEventForm = ref(false)
 const showEditForm = ref(false)
 const editingEvent = ref<{ id: string; name: string; typeId: string; time: number } | null>(null)
@@ -80,6 +82,8 @@ function onEventSaved() {
   showEventForm.value = false
   showEditForm.value = false
   editingEvent.value = null
+  // 新增事件后滚动到顶部
+  eventListRef.value?.resetScroll()
 }
 
 function onEditEvent(event: { id: string; name: string; typeId: string; time: number }) {
