@@ -1,5 +1,5 @@
 <template>
-  <view class="type-manager">
+  <view class="type-manager" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
     <!-- Header -->
     <view class="manager-header">
       <text class="manager-title gradient-text">类型管理</text>
@@ -9,7 +9,7 @@
     </view>
 
     <!-- Type List -->
-    <scroll-view class="manager-content" scroll-y>
+    <scroll-view class="manager-content" scroll-y @click="closeActionMenu">
       <view v-if="eventTypeStore.types.length === 0" class="empty-tip">
         <text class="fa-solid">&#xf01c;</text>
         <text>暂无类型，请点击右下角新建</text>
@@ -31,11 +31,18 @@
           <text class="type-count">{{ type.eventCount }} 个事件</text>
         </view>
         <view class="type-actions">
-          <view class="edit-icon" @click.stop="openEditDialog(type)">
-            <text class="fa-solid">&#xf044;</text>
+          <view class="more-btn" @click.stop="toggleActionMenu(type.id)">
+            <text class="fa-solid">&#xf142;</text>
           </view>
-          <view class="delete-icon" @click.stop="confirmDelete(type)">
-            <text class="fa-solid">&#xf2ed;</text>
+          <view v-if="activeActionMenuId === type.id" class="action-menu">
+            <view class="menu-item edit" @click="openEditDialog(type)">
+              <text class="fa-solid">&#xf044;</text>
+              <text>编辑</text>
+            </view>
+            <view class="menu-item delete" @click="confirmDelete(type)">
+              <text class="fa-solid">&#xf2ed;</text>
+              <text>删除</text>
+            </view>
           </view>
         </view>
       </view>
@@ -143,6 +150,16 @@ import { ref, computed } from 'vue'
 import { useEventTypeStore } from '@/store/eventType'
 import { useEventStore } from '@/store/event'
 
+// 导航栏高度（小程序端需要从胶囊按钮下方开始）
+// 使用同步方式获取，确保渲染前已有正确值
+const navBarHeight = ref(88)
+// #ifdef MP-WEIXIN
+const systemInfo = uni.getSystemInfoSync()
+const menuButton = uni.getMenuButtonBoundingClientRect()
+// 导航栏高度 = 胶囊按钮 bottom + (胶囊按钮 top - 状态栏高度)
+navBarHeight.value = menuButton.bottom + (menuButton.top - systemInfo.statusBarHeight)
+// #endif
+
 interface TypeWithCount {
   id: string
   name: string
@@ -176,6 +193,7 @@ const dialogMode = ref<'create' | 'edit'>('create')
 const editingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)
 const deletingType = ref<TypeWithCount | null>(null)
+const activeActionMenuId = ref<string | null>(null)
 
 // Form data
 const formData = ref({
@@ -205,8 +223,19 @@ function closeManager() {
   emit('close')
 }
 
+// Toggle action menu
+function toggleActionMenu(typeId: string) {
+  activeActionMenuId.value = activeActionMenuId.value === typeId ? null : typeId
+}
+
+// Close action menu
+function closeActionMenu() {
+  activeActionMenuId.value = null
+}
+
 // Open edit dialog
 function openEditDialog(type: TypeWithCount) {
+  closeActionMenu()
   dialogMode.value = 'edit'
   editingId.value = type.id
   formData.value = {
@@ -261,6 +290,7 @@ function saveType() {
 
 // Confirm delete
 function confirmDelete(type: TypeWithCount) {
+  closeActionMenu()
   deletingType.value = type
   deletingId.value = type.id
   showDeleteConfirm.value = true
@@ -289,6 +319,11 @@ function executeDelete() {
   flex-direction: column;
   height: 100vh;
   background: #ffffff;
+
+  /* #ifdef MP-WEIXIN */
+  padding-top: var(--nav-bar-height);
+  height: calc(100vh - var(--nav-bar-height));
+  /* #endif */
 }
 
 .manager-header {
@@ -393,34 +428,81 @@ function executeDelete() {
     }
 
     .type-actions {
+      position: relative;
       display: flex;
-      gap: $spacing-sm;
+      align-items: center;
+      padding-right: $spacing-md;
 
-      .edit-icon,
-      .delete-icon {
-        width: 56rpx;
-        height: 56rpx;
-        border-radius: $radius-md;
+      .more-btn {
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: $radius-lg;
+        background: rgba(99, 102, 241, 0.08);
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all $transition-fast;
+        margin-left: auto;
 
         .fa-solid {
-          font-size: 18rpx;
+          font-size: 20rpx;
+          color: $text-secondary;
+        }
+
+        &:active {
+          background: rgba(99, 102, 241, 0.15);
         }
       }
 
-      .edit-icon {
-        background: rgba(99, 102, 241, 0.1);
-        .fa-solid {
-          color: $accent-indigo;
-        }
-      }
+      .action-menu {
+        position: absolute;
+        right: $spacing-md;
+        top: calc(100% + 16rpx);
+        background: #ffffff;
+        border-radius: $radius-lg;
+        box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+        z-index: 100;
+        overflow: hidden;
+        min-width: 200rpx;
 
-      .delete-icon {
-        background: rgba(239, 68, 68, 0.1);
-        .fa-solid {
-          color: #EF4444;
+        .menu-item {
+          display: flex;
+          align-items: center;
+          gap: $spacing-md;
+          padding: $spacing-lg $spacing-xl;
+          transition: background $transition-fast;
+
+          .fa-solid {
+            font-size: 20rpx;
+          }
+
+          text {
+            font-size: 30rpx;
+            font-weight: 500;
+            color: $text-primary;
+          }
+
+          &:active {
+            background: rgba(99, 102, 241, 0.05);
+          }
+
+          &.edit {
+            .fa-solid {
+              color: $accent-indigo;
+            }
+          }
+
+          &.delete {
+            border-top: 1px solid rgba(99, 102, 241, 0.08);
+
+            .fa-solid {
+              color: #EF4444;
+            }
+
+            text {
+              color: #EF4444;
+            }
+          }
         }
       }
     }
