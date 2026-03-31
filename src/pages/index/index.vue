@@ -16,6 +16,13 @@
         <view class="deco-circle c2"></view>
         <view class="deco-circle c3"></view>
       </view>
+      <!-- Type management entry -->
+      <view class="type-manage-btn" @click="showTypeManager = true">
+        <view class="btn-icon-bg">
+          <text class="fa-solid">&#xf02b;</text>
+        </view>
+        <text class="btn-text">类型</text>
+      </view>
     </view>
 
     <!-- Filter bar -->
@@ -51,6 +58,11 @@
 
     <!-- Custom TabBar -->
     <CustomTabBar />
+
+    <!-- Type Manager Popup -->
+    <view v-if="showTypeManager" class="type-manager-overlay">
+      <TypeManager @close="showTypeManager = false" />
+    </view>
   </view>
 </template>
 
@@ -62,6 +74,7 @@ import FilterBar from '@/components/FilterBar.vue'
 import EventList from '@/components/EventList.vue'
 import EventForm from '@/components/EventForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import TypeManager from '@/components/TypeManager.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
@@ -76,6 +89,7 @@ const eventListRef = ref<InstanceType<typeof EventList> | null>(null)
 
 const showEventForm = ref(false)
 const showEditForm = ref(false)
+const showTypeManager = ref(false)
 const editingEvent = ref<{ id: string; name: string; typeId: string; time: number } | null>(null)
 
 function onEventSaved() {
@@ -108,6 +122,47 @@ function onEditEvent(event: { id: string; name: string; typeId: string; time: nu
     padding: $spacing-xl $spacing-lg;
     position: relative;
     overflow: hidden;
+
+    .type-manage-btn {
+      position: absolute;
+      right: $spacing-md;
+      top: $spacing-lg;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6rpx;
+      padding: $spacing-sm $spacing-md;
+      z-index: 10;
+
+      .btn-icon-bg {
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: $radius-lg;
+        background: $gradient-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.35);
+
+        .fa-solid {
+          font-size: 32rpx;
+          color: #ffffff;
+        }
+      }
+
+      .btn-text {
+        font-size: 22rpx;
+        color: $text-primary;
+        font-weight: 500;
+        text-shadow: 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
+      }
+
+      &:active {
+        .btn-icon-bg {
+          transform: scale(0.92);
+        }
+      }
+    }
 
     .header-content {
       display: flex;
@@ -217,6 +272,16 @@ function onEditEvent(event: { id: string; name: string; typeId: string; time: nu
       transform: scale(0.92);
       box-shadow: 0 0 30rpx rgba(255, 107, 107, 0.4);
     }
+  }
+
+  .type-manager-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
   }
 }
 </style>
