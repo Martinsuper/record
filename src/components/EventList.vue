@@ -188,6 +188,10 @@ function getEventOffset(index: number): number {
 // 滚动事件处理
 function onScroll(e: { detail: { scrollTop: number } }): void {
   scrollTop.value = e.detail.scrollTop
+  // 滚动时关闭菜单
+  if (menuVisible.value) {
+    closeMenu()
+  }
 }
 
 // 重置滚动位置（用于新增事件后）
@@ -220,10 +224,8 @@ function onTouchStart(e: any, eventId: string) {
   longPressTimer.value = setTimeout(() => {
     if (isLongPressing.value) {
       // 长按触发，显示菜单
-      menuPosition.value = {
-        x: touchStartPos.value.x,
-        y: touchStartPos.value.y - 60 // 在长按位置上方 60px
-      }
+      const adjustedPos = adjustMenuPosition(touchStartPos.value.x, touchStartPos.value.y - 60)
+      menuPosition.value = adjustedPos
       menuVisible.value = true
     }
   }, LONG_PRESS_DURATION)
@@ -253,6 +255,27 @@ function onTouchMove(e: any) {
       longPressTimer.value = null
     }
   }
+}
+
+// 调整菜单位置以避免超出屏幕边界
+function adjustMenuPosition(x: number, y: number) {
+  const systemInfo = uni.getSystemInfoSync()
+  const menuWidth = 200 // 约等于 rpx 转 px
+  const menuHeight = 60
+
+  // 水平边界检测
+  if (x - menuWidth / 2 < 0) {
+    x = menuWidth / 2 + 10
+  } else if (x + menuWidth / 2 > systemInfo.windowWidth) {
+    x = systemInfo.windowWidth - menuWidth / 2 - 10
+  }
+
+  // 垂直边界检测 - 如果上方空间不够，显示在下方
+  if (y < 0) {
+    y = touchStartPos.value.y + 60
+  }
+
+  return { x, y }
 }
 
 // 关闭菜单
