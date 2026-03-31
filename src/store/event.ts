@@ -29,18 +29,20 @@ export const useEventStore = defineStore('event', {
     // 新增：缓存状态
     _filteredEventsCache: null as EventData[] | null,
     _cacheKey: '',
-    isLoaded: false
+    isLoaded: false,
+    // 分页加载相关
+    pageSize: 10, // 每页加载数量
+    loadedCount: 0 // 已加载数量
   }),
 
   getters: {
     /**
-     * 过滤后的事件列表（按时间倒序）
+     * 过滤后的事件列表（按时间倒序，支持分页）
      */
     filteredEvents: (state): EventData[] => {
       // 生成缓存 key：包含过滤条件和数据变化标识
-      // 使用所有事件时间戳的总和作为数据变化标识，确保任何事件的增删改都能触发缓存失效
       const totalEventTime = state.events.reduce((sum, e) => sum + e.time, 0)
-      const cacheKey = `${state.filterType}|${state.filterTimeRange}|${state.events.length}|${totalEventTime}`
+      const cacheKey = `${state.filterType}|${state.filterTimeRange}|${state.events.length}|${totalEventTime}|${state.loadedCount}`
 
       // 缓存命中时直接返回
       if (state._cacheKey === cacheKey && state._filteredEventsCache) {
@@ -61,11 +63,27 @@ export const useEventStore = defineStore('event', {
       // 按时间倒序排序
       result.sort((a, b) => b.time - a.time)
 
+      // 分页：只返回已加载数量的事件
+      const loadedCount = state.loadedCount || result.length
+      const paginatedResult = result.slice(0, loadedCount)
+
       // 更新缓存
-      state._filteredEventsCache = result
+      state._filteredEventsCache = paginatedResult
       state._cacheKey = cacheKey
 
-      return result
+      return paginatedResult
+    },
+
+    /**
+     * 是否还有更多事件可加载
+     */
+    hasMoreEvents: (state): boolean => {
+      let result = [...state.events]
+      if (state.filterType) {
+        result = result.filter(event => event.typeId === state.filterType)
+      }
+      result = filterByTimeRange(result, state.filterTimeRange)
+      return state.loadedCount < result.length
     },
 
     /**
@@ -164,6 +182,8 @@ export const useEventStore = defineStore('event', {
         }
       })
       this.isLoaded = true
+      // 初始化时加载第一页
+      this.loadedCount = this.pageSize
     },
 
     /**
@@ -243,6 +263,54 @@ export const useEventStore = defineStore('event', {
     clearFilters(): void {
       this.filterType = null
       this.filterTimeRange = 'all'
+    },
+
+    /**
+     * 重置分页状态（用于筛选条件变化时）
+     */
+    resetPagination(): void {
+      this.loadedCount = 0
+      // 清空缓存以触发重新计算
+      this._filteredEventsCache = null
+    },
+
+    /**
+     * 加载更多事件
+     * @returns 加载后的事件列表
+     */
+    loadMore(): EventData[] {
+      // 获取当前过滤后的完整列表（临时计算，不更新缓存）
+      let result = [...this.events]
+      if (this.filterType) {
+        result = result.filter(event => event.typeId === this.filterType)
+      }
+      result = filterByTimeRange(result, this.filterTimeRange)
+      result.sort((a, b) => b.time - a.time)
+
+      const oldLoadedCount = this.loadedCount || result.length
+      const newLoadedCount = Math.min(oldLoadedCount + this.pageSize, result.length)
+      this.loadedCount = newLoadedCount
+
+      // 返回新的已加载列表
+      this._filteredEventsCache = result.slice(0, newLoadedCount)
+      return this._filteredEventsCache
+    },
+
+    /**
+     * 刷新事件列表
+     */
+    refresh(): EventData[] {
+      // 获取当前过滤后的完整列表
+      let result = [...this.events]
+      if (this.filterType) {
+        result = result.filter(event => event.typeId === this.filterType)
+      }
+      result = filterByTimeRange(result, this.filterTimeRange)
+      result.sort((a, b) => b.time - a.time)
+
+      this.loadedCount = result.length
+      this._filteredEventsCache = result
+      return result
     }
   }
 })

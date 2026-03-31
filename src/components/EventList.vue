@@ -1,7 +1,11 @@
 <template>
   <view class="event-list">
     <!-- Empty state -->
-    <view v-if="filteredEvents.length === 0" class="empty-state glass-card">
+    <view v-if="!eventStore.isLoaded" class="loading-state">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view v-else-if="filteredEvents.length === 0" class="empty-state glass-card">
       <view class="empty-icon-wrap">
         <text class="fa-solid">&#xf01c;</text>
       </view>
@@ -14,25 +18,22 @@
       </view>
     </view>
 
-    <!-- Virtual scroll container -->
+    <!-- 原生滚动 + 下拉刷新 -->
     <scroll-view
       v-else
       scroll-y
-      :scroll-top="scrollTop"
-      :style="{ height: containerHeight + 'px' }"
-      :show-scrollbar="false"
-      @scroll="onScroll"
-      class="virtual-scroll-container"
+      class="scroll-container"
+      refresher-enabled
+      :refresher-triggered="isRefreshing"
+      @refresherrefresh="onRefresh"
+      @scrolltolower="onLoadMore"
     >
-      <!-- 占位容器，撑开真实高度 -->
-      <view :style="{ height: totalHeight + 'px' }">
-        <!-- 仅渲染可视区域项目 -->
+      <view class="event-list-inner">
         <view
-          v-for="event in visibleEvents"
+          v-for="event in filteredEvents"
           :key="event.id"
           class="event-card glass-card"
           :class="{ 'expanded': expandedEventId === event.id }"
-          :style="getCardStyle(event._index)"
         >
           <view
             class="event-card-inner"
@@ -78,15 +79,21 @@
           <!-- Card decoration -->
           <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
         </view>
+
+        <!-- 加载更多提示 -->
+        <view v-if="isLoadingMore" class="loading-more">
+          <text class="loading-more-text">加载中...</text>
+        </view>
+        <view v-else-if="hasMore === false && filteredEvents.length > 0" class="no-more">
+          <text class="no-more-text">- 没有更多了 -</text>
+        </view>
       </view>
     </scroll-view>
-
-    <!-- 移除气泡菜单 -->
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { formatTime } from '@/utils/time'
@@ -94,14 +101,23 @@ import { formatTime } from '@/utils/time'
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 
-// 监听事件类型变化，确保组件能响应类型变更
+// 监听事件类型变化
 const typeVersion = computed(() => eventTypeStore.types.length)
 
 const filteredEvents = computed(() => {
-  // 访问 typeVersion 以建立响应式依赖
   void typeVersion.value
   return eventStore.filteredEvents
 })
+
+// 是否有更多数据
+const hasMore = computed(() => eventStore.hasMoreEvents)
+
+// 加载状态
+const isRefreshing = ref(false)
+const isLoadingMore = ref(false)
+
+// 展开状态
+const expandedEventId = ref<string | null>(null)
 
 // Helper to adjust color brightness
 function adjustColor(color: string, amount: number): string {
@@ -113,13 +129,11 @@ function adjustColor(color: string, amount: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
-// 直接从 store 获取类型信息，确保响应式更新
 function getTypeGradient(typeId: string): string {
   const type = eventTypeStore.getTypeById(typeId)
   if (type) {
     return `linear-gradient(135deg, ${type.color} 0%, ${adjustColor(type.color, -20)} 100%)`
   }
-  // 默认类型（未分类）的颜色
   return 'linear-gradient(135deg, #999999 0%, #7a7a7a 100%)'
 }
 
@@ -132,111 +146,58 @@ function getTypeName(typeId: string): string {
   return eventTypeStore.getTypeName(typeId)
 }
 
-// 虚拟滚动配置
-const ITEM_HEIGHT = 120 // 卡片基础高度（rpx 转 px，包含间距）
-const BUFFER_SIZE = 5   // 缓冲区项目数
-const CARD_GAP = 16 // 卡片间距 px
-
-// 展开状态
-const expandedEventId = ref<string | null>(null)
-// 展开后额外增加的高度 (与 .event-detail 高度匹配)
-const EXPANDED_EXTRA_HEIGHT = 100
-
-const scrollTop = ref(0)
-const containerHeight = ref(500) // 默认容器高度，后续会计算
-
-// 计算可视范围
-const visibleRange = computed(() => {
-  const itemTotalHeight = ITEM_HEIGHT + CARD_GAP
-  const startIndex = Math.max(0, Math.floor(scrollTop.value / itemTotalHeight) - BUFFER_SIZE)
-  const visibleCount = Math.ceil(containerHeight.value / itemTotalHeight) + 2 * BUFFER_SIZE
-  const endIndex = Math.min(filteredEvents.value.length, startIndex + visibleCount)
-  return { startIndex, endIndex }
-})
-
-// 仅渲染可视区域的事件
-const visibleEvents = computed(() => {
-  const { startIndex, endIndex } = visibleRange.value
-  return filteredEvents.value.slice(startIndex, endIndex).map((event, i) => ({
-    ...event,
-    _index: startIndex + i
-  }))
-})
-
-// 总高度（用于撑开滚动容器，考虑展开状态）
-const totalHeight = computed(() => {
-  let height = 0
-  for (let i = 0; i < filteredEvents.value.length; i++) {
-    height += ITEM_HEIGHT
-    const isExpanded = expandedEventId.value !== null && filteredEvents.value[i]?.id === expandedEventId.value
-    if (!isExpanded) {
-      height += CARD_GAP
-    }
-  }
-  // 如果有展开的卡片，增加额外高度
-  if (expandedEventId.value !== null) {
-    height += EXPANDED_EXTRA_HEIGHT
-  }
-  return height
-})
-
-// 计算每个项目的偏移位置
-function getEventOffset(index: number): number {
-  let offset = 0
-  for (let i = 0; i < index; i++) {
-    // 每张卡片的基础高度
-    offset += ITEM_HEIGHT
-    // 如果这张卡片是展开的，增加额外高度且没有 margin-bottom
-    const isExpanded = expandedEventId.value !== null && filteredEvents.value[i]?.id === expandedEventId.value
-    if (isExpanded) {
-      offset += EXPANDED_EXTRA_HEIGHT
-    } else {
-      offset += CARD_GAP
-    }
-  }
-  return offset
-}
-
-// 获取卡片样式（支持展开状态）
-function getCardStyle(index: number) {
-  const event = filteredEvents.value[index]
-  const isExpanded = expandedEventId.value === event?.id
-  // 展开卡片高度增加，非展开卡片保持基础高度
-  const height = isExpanded ? (ITEM_HEIGHT + EXPANDED_EXTRA_HEIGHT) : ITEM_HEIGHT
-  return {
-    position: 'absolute' as const,
-    top: getEventOffset(index) + 'px',
-    width: '100%',
-    height: height + 'px'
-  }
-}
-
 // 切换展开/收起状态
 function toggleExpand(eventId: string) {
   expandedEventId.value = expandedEventId.value === eventId ? null : eventId
 }
 
-// 滚动事件处理
-function onScroll(e: { detail: { scrollTop: number } }): void {
-  scrollTop.value = e.detail.scrollTop
-  // 滚动时收起展开的卡片
-  if (expandedEventId.value !== null) {
-    expandedEventId.value = null
-  }
+// 下拉刷新
+async function onRefresh() {
+  isRefreshing.value = true
+  expandedEventId.value = null
+
+  // 重置分页并刷新数据
+  eventStore.resetPagination()
+  eventStore.refresh()
+
+  // 模拟短暂延迟，让刷新动画更自然
+  await new Promise(resolve => setTimeout(resolve, 300))
+  isRefreshing.value = false
+}
+
+// 上拉加载更多
+async function onLoadMore() {
+  if (isLoadingMore.value || !hasMore.value) return
+
+  isLoadingMore.value = true
+  eventStore.loadMore()
+
+  // 模拟短暂延迟
+  await new Promise(resolve => setTimeout(resolve, 200))
+  isLoadingMore.value = false
 }
 
 // 重置滚动位置（用于新增事件后）
 function resetScroll() {
-  scrollTop.value = 0
+  eventStore.resetPagination()
+  eventStore.refresh()
   expandedEventId.value = null
 }
 
-// 初始化时计算容器高度
-onMounted(() => {
-  const systemInfo = uni.getSystemInfoSync()
-  // 减去 header + filter + tabbar 大约 200px
-  containerHeight.value = systemInfo.windowHeight - 200
-})
+// 监听筛选条件变化，重置分页
+watch(
+  () => eventStore.filterType,
+  () => {
+    eventStore.resetPagination()
+  }
+)
+
+watch(
+  () => eventStore.filterTimeRange,
+  () => {
+    eventStore.resetPagination()
+  }
+)
 
 // 暴露方法给父组件
 defineExpose({
@@ -277,6 +238,18 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
 
 <style lang="scss" scoped>
 .event-list {
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-2xl;
+
+    .loading-text {
+      font-size: 28rpx;
+      color: $text-secondary;
+    }
+  }
+
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -346,16 +319,18 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
     }
   }
 
-  .virtual-scroll-container {
-    overflow: hidden;
+  .scroll-container {
+    height: calc(100vh - 300rpx);
+
+    .event-list-inner {
+      padding: $spacing-md;
+    }
 
     .event-card {
       margin-bottom: $spacing-md;
-      padding-bottom: 0;
-      box-sizing: border-box;
-      overflow: visible;
       position: relative;
       transition: all 0.3s ease;
+      overflow: visible;
 
       &.expanded {
         margin-bottom: 0;
@@ -425,7 +400,6 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
             line-height: 1.5;
             display: block;
             margin-bottom: $spacing-sm;
-            // Ensure fixed height for virtual scroll
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -447,7 +421,6 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
             }
           }
 
-          // 展开后的详情区域
           .event-detail {
             margin-top: $spacing-md;
             padding-top: $spacing-md;
@@ -513,6 +486,30 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
         height: 100rpx;
         border-radius: 50%;
         opacity: 0.1;
+      }
+    }
+
+    .loading-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-lg;
+
+      .loading-more-text {
+        font-size: 26rpx;
+        color: $text-secondary;
+      }
+    }
+
+    .no-more {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-lg;
+
+      .no-more-text {
+        font-size: 24rpx;
+        color: $text-muted;
       }
     }
   }
