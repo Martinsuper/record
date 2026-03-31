@@ -9,7 +9,7 @@
         <text class="type-name">{{ selectedTypeData.name }}</text>
       </view>
       <text v-else class="placeholder">请选择类型</text>
-      <text class="fa-solid">&#xf078;</text>
+      <text class="fa-solid arrow-icon">&#xf078;</text>
     </view>
 
     <!-- New type button -->
@@ -234,24 +234,36 @@ function saveNewType() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md;
-    min-height: 80rpx;
+    padding: $spacing-md $spacing-lg;
+    min-height: 88rpx;
+    border-radius: $radius-lg;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    transition: all $transition-fast;
+
+    &:active {
+      background: rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.2);
+    }
 
     .selected-type {
       display: flex;
       align-items: center;
       gap: $spacing-sm;
+      flex: 1;
+      overflow: hidden;
 
       .type-badge {
-        width: 36rpx;
-        height: 36rpx;
+        width: 40rpx;
+        height: 40rpx;
         border-radius: $radius-sm;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
 
         .fa-solid {
-          font-size: 16rpx;
+          font-size: 18rpx;
           color: #ffffff;
         }
       }
@@ -260,17 +272,26 @@ function saveNewType() {
         font-size: 30rpx;
         font-weight: 500;
         color: $text-primary;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
     .placeholder {
       font-size: 30rpx;
       color: $text-muted;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .fa-solid {
+    .arrow-icon {
       font-size: 16rpx;
       color: $text-secondary;
+      flex-shrink: 0;
+      margin-left: $spacing-xs;
     }
   }
 
