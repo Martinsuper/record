@@ -131,13 +131,38 @@ export const useEventStore = defineStore('event', {
       if (this.isLoaded) return
 
       const storedEvents = getEvents()
-      this.events = storedEvents.map((event) => ({
-        id: event.id,
-        name: event.name || '',
-        typeId: event.typeId || '',
-        time: typeof event.time === 'number' ? event.time : new Date(event.time).getTime(),
-        createdAt: event.createdAt || Date.now()
-      }))
+      this.events = storedEvents.map((event) => {
+        // 处理 time：可能是数字或字符串（存储格式）
+        let time: number
+        if (typeof event.time === 'number') {
+          time = event.time
+        } else if (typeof event.time === 'string') {
+          // 尝试解析为数字时间戳
+          const parsed = parseInt(event.time, 10)
+          time = isNaN(parsed) ? new Date(event.time).getTime() : parsed
+        } else {
+          time = Date.now()
+        }
+
+        // 处理 createdAt：可能是数字或字符串（存储格式）
+        let createdAt: number
+        if (typeof event.createdAt === 'number') {
+          createdAt = event.createdAt
+        } else if (typeof event.createdAt === 'string') {
+          const parsed = parseInt(event.createdAt, 10)
+          createdAt = isNaN(parsed) ? Date.now() : parsed
+        } else {
+          createdAt = Date.now()
+        }
+
+        return {
+          id: event.id,
+          name: event.name || '',
+          typeId: event.typeId || '',
+          time,
+          createdAt
+        }
+      })
       this.isLoaded = true
     },
 
