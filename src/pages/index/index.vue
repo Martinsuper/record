@@ -99,7 +99,12 @@ function onEditEvent(event: { id: string; name: string; typeId: string; time: nu
 
   .header {
     margin: $spacing-lg $spacing-md;
+    /* #ifdef MP */
     margin-top: calc(var(--nav-bar-height) + $spacing-lg);
+    /* #endif */
+    /* #ifdef H5 */
+    margin-top: $spacing-lg;
+    /* #endif */
     padding: $spacing-xl $spacing-lg;
     position: relative;
     overflow: hidden;

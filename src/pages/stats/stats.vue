@@ -157,7 +157,12 @@ function getBarHeight(count: number): number {
   .header {
     position: relative;
     padding: $spacing-xl $spacing-md;
+    /* #ifdef MP */
     padding-top: calc(var(--nav-bar-height) + $spacing-xl);
+    /* #endif */
+    /* #ifdef H5 */
+    padding-top: $spacing-xl;
+    /* #endif */
 
     .header-bg {
       position: absolute;
