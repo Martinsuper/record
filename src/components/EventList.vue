@@ -32,37 +32,36 @@
           class="event-card glass-card"
           :style="{ position: 'absolute', top: getEventOffset(event._index) + 'px', width: '100%' }"
         >
-          <u-swipe-action>
-            <u-swipe-action-item
-              :options="swipeOptions"
-              @click="(e: { index: number }) => handleSwipeClick(e.index, event.id)"
-            >
-              <view class="event-card-inner">
-                <!-- Type indicator with gradient -->
-                <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
+          <view
+            class="event-card-inner"
+            @touchstart="(e: any) => onTouchStart(e, event.id)"
+            @touchend="onTouchEnd"
+            @touchmove="onTouchMove"
+            @touchcancel="onTouchEnd"
+          >
+            <!-- Type indicator with gradient -->
+            <view class="type-indicator" :style="{ background: getTypeGradient(event.typeId) }"></view>
 
-                <!-- Content -->
-                <view class="event-content">
-                  <view class="event-header">
-                    <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-                      <text class="fa-solid">&#xf005;</text>
-                      <text class="type-name">{{ getTypeName(event.typeId) }}</text>
-                    </view>
-                  </view>
-
-                  <text class="event-name">{{ event.name }}</text>
-
-                  <view class="event-time">
-                    <text class="fa-solid">&#xf017;</text>
-                    <text class="time-text">{{ formatTime(event.time) }}</text>
-                  </view>
+            <!-- Content -->
+            <view class="event-content">
+              <view class="event-header">
+                <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
+                  <text class="fa-solid">&#xf005;</text>
+                  <text class="type-name">{{ getTypeName(event.typeId) }}</text>
                 </view>
               </view>
 
-              <!-- Card decoration -->
-              <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
-            </u-swipe-action-item>
-          </u-swipe-action>
+              <text class="event-name">{{ event.name }}</text>
+
+              <view class="event-time">
+                <text class="fa-solid">&#xf017;</text>
+                <text class="time-text">{{ formatTime(event.time) }}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- Card decoration -->
+          <view class="card-decoration" :style="{ background: getTypeGradient(event.typeId) }"></view>
         </view>
       </view>
     </scroll-view>
@@ -181,53 +180,51 @@ defineExpose({
   resetScroll
 })
 
-// Swipe action options - 编辑和删除按钮
-const swipeOptions = [
-  {
-    text: '编辑',
-    style: {
-      backgroundColor: '#3B82F6'
-    }
-  },
-  {
-    text: '删除',
-    style: {
-      backgroundColor: '#EF4444'
-    }
-  }
-]
-
 const emit = defineEmits(['edit'])
 
-// Handle swipe action clicks
-const handleSwipeClick = (index: number, eventId: string) => {
-  const event = eventStore.events.find(e => e.id === eventId)
-  if (!event) return
+// 触摸开始
+function onTouchStart(e: any, eventId: string) {
+  const touch = e.touches[0]
+  touchStartPos.value = { x: touch.clientX, y: touch.clientY }
+  selectedEventId.value = eventId
+  isLongPressing.value = true
 
-  if (index === 0) {
-    // 编辑按钮
-    emit('edit', {
-      id: event.id,
-      name: event.name,
-      typeId: event.typeId,
-      time: event.time
-    })
-  } else if (index === 1) {
-    // 删除按钮
-    uni.showModal({
-      title: '确认删除',
-      content: '确定要删除这个事件吗？',
-      confirmColor: '#EF4444',
-      success: (res) => {
-        if (res.confirm) {
-          eventStore.deleteEvent(eventId)
-          uni.showToast({
-            title: '已删除',
-            icon: 'success'
-          })
-        }
+  // 开始长按计时
+  longPressTimer.value = setTimeout(() => {
+    if (isLongPressing.value) {
+      // 长按触发，显示菜单
+      menuPosition.value = {
+        x: touchStartPos.value.x,
+        y: touchStartPos.value.y - 60 // 在长按位置上方 60px
       }
-    })
+      menuVisible.value = true
+    }
+  }, LONG_PRESS_DURATION)
+}
+
+// 触摸结束
+function onTouchEnd() {
+  isLongPressing.value = false
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+}
+
+// 触摸移动（取消长按）
+function onTouchMove(e: any) {
+  const touch = e.touches[0]
+  const distance = Math.sqrt(
+    Math.pow(touch.clientX - touchStartPos.value.x, 2) +
+    Math.pow(touch.clientY - touchStartPos.value.y, 2)
+  )
+  if (distance > CANCEL_DISTANCE) {
+    // 移动超过阈值，取消长按
+    isLongPressing.value = false
+    if (longPressTimer.value) {
+      clearTimeout(longPressTimer.value)
+      longPressTimer.value = null
+    }
   }
 }
 </script>
