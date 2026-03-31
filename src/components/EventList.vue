@@ -80,6 +80,7 @@
         <text class="fa-solid">&#xf044;</text>
         <text class="menu-text">编辑</text>
       </view>
+      <view class="menu-divider"></view>
       <view class="menu-item delete" @click="handleMenuDelete">
         <text class="fa-solid">&#xf1f8;</text>
         <text class="menu-text">删除</text>
@@ -490,34 +491,75 @@ function handleMenuDelete() {
   z-index: 9999;
   display: flex;
   align-items: center;
-  gap: 32rpx;
-  padding: 20rpx 32rpx;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateX(-50%);
+  padding: 0 $spacing-lg;
+  height: 88rpx;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12), 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+  transform: translateX(-50%) translateY(10rpx);
+  opacity: 0;
+  animation: menu-appear 0.2s ease-out forwards;
+
+  // 小三角指示器
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -12rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12rpx solid transparent;
+    border-right: 12rpx solid transparent;
+    border-top: 12rpx solid #FFFFFF;
+  }
 
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 8rpx;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+    border-radius: 12rpx;
+    transition: background 0.15s ease;
 
     .fa-solid {
-      font-size: 28rpx;
+      font-size: 30rpx;
     }
 
     .menu-text {
-      font-size: 26rpx;
-      font-weight: 500;
+      font-size: 28rpx;
+      font-weight: 600;
     }
 
     &.edit {
-      color: #3B82F6;
+      color: $primary-color;
+
+      &:active {
+        background: rgba($primary-color, 0.1);
+      }
     }
 
     &.delete {
       color: #EF4444;
+
+      &:active {
+        background: rgba(#EF4444, 0.1);
+      }
     }
+  }
+
+  .menu-divider {
+    width: 2rpx;
+    height: 40rpx;
+    background: #E5E7EB;
+    margin: 0 $spacing-sm;
+  }
+}
+
+@keyframes menu-appear {
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
