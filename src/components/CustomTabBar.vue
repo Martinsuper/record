@@ -16,6 +16,14 @@
       <text class="fa-solid">&#xf200;</text>
       <text class="tab-text">统计</text>
     </view>
+    <view
+      class="tab-item"
+      :class="{ active: currentIndex === 2 }"
+      @click="switchTab(2)"
+    >
+      <text class="fa-solid">&#xf0e7;</text>
+      <text class="tab-text">数据</text>
+    </view>
   </view>
 </template>
 
@@ -27,17 +35,18 @@ const currentIndex = ref(0)
 
 const pages = [
   '/pages/index/index',
-  '/pages/stats/stats'
+  '/pages/stats/stats',
+  '/pages/data-manager/data-manager'
 ]
 
 function getCurrentPageIndex(): number {
   const pageStack = getCurrentPages()
   if (pageStack.length === 0) return 0
   const currentPage = pageStack[pageStack.length - 1]
-  // 使用完整的 route 路径判断
   const route = currentPage.route || ''
-  // 统计页面返回 1，事件页面返回 0
+
   if (route === 'pages/stats/stats') return 1
+  if (route === 'pages/data-manager/data-manager') return 2
   return 0
 }
 
