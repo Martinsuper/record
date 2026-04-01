@@ -32,8 +32,8 @@ export const useAnniversaryStore = defineStore('anniversary', {
      */
     sortedAnniversaries: (state): AnniversaryData[] => {
       return [...state.anniversaries].sort((a, b) => {
-        const calcA = calculateAnniversary(a.date, a.repeatType)
-        const calcB = calculateAnniversary(b.date, b.repeatType)
+        const calcA = calculateAnniversary(a.date, a.mode, a.repeatType)
+        const calcB = calculateAnniversary(b.date, b.mode, b.repeatType)
         return calcA.days - calcB.days
       })
     }
@@ -52,6 +52,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
         name: item.name || '',
         date: item.date || Date.now(),
         repeatType: item.repeatType || 'year',
+        mode: item.mode || 'countdown',
         categoryId: item.categoryId || '',
         sortOrder: item.sortOrder || 0,
         createdAt: item.createdAt || Date.now(),
