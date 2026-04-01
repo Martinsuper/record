@@ -32,6 +32,15 @@
 				"navigationBarTextStyle": "black",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/anniversary/anniversary",
+			"style": {
+				"navigationBarTitleText": "纪念日",
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {
@@ -56,8 +65,8 @@
 				"text": "统计"
 			},
 			{
-				"pagePath": "pages/data-manager/data-manager",
-				"text": "数据"
+				"pagePath": "pages/anniversary/anniversary",
+				"text": "纪念日"
 			}
 		]
 	}
