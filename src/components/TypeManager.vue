@@ -233,20 +233,15 @@ const deletingTypeCount = computed(() => {
 })
 
 // Custom popup style for WeChat Mini Program to fix bottom spacing issue
-const customPopupStyle = computed(() => {
+const customPopupStyle = {
   // #ifdef MP-WEIXIN
-  return {
-    paddingBottom: '0',
-    paddingTop: '0',
-    'padding-bottom': '0',
-    'padding-top': '0',
-    'min-height': 'auto',
-    height: 'auto',
-    display: 'block'
-  }
+  paddingBottom: '0',
+  paddingTop: '0',
+  minHeight: 'auto',
+  height: 'auto',
+  display: 'block'
   // #endif
-  return {}
-})
+}
 
 // Close manager
 function closeManager() {
@@ -347,13 +342,18 @@ function executeDelete() {
 .type-manager {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
   background: #ffffff;
   padding-bottom: env(safe-area-inset-bottom);
 
   /* #ifdef MP-WEIXIN */
   padding-top: var(--nav-bar-height);
   height: calc(100vh - var(--nav-bar-height));
+  /* #endif */
+
+  /* #ifndef MP-WEIXIN */
+  height: 100vh;
   /* #endif */
 }
 
@@ -379,7 +379,7 @@ function executeDelete() {
     justify-content: center;
 
     .fa-solid {
-      font-size: 18rpx;
+      font-size: 20rpx;
       color: $text-secondary;
     }
   }
@@ -387,8 +387,10 @@ function executeDelete() {
 
 .manager-content {
   flex: 1;
+  width: 100%;
+  box-sizing: border-box;
   overflow-y: auto;
-  padding: $spacing-lg;
+  padding: $spacing-lg $spacing-xl;
 
   .empty-tip {
     display: flex;
@@ -396,15 +398,14 @@ function executeDelete() {
     align-items: center;
     justify-content: center;
     gap: $spacing-lg;
-    padding: $spacing-xl * 2;
-    color: $text-secondary;
-    font-size: 28rpx;
+    padding: 96rpx;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
     border-radius: $radius-xl;
     border: 1px dashed rgba(99, 102, 241, 0.2);
 
     .fa-solid {
       font-size: 64rpx;
+      color: $text-secondary;
       background: linear-gradient(135deg, $accent-indigo 0%, $accent-purple 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -412,7 +413,7 @@ function executeDelete() {
       opacity: 0.6;
     }
 
-    text:last-child {
+    > text:last-child {
       font-size: 28rpx;
       color: $text-secondary;
       opacity: 0.8;
@@ -422,8 +423,10 @@ function executeDelete() {
   .type-item {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
+    gap: $spacing-sm;
     padding: $spacing-md;
+    width: 100%;
+    box-sizing: border-box;
     border-radius: $radius-lg;
     background: rgba(99, 102, 241, 0.03);
     margin-bottom: $spacing-md;
@@ -476,18 +479,16 @@ function executeDelete() {
       position: relative;
       display: flex;
       align-items: center;
-      padding-right: $spacing-md;
 
       .more-btn {
-        width: 64rpx;
-        height: 64rpx;
-        border-radius: $radius-lg;
+        width: 48rpx;
+        height: 48rpx;
+        border-radius: $radius-md;
         background: rgba(99, 102, 241, 0.08);
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all $transition-fast;
-        margin-left: auto;
 
         .fa-solid {
           font-size: 20rpx;
@@ -583,7 +584,7 @@ function executeDelete() {
     border: 1px dashed $accent-indigo;
 
     .fa-solid {
-      font-size: 18rpx;
+      font-size: 20rpx;
       color: $accent-indigo;
     }
 
@@ -604,23 +605,7 @@ function executeDelete() {
   padding: $spacing-lg;
   background: #ffffff !important;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
-  margin-bottom: 0;
-  padding-bottom: $spacing-lg;
 }
-
-/* #ifdef MP-WEIXIN */
-/* 修复小程序端 u-popup 底部空白问题 */
-.uni-popup__wrapper-box {
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-/* 强制覆盖 dialog 卡片底部边距 */
-.dialog-card,
-.delete-dialog-card {
-  margin-bottom: -50rpx !important;
-}
-/* #endif */
 
 .dialog-header {
   text-align: center;
@@ -671,7 +656,9 @@ function executeDelete() {
         &.selected {
           transform: scale(1.1);
           box-shadow: $shadow-medium;
-          border: 2rpx solid rgba(255, 255, 255, 0.8);
+          border-width: 2rpx;
+          border-style: solid;
+          border-color: rgba(255, 255, 255, 0.8);
 
           .fa-solid {
             font-size: 22rpx;
@@ -718,11 +705,6 @@ function executeDelete() {
   display: flex;
   gap: $spacing-md;
   margin-top: $spacing-lg;
-  margin-bottom: 0;
-
-  /* #ifdef MP-WEIXIN */
-  margin-bottom: 0;
-  /* #endif */
 
   .btn-cancel,
   .btn-save {
@@ -756,7 +738,7 @@ function executeDelete() {
     box-shadow: $shadow-glow;
 
     .fa-solid {
-      font-size: 18rpx;
+      font-size: 20rpx;
       color: #ffffff;
     }
 
@@ -850,7 +832,7 @@ function executeDelete() {
       box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.3);
 
       .fa-solid {
-        font-size: 18rpx;
+        font-size: 20rpx;
         color: #ffffff;
       }
 
