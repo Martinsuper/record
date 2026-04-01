@@ -120,6 +120,7 @@ export interface AnniversaryData {
   name: string
   date: number
   repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
+  mode: 'countdown' | 'elapsed'  // 倒计时 | 正计时
   categoryId: string
   sortOrder: number
   createdAt: number
