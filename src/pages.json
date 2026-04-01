@@ -23,6 +23,15 @@
 				"navigationBarTextStyle": "black",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/data-manager/data-manager",
+			"style": {
+				"navigationBarTitleText": "数据管理",
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {
@@ -45,6 +54,10 @@
 			{
 				"pagePath": "pages/stats/stats",
 				"text": "统计"
+			},
+			{
+				"pagePath": "pages/data-manager/data-manager",
+				"text": "数据"
 			}
 		]
 	}
