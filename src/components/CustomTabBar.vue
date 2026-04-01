@@ -21,8 +21,8 @@
       :class="{ active: currentIndex === 2 }"
       @click="switchTab(2)"
     >
-      <text class="fa-solid">&#xf0e7;</text>
-      <text class="tab-text">数据</text>
+      <text class="fa-solid">&#xf004;</text>
+      <text class="tab-text">纪念日</text>
     </view>
   </view>
 </template>
@@ -36,7 +36,7 @@ const currentIndex = ref(0)
 const pages = [
   '/pages/index/index',
   '/pages/stats/stats',
-  '/pages/data-manager/data-manager'
+  '/pages/anniversary/anniversary'
 ]
 
 function getCurrentPageIndex(): number {
@@ -46,7 +46,7 @@ function getCurrentPageIndex(): number {
   const route = currentPage.route || ''
 
   if (route === 'pages/stats/stats') return 1
-  if (route === 'pages/data-manager/data-manager') return 2
+  if (route === 'pages/anniversary/anniversary') return 2
   return 0
 }
 
