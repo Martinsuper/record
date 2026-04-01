@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { getAnniversaries, saveAnniversaries, AnniversaryData } from '@/utils/storage'
+import { getAnniversaries, saveAnniversaries } from '@/utils/storage'
+import type { AnniversaryData } from '@/utils/storage'
 import { calculateAnniversary } from '@/utils/anniversary'
 
 /**
