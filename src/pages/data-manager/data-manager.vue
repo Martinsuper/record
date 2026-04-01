@@ -125,6 +125,7 @@ const previewData = ref({
 
 // ExportData 接口定义
 interface ExportData {
+  version: number
   events: EventData[]
   types: EventTypeData[]
   exportedAt: number
@@ -135,6 +136,7 @@ interface ExportData {
  */
 function handleExport(): void {
   const exportData: ExportData = {
+    version: 1,
     events: eventStore.events,
     types: eventTypeStore.types,
     exportedAt: Date.now()
@@ -167,6 +169,15 @@ function handleImport(): void {
     success: (res) => {
       try {
         const data = JSON.parse(res.data) as ExportData
+
+        // 校验版本
+        if (data.version !== 1) {
+          uni.showToast({
+            title: '数据版本不兼容',
+            icon: 'none'
+          })
+          return
+        }
 
         // 校验 JSON 格式
         if (!data.events || !Array.isArray(data.events)) {
