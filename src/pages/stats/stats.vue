@@ -95,6 +95,18 @@
       </view>
     </view>
 
+    <!-- Data management entry -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.5s" @click="goToDataManager">
+      <view class="section-header">
+        <text class="fa-solid">&#xf0e7;</text>
+        <text class="section-title">数据管理</text>
+      </view>
+      <view class="section-desc">导出或导入数据</view>
+      <view class="entry-arrow">
+        <text class="fa-solid">&#xf054;</text>
+      </view>
+    </view>
+
     <!-- Custom TabBar -->
     <CustomTabBar />
   </view>
@@ -146,6 +158,12 @@ const maxCount = computed(() => Math.max(...recentStats.value.map(d => d.count),
 function getBarHeight(count: number): number {
   if (maxCount.value === 0) return 0
   return Math.round((count / maxCount.value) * 140)
+}
+
+function goToDataManager() {
+  uni.navigateTo({
+    url: '/pages/data-manager/data-manager'
+  })
 }
 </script>
 
@@ -263,6 +281,7 @@ function getBarHeight(count: number): number {
   .section-card {
     margin: $spacing-md;
     padding: $spacing-lg;
+    position: relative;
 
     .section-header {
       display: flex;
@@ -280,6 +299,22 @@ function getBarHeight(count: number): number {
         font-weight: 600;
         color: $text-primary;
       }
+    }
+
+    .entry-arrow {
+      position: absolute;
+      right: $spacing-lg;
+      top: 50%;
+      transform: translateY(-50%);
+
+      .fa-solid {
+        font-size: 20rpx;
+        color: $text-muted;
+      }
+    }
+
+    .section-desc {
+      padding-right: $spacing-xl;
     }
 
     .empty-state {
