@@ -20,8 +20,8 @@
         :key="type.id"
         class="type-item"
         :class="{ 'deleting': deletingId === type.id }"
-        @click="openEditDialog(type)"
-        @longpress="confirmDelete(type)"
+        @click.stop="openEditDialog(type)"
+        @longpress.stop="confirmDelete(type)"
       >
         <view class="type-badge" :style="{ backgroundColor: type.color }">
           <text class="fa-solid">&#xf005;</text>
@@ -57,8 +57,15 @@
     </view>
 
     <!-- Edit/Create Dialog -->
-    <u-popup :show="showDialog" mode="center" @close="closeDialog">
-      <view class="dialog-card glass-card">
+    <u-popup
+      :show="showDialog"
+      mode="center"
+      @close="closeDialog"
+      :custom-style="customPopupStyle"
+      :safe-area-inset-bottom="false"
+      :mask-touch="false"
+    >
+      <view class="dialog-card">
         <view class="dialog-header">
           <text class="dialog-title">{{ dialogMode === 'edit' ? '编辑类型' : '新建类型' }}</text>
         </view>
@@ -119,8 +126,15 @@
     </u-popup>
 
     <!-- Delete Confirmation Dialog -->
-    <u-popup :show="showDeleteConfirm" mode="center" @close="closeDeleteConfirm">
-      <view class="delete-dialog-card glass-card">
+    <u-popup
+      :show="showDeleteConfirm"
+      mode="center"
+      @close="closeDeleteConfirm"
+      :custom-style="customPopupStyle"
+      :safe-area-inset-bottom="false"
+      :mask-touch="false"
+    >
+      <view class="delete-dialog-card">
         <view class="delete-icon-wrapper">
           <text class="fa-solid">&#xf1f8;</text>
         </view>
@@ -216,6 +230,22 @@ const typesWithCount = computed<TypeWithCount[]>(() => {
 const deletingTypeCount = computed(() => {
   if (!deletingType.value) return 0
   return deletingType.value.eventCount
+})
+
+// Custom popup style for WeChat Mini Program to fix bottom spacing issue
+const customPopupStyle = computed(() => {
+  // #ifdef MP-WEIXIN
+  return {
+    paddingBottom: '0',
+    paddingTop: '0',
+    'padding-bottom': '0',
+    'padding-top': '0',
+    'min-height': 'auto',
+    height: 'auto',
+    display: 'block'
+  }
+  // #endif
+  return {}
 })
 
 // Close manager
@@ -319,6 +349,7 @@ function executeDelete() {
   flex-direction: column;
   height: 100vh;
   background: #ffffff;
+  padding-bottom: env(safe-area-inset-bottom);
 
   /* #ifdef MP-WEIXIN */
   padding-top: var(--nav-bar-height);
@@ -364,13 +395,27 @@ function executeDelete() {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: $spacing-md;
-    padding: $spacing-xl;
+    gap: $spacing-lg;
+    padding: $spacing-xl * 2;
     color: $text-secondary;
     font-size: 28rpx;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+    border-radius: $radius-xl;
+    border: 1px dashed rgba(99, 102, 241, 0.2);
 
     .fa-solid {
-      font-size: 48rpx;
+      font-size: 64rpx;
+      background: linear-gradient(135deg, $accent-indigo 0%, $accent-purple 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0.6;
+    }
+
+    text:last-child {
+      font-size: 28rpx;
+      color: $text-secondary;
+      opacity: 0.8;
     }
   }
 
@@ -456,14 +501,16 @@ function executeDelete() {
 
       .action-menu {
         position: absolute;
-        right: $spacing-md;
-        top: calc(100% + 16rpx);
+        right: 0;
+        top: 100%;
         background: #ffffff;
         border-radius: $radius-lg;
         box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
         z-index: 100;
         overflow: hidden;
         min-width: 200rpx;
+        transform-origin: top right;
+        animation: menuSlideIn 0.2s ease-out;
 
         .menu-item {
           display: flex;
@@ -509,6 +556,18 @@ function executeDelete() {
   }
 }
 
+// Menu slide-in animation
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8rpx) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .manager-footer {
   padding: $spacing-lg;
   border-top: 1px solid rgba(99, 102, 241, 0.1);
@@ -536,14 +595,32 @@ function executeDelete() {
   }
 }
 
-// Dialog styles
+// Dialog styles - responsive width
 .dialog-card,
 .delete-dialog-card {
-  width: 600rpx;
+  width: 100%;
+  max-width: 600rpx;
   border-radius: $radius-xl;
   padding: $spacing-lg;
-  background: #ffffff;
+  background: #ffffff !important;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
+  margin-bottom: 0;
+  padding-bottom: $spacing-lg;
 }
+
+/* #ifdef MP-WEIXIN */
+/* 修复小程序端 u-popup 底部空白问题 */
+.uni-popup__wrapper-box {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* 强制覆盖 dialog 卡片底部边距 */
+.dialog-card,
+.delete-dialog-card {
+  margin-bottom: -50rpx !important;
+}
+/* #endif */
 
 .dialog-header {
   text-align: center;
@@ -558,6 +635,10 @@ function executeDelete() {
 .dialog-content {
   .form-item {
     margin-bottom: $spacing-lg;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     .form-label {
       display: block;
@@ -575,13 +656,12 @@ function executeDelete() {
     }
 
     .color-grid {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
       gap: $spacing-md;
 
       .color-option {
-        width: 64rpx;
-        height: 64rpx;
+        aspect-ratio: 1;
         border-radius: $radius-md;
         display: flex;
         align-items: center;
@@ -589,21 +669,27 @@ function executeDelete() {
         transition: all $transition-fast;
 
         &.selected {
-          transform: scale(1.15);
+          transform: scale(1.1);
           box-shadow: $shadow-medium;
+          border: 2rpx solid rgba(255, 255, 255, 0.8);
 
           .fa-solid {
             font-size: 22rpx;
             color: #ffffff;
           }
         }
+
+        &:active {
+          transform: scale(0.95);
+        }
       }
     }
 
     .preview-card {
-      background: rgba(99, 102, 241, 0.05);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
       border-radius: $radius-lg;
       padding: $spacing-lg;
+      border: 1px solid rgba(99, 102, 241, 0.1);
 
       .type-tag {
         display: inline-flex;
@@ -611,14 +697,15 @@ function executeDelete() {
         gap: $spacing-xs;
         padding: $spacing-sm $spacing-md;
         border-radius: $radius-full;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 
         .fa-solid {
-          font-size: 14rpx;
+          font-size: 16rpx;
           color: #ffffff;
         }
 
         .tag-name {
-          font-size: 26rpx;
+          font-size: 28rpx;
           font-weight: 500;
           color: #ffffff;
         }
@@ -631,32 +718,41 @@ function executeDelete() {
   display: flex;
   gap: $spacing-md;
   margin-top: $spacing-lg;
+  margin-bottom: 0;
 
-  .btn-cancel {
+  /* #ifdef MP-WEIXIN */
+  margin-bottom: 0;
+  /* #endif */
+
+  .btn-cancel,
+  .btn-save {
     flex: 1;
     height: 80rpx;
     border-radius: $radius-lg;
-    background: rgba(99, 102, 241, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: $spacing-sm;
+    transition: all $transition-fast;
+  }
+
+  .btn-cancel {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.1);
 
     text {
       font-size: 30rpx;
       font-weight: 600;
       color: $text-secondary;
     }
+
+    &:active {
+      background: rgba(99, 102, 241, 0.1);
+    }
   }
 
   .btn-save {
-    flex: 2;
-    height: 80rpx;
-    border-radius: $radius-lg;
     background: $gradient-primary;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-sm;
     box-shadow: $shadow-glow;
 
     .fa-solid {
@@ -672,6 +768,11 @@ function executeDelete() {
 
     &.disabled {
       opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    &:active:not(.disabled) {
+      transform: scale(0.96);
     }
   }
 }
@@ -682,17 +783,17 @@ function executeDelete() {
   padding: $spacing-xl;
 
   .delete-icon-wrapper {
-    width: 96rpx;
-    height: 96rpx;
+    width: 80rpx;
+    height: 80rpx;
     border-radius: $radius-full;
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto $spacing-md;
 
     .fa-solid {
-      font-size: 36rpx;
+      font-size: 32rpx;
       color: #EF4444;
     }
   }
@@ -717,31 +818,35 @@ function executeDelete() {
     display: flex;
     gap: $spacing-md;
 
-    .btn-cancel {
+    .btn-cancel,
+    .btn-delete {
       flex: 1;
       height: 80rpx;
       border-radius: $radius-lg;
-      background: rgba(99, 102, 241, 0.05);
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: $spacing-sm;
+      transition: all $transition-fast;
+    }
+
+    .btn-cancel {
+      background: rgba(99, 102, 241, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.1);
 
       text {
         font-size: 30rpx;
         font-weight: 600;
         color: $text-secondary;
       }
+
+      &:active {
+        background: rgba(99, 102, 241, 0.1);
+      }
     }
 
     .btn-delete {
-      flex: 1;
-      height: 80rpx;
-      border-radius: $radius-lg;
       background: #EF4444;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: $spacing-sm;
       box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.3);
 
       .fa-solid {
@@ -753,6 +858,11 @@ function executeDelete() {
         font-size: 30rpx;
         font-weight: 600;
         color: #ffffff;
+      }
+
+      &:active {
+        transform: scale(0.96);
+        box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.25);
       }
     }
   }
