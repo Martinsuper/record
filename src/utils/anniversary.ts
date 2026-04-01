@@ -3,10 +3,10 @@
  */
 
 export interface AnniversaryCalcResult {
-  isFuture: boolean      // 是否未发生（倒计时）
-  days: number           // 天数
-  displayText: string    // 显示文本
-  nextDate: number       // 下次日期时间戳
+  mode: 'countdown' | 'elapsed'  // 显示模式
+  days: number                   // 天数
+  displayText: string            // 显示文本
+  nextDate: number               // 下次日期时间戳
 }
 
 /**
@@ -36,18 +36,34 @@ export function getNextYearDate(originalDate: number): number {
 /**
  * 计算纪念日
  * @param date 原始日期时间戳
+ * @param mode 显示模式：countdown(倒计时) | elapsed(正计时)
  * @param repeatType 重复类型
  * @returns 计算结果
  */
 export function calculateAnniversary(
   date: number,
+  mode: 'countdown' | 'elapsed' = 'countdown',
   repeatType: 'none' | 'year' | 'month' | 'week' | 'day' = 'year'
 ): AnniversaryCalcResult {
-  const now = Date.now()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const todayTimestamp = today.getTime()
 
+  // 正计时模式：计算从首次日期到现在的天数
+  if (mode === 'elapsed') {
+    const targetDate = new Date(date)
+    targetDate.setHours(0, 0, 0, 0)
+    const targetTimestamp = targetDate.getTime()
+    const days = Math.floor((todayTimestamp - targetTimestamp) / (24 * 60 * 60 * 1000))
+    return {
+      mode: 'elapsed',
+      days,
+      displayText: formatDaysText(days, 'elapsed'),
+      nextDate: targetTimestamp
+    }
+  }
+
+  // 倒计时模式：计算到下次日期的天数
   // 对于年重复
   if (repeatType === 'year') {
     const thisYearDate = getThisYearDate(date)
@@ -56,9 +72,9 @@ export function calculateAnniversary(
       // 今年还未过
       const days = Math.ceil((thisYearDate - todayTimestamp) / (24 * 60 * 60 * 1000))
       return {
-        isFuture: true,
+        mode: 'countdown',
         days,
-        displayText: formatDaysText(days, true),
+        displayText: formatDaysText(days, 'countdown'),
         nextDate: thisYearDate
       }
     } else {
@@ -66,9 +82,9 @@ export function calculateAnniversary(
       const nextYearDate = getNextYearDate(date)
       const days = Math.ceil((nextYearDate - todayTimestamp) / (24 * 60 * 60 * 1000))
       return {
-        isFuture: true,
+        mode: 'countdown',
         days,
-        displayText: formatDaysText(days, true),
+        displayText: formatDaysText(days, 'countdown'),
         nextDate: nextYearDate
       }
     }
@@ -83,18 +99,18 @@ export function calculateAnniversary(
     // 未发生
     const days = Math.ceil((targetTimestamp - todayTimestamp) / (24 * 60 * 60 * 1000))
     return {
-      isFuture: true,
+      mode: 'countdown',
       days,
-      displayText: formatDaysText(days, true),
+      displayText: formatDaysText(days, 'countdown'),
       nextDate: targetTimestamp
     }
   } else {
     // 已发生，显示正计时
     const days = Math.floor((todayTimestamp - targetTimestamp) / (24 * 60 * 60 * 1000))
     return {
-      isFuture: false,
+      mode: 'elapsed',
       days,
-      displayText: formatDaysText(days, false),
+      displayText: formatDaysText(days, 'elapsed'),
       nextDate: targetTimestamp
     }
   }
@@ -103,11 +119,11 @@ export function calculateAnniversary(
 /**
  * 格式化天数显示文本
  * @param days 天数
- * @param isFuture 是否未发生
+ * @param mode 显示模式
  * @returns 显示文本
  */
-export function formatDaysText(days: number, isFuture: boolean): string {
-  if (isFuture) {
+export function formatDaysText(days: number, mode: 'countdown' | 'elapsed'): string {
+  if (mode === 'countdown') {
     // 倒计时
     if (days === 0) return '今天'
     if (days === 1) return '明天'
