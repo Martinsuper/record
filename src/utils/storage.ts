@@ -77,6 +77,7 @@ export interface EventType {
   name: string
   color: string
   icon?: string
+  createdAt?: number
 }
 
 /**

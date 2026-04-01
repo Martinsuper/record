@@ -96,7 +96,7 @@ export function filterByTimeRange(events, range) {
 /**
  * 获取近 N 天的日期列表
  * @param {number} n 天数
- * @returns {Array<{date: string, timestamp: number}>} 日期列表
+ * @returns {Array<{date: string, label: string, timestamp: number}>} 日期列表
  */
 export function getRecentDays(n = 7) {
   const result = []

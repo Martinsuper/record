@@ -171,7 +171,7 @@ const navBarHeight = ref(88)
 const systemInfo = uni.getSystemInfoSync()
 const menuButton = uni.getMenuButtonBoundingClientRect()
 // 导航栏高度 = 胶囊按钮 bottom + (胶囊按钮 top - 状态栏高度)
-navBarHeight.value = menuButton.bottom + (menuButton.top - systemInfo.statusBarHeight)
+navBarHeight.value = menuButton.bottom + (menuButton.top - (systemInfo.statusBarHeight ?? 0))
 // #endif
 
 interface TypeWithCount {

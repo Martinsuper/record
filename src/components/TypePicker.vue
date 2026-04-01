@@ -130,8 +130,8 @@ import { useEventTypeStore } from '@/store/eventType'
 
 const props = defineProps({
   modelValue: {
-    type: String,
-    default: ''
+    type: String as () => string | null,
+    default: null
   }
 })
 

@@ -116,7 +116,7 @@ export const useEventStore = defineStore('event', {
     /**
      * 近7天事件统计
      */
-    recentDaysStats: (state): { date: string; count: number; timestamp: number }[] => {
+    recentDaysStats: (state): { date: string; label: string; count: number; timestamp: number }[] => {
       const recentDays = getRecentDays(7)
       const counts = new Map<number, number>()
 
@@ -133,7 +133,8 @@ export const useEventStore = defineStore('event', {
 
       // 构建返回结果
       return recentDays.map(day => ({
-        date: day.label,
+        date: day.date,
+        label: day.label,
         count: counts.get(day.timestamp) || 0,
         timestamp: day.timestamp
       }))

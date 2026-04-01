@@ -83,7 +83,7 @@
             :key="option.value"
             class="picker-item"
             :class="{ selected: eventStore.filterTimeRange === option.value }"
-            @click="selectTimeRange(option.value)"
+            @click="selectTimeRange(option.value as TimeRangeFilter)"
           >
             <text class="fa-solid">{{ option.iconUnicode }}</text>
             <text class="picker-item-text">{{ option.label }}</text>

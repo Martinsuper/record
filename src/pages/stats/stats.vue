@@ -89,7 +89,7 @@
                 :style="{ height: getBarHeight(day.count) + 'rpx' }"
               />
             </view>
-            <text class="bar-label">{{ day.label }}</text>
+            <text class="bar-label">{{ day.date }}</text>
           </view>
         </view>
       </view>
