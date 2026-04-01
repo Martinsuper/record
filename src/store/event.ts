@@ -311,6 +311,44 @@ export const useEventStore = defineStore('event', {
       this.loadedCount = result.length
       this._filteredEventsCache = result
       return result
+    },
+
+    /**
+     * 合并导入的事件数据
+     * @param importedEvents 导入的事件数组
+     * @returns { added: number, updated: number } 新增和更新的数量
+     */
+    mergeEvents(importedEvents: EventData[]): { added: number; updated: number } {
+      let added = 0
+      let updated = 0
+
+      importedEvents.forEach((imported) => {
+        const existing = this.events.find((e) => e.id === imported.id)
+
+        if (existing) {
+          // 更新已存在的事件
+          existing.name = imported.name || existing.name
+          existing.typeId = imported.typeId || existing.typeId
+          existing.time = imported.time || existing.time
+          updated++
+        } else {
+          // 新增事件
+          this.events.push({
+            id: imported.id,
+            name: imported.name || '',
+            typeId: imported.typeId || '',
+            time: imported.time || Date.now(),
+            createdAt: imported.createdAt || Date.now()
+          })
+          added++
+        }
+      })
+
+      if (added > 0 || updated > 0) {
+        this.saveToStorage()
+      }
+
+      return { added, updated }
     }
   }
 })
