@@ -5,7 +5,9 @@
 
 export const STORAGE_KEYS = {
   EVENTS: 'events',
-  EVENT_TYPES: 'eventTypes'
+  EVENT_TYPES: 'eventTypes',
+  ANNIVERSARIES: 'anniversaries',
+  ANNIVERSARY_CATEGORIES: 'anniversaryCategories'
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
@@ -110,4 +112,32 @@ export function getEventTypes(): EventType[] {
  */
 export function saveEventTypes(types: EventType[]): void {
   setStorage(STORAGE_KEYS.EVENT_TYPES, types)
+}
+
+// 纪念日类型定义
+export interface AnniversaryData {
+  id: string
+  name: string
+  date: number
+  repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
+  categoryId: string
+  sortOrder: number
+  createdAt: number
+  updatedAt: number
+}
+
+/**
+ * 获取纪念日列表
+ * @returns 纪念日数组
+ */
+export function getAnniversaries(): AnniversaryData[] {
+  return getStorage<AnniversaryData[]>(STORAGE_KEYS.ANNIVERSARIES) || []
+}
+
+/**
+ * 保存纪念日列表
+ * @param anniversaries 纪念日数组
+ */
+export function saveAnniversaries(anniversaries: AnniversaryData[]): void {
+  setStorage(STORAGE_KEYS.ANNIVERSARIES, anniversaries)
 }
