@@ -137,6 +137,42 @@ export const useEventTypeStore = defineStore('eventType', {
         Object.assign(type, data)
         this.saveToStorage()
       }
+    },
+
+    /**
+     * 合并导入的事件类型数据
+     * @param importedTypes 导入的类型数组
+     * @returns { added: number, updated: number } 新增和更新的数量
+     */
+    mergeTypes(importedTypes: EventTypeData[]): { added: number; updated: number } {
+      let added = 0
+      let updated = 0
+
+      importedTypes.forEach((imported) => {
+        const existing = this.types.find((t) => t.id === imported.id)
+
+        if (existing) {
+          // 更新已存在的类型
+          existing.name = imported.name || existing.name
+          existing.color = imported.color || existing.color
+          updated++
+        } else {
+          // 新增类型
+          this.types.push({
+            id: imported.id,
+            name: imported.name || '',
+            color: imported.color || '#999999',
+            createdAt: imported.createdAt || Date.now()
+          })
+          added++
+        }
+      })
+
+      if (added > 0 || updated > 0) {
+        this.saveToStorage()
+      }
+
+      return { added, updated }
     }
   }
 })
