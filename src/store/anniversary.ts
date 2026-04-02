@@ -15,7 +15,8 @@ function generateAnniversaryId(): string {
 export const useAnniversaryStore = defineStore('anniversary', {
   state: () => ({
     anniversaries: [] as AnniversaryData[],
-    isLoaded: false
+    isLoaded: false,
+    selectedCategoryId: null as string | null
   }),
 
   getters: {
@@ -36,6 +37,17 @@ export const useAnniversaryStore = defineStore('anniversary', {
         const calcB = calculateAnniversary(b.date, b.mode, b.repeatType)
         return calcA.days - calcB.days
       })
+    },
+
+    /**
+     * 筛选后的纪念日列表
+     * 根据选中的分类进行过滤
+     */
+    filteredAnniversaries: (state): AnniversaryData[] => {
+      if (!state.selectedCategoryId) {
+        return state.anniversaries
+      }
+      return state.anniversaries.filter(a => a.categoryId === state.selectedCategoryId)
     }
   },
 
@@ -115,6 +127,14 @@ export const useAnniversaryStore = defineStore('anniversary', {
      */
     getAnniversaryById(id: string): AnniversaryData | undefined {
       return this.anniversaries.find(a => a.id === id)
+    },
+
+    /**
+     * 设置分类筛选
+     * @param categoryId 分类 ID，null 表示显示全部
+     */
+    setCategoryFilter(categoryId: string | null): void {
+      this.selectedCategoryId = categoryId
     }
   }
 })
