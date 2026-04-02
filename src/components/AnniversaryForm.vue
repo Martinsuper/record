@@ -63,12 +63,70 @@
             <text>重复方式</text>
           </view>
           <view class="repeat-options">
+            <view class="repeat-row">
+              <view
+                class="repeat-option"
+                :class="{ active: repeatType === 'year' }"
+                @click="repeatType = 'year'"
+              >
+                <text>每年</text>
+              </view>
+              <view
+                class="repeat-option"
+                :class="{ active: repeatType === 'month' }"
+                @click="repeatType = 'month'"
+              >
+                <text>每月</text>
+              </view>
+              <view
+                class="repeat-option"
+                :class="{ active: repeatType === 'week' }"
+                @click="repeatType = 'week'"
+              >
+                <text>每周</text>
+              </view>
+              <view
+                class="repeat-option"
+                :class="{ active: repeatType === 'day' }"
+                @click="repeatType = 'day'"
+              >
+                <text>每天</text>
+              </view>
+            </view>
+            <view class="repeat-row">
+              <view
+                class="repeat-option full-width"
+                :class="{ active: repeatType === 'none' }"
+                @click="repeatType = 'none'"
+              >
+                <text>不重复</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- Display mode -->
+        <view class="form-item">
+          <view class="form-label">
+            <text class="fa-solid">&#xf017;</text>
+            <text>显示模式</text>
+          </view>
+          <view class="mode-options">
             <view
-              class="repeat-option"
-              :class="{ active: repeatType === 'year' }"
-              @click="repeatType = 'year'"
+              class="mode-option"
+              :class="{ active: displayMode === 'countdown' }"
+              @click="displayMode = 'countdown'"
             >
-              <text>每年</text>
+              <text class="fa-solid">&#xf061;</text>
+              <text>倒计时</text>
+            </view>
+            <view
+              class="mode-option"
+              :class="{ active: displayMode === 'elapsed' }"
+              @click="displayMode = 'elapsed'"
+            >
+              <text class="fa-solid">&#xf060;</text>
+              <text>正计时</text>
             </view>
           </view>
         </view>
@@ -112,6 +170,7 @@ interface EditData {
   name: string
   date: number
   repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
+  mode: 'countdown' | 'elapsed'
 }
 
 const props = defineProps({
@@ -127,6 +186,7 @@ const anniversaryStore = useAnniversaryStore()
 const anniversaryName = ref('')
 const anniversaryDate = ref(Date.now())
 const repeatType = ref<'none' | 'year' | 'month' | 'week' | 'day'>('year')
+const displayMode = ref<'countdown' | 'elapsed'>('countdown')
 const showDatePicker = ref(false)
 const showDeleteConfirm = ref(false)
 
@@ -140,12 +200,14 @@ watch(() => props.visible, (val) => {
     anniversaryName.value = ''
     anniversaryDate.value = Date.now()
     repeatType.value = 'year'
+    displayMode.value = 'countdown'
 
     // 编辑模式填充数据
     if (props.isEditMode && props.editData) {
       anniversaryName.value = props.editData.name
       anniversaryDate.value = props.editData.date
       repeatType.value = props.editData.repeatType
+      displayMode.value = props.editData.mode
     }
   }
 })
@@ -167,7 +229,8 @@ function onSave() {
     anniversaryStore.updateAnniversary(props.editData.id, {
       name: anniversaryName.value.trim(),
       date: anniversaryDate.value,
-      repeatType: repeatType.value
+      repeatType: repeatType.value,
+      mode: displayMode.value
     })
     uni.showToast({ title: '纪念日已更新', icon: 'success' })
   } else {
@@ -176,6 +239,7 @@ function onSave() {
       name: anniversaryName.value.trim(),
       date: anniversaryDate.value,
       repeatType: repeatType.value,
+      mode: displayMode.value,
       categoryId: ''
     })
     uni.showToast({ title: '纪念日已添加', icon: 'success' })
@@ -314,14 +378,66 @@ function onClose() {
 
       .repeat-options {
         display: flex;
+        flex-direction: column;
         gap: $spacing-md;
 
-        .repeat-option {
+        .repeat-row {
+          display: flex;
+          gap: $spacing-md;
+
+          .repeat-option {
+            flex: 1;
+            padding: $spacing-md $spacing-lg;
+            border-radius: $radius-lg;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all $transition-fast;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text {
+              font-size: 28rpx;
+              color: $text-secondary;
+            }
+
+            &.active {
+              background: $gradient-cool;
+              border-color: transparent;
+
+              text {
+                color: #ffffff;
+                font-weight: 600;
+              }
+            }
+
+            &.full-width {
+              flex: 1;
+            }
+          }
+        }
+      }
+
+      .mode-options {
+        display: flex;
+        gap: $spacing-md;
+
+        .mode-option {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: $spacing-sm;
           padding: $spacing-md $spacing-lg;
           border-radius: $radius-lg;
           background: rgba(99, 102, 241, 0.05);
           border: 1px solid rgba(99, 102, 241, 0.1);
           transition: all $transition-fast;
+
+          .fa-solid {
+            font-size: 16rpx;
+            color: $text-secondary;
+          }
 
           text {
             font-size: 28rpx;
@@ -329,8 +445,12 @@ function onClose() {
           }
 
           &.active {
-            background: $gradient-cool;
+            background: $gradient-warm;
             border-color: transparent;
+
+            .fa-solid {
+              color: #ffffff;
+            }
 
             text {
               color: #ffffff;
