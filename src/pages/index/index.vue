@@ -133,7 +133,7 @@ function onReminderClose() {
   showReminder.value = false
 }
 
-function onReminderNavigate() {
+function onReminderNavigate(_id: string) {
   showReminder.value = false
   uni.switchTab({
     url: '/pages/anniversary/anniversary'
