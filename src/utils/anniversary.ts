@@ -90,6 +90,83 @@ export function calculateAnniversary(
     }
   }
 
+  // 每月重复
+  if (repeatType === 'month') {
+    const originalDate = new Date(date)
+    const thisMonthDate = new Date(today.getFullYear(), today.getMonth(), originalDate.getDate())
+    thisMonthDate.setHours(0, 0, 0, 0)
+    const thisMonthTimestamp = thisMonthDate.getTime()
+
+    if (thisMonthTimestamp >= todayTimestamp) {
+      // 本月还未过
+      const days = Math.ceil((thisMonthTimestamp - todayTimestamp) / (24 * 60 * 60 * 1000))
+      return {
+        mode: 'countdown',
+        days,
+        displayText: formatDaysText(days, 'countdown'),
+        nextDate: thisMonthTimestamp
+      }
+    } else {
+      // 本月已过，计算下月
+      const nextMonth = today.getMonth() + 1
+      const nextYear = nextMonth > 11 ? today.getFullYear() + 1 : today.getFullYear()
+      const adjustedMonth = nextMonth > 11 ? 0 : nextMonth
+      const nextMonthDate = new Date(nextYear, adjustedMonth, originalDate.getDate())
+      nextMonthDate.setHours(0, 0, 0, 0)
+      const days = Math.ceil((nextMonthDate.getTime() - todayTimestamp) / (24 * 60 * 60 * 1000))
+      return {
+        mode: 'countdown',
+        days,
+        displayText: formatDaysText(days, 'countdown'),
+        nextDate: nextMonthDate.getTime()
+      }
+    }
+  }
+
+  // 每周重复
+  if (repeatType === 'week') {
+    const originalDate = new Date(date)
+    const targetDayOfWeek = originalDate.getDay()
+    const todayDayOfWeek = today.getDay()
+
+    // 计算到下一次目标星期几的天数
+    let daysUntilTarget = targetDayOfWeek - todayDayOfWeek
+    if (daysUntilTarget < 0) {
+      daysUntilTarget += 7
+    }
+    if (daysUntilTarget === 0) {
+      // 今天就是目标星期几，检查是否已过（简单处理：当天都显示"今天")
+      const targetDate = new Date(today)
+      targetDate.setHours(0, 0, 0, 0)
+      return {
+        mode: 'countdown',
+        days: 0,
+        displayText: '今天',
+        nextDate: targetDate.getTime()
+      }
+    }
+
+    const nextDate = new Date(todayTimestamp + daysUntilTarget * 24 * 60 * 60 * 1000)
+    return {
+      mode: 'countdown',
+      days: daysUntilTarget,
+      displayText: formatDaysText(daysUntilTarget, 'countdown'),
+      nextDate: nextDate.getTime()
+    }
+  }
+
+  // 每天重复
+  if (repeatType === 'day') {
+    // 每天重复意味着明天又是一个新的纪念日
+    const tomorrow = new Date(todayTimestamp + 24 * 60 * 60 * 1000)
+    return {
+      mode: 'countdown',
+      days: 1,
+      displayText: '明天',
+      nextDate: tomorrow.getTime()
+    }
+  }
+
   // 不重复：判断是否已过
   const targetDate = new Date(date)
   targetDate.setHours(0, 0, 0, 0)
