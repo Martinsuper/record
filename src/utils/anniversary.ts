@@ -18,6 +18,24 @@ export interface UpcomingAnniversary {
   mode: 'countdown' | 'elapsed'
 }
 
+// 里程碑类型定义
+export interface Milestone {
+  days: number
+  text: string
+  emoji: string
+}
+
+// 里程碑配置
+const MILESTONES: Milestone[] = [
+  { days: 1, text: '第1天', emoji: '🎉' },
+  { days: 7, text: '第7天', emoji: '📅' },
+  { days: 30, text: '第30天', emoji: '🗓️' },
+  { days: 100, text: '第100天', emoji: '💯' },
+  { days: 365, text: '第1年', emoji: '🏆' },
+  { days: 500, text: '第500天', emoji: '⭐' },
+  { days: 1000, text: '第1000天', emoji: '👑' }
+]
+
 /**
  * 获取今年同一天的时间戳
  * @param originalDate 原始日期时间戳
@@ -264,4 +282,13 @@ export function getUpcomingAnniversaries(
 
   // 按天数升序排序
   return result.sort((a, b) => a.days - b.days)
+}
+
+/**
+ * 获取里程碑提示
+ * @param days 已过天数
+ * @returns 里程碑信息，无里程碑返回 null
+ */
+export function getMilestone(days: number): Milestone | null {
+  return MILESTONES.find(m => m.days === days) || null
 }
