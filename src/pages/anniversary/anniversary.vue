@@ -109,7 +109,7 @@ const navBarHeight = computed(() => {
 // 表单状态
 const showForm = ref(false)
 const showEditForm = ref(false)
-const editingAnniversary = ref<{ id: string; name: string; date: number; repeatType: 'none' | 'year' | 'month' | 'week' | 'day'; mode: 'countdown' | 'elapsed' } | null>(null)
+const editingAnniversary = ref<{ id: string; name: string; date: number; repeatType: 'none' | 'year' | 'month' | 'week' | 'day'; mode: 'countdown' | 'elapsed'; categoryId: string } | null>(null)
 
 // 加载数据
 onMounted(() => {
@@ -125,7 +125,8 @@ function onCardClick(id: string) {
       name: anniversary.name,
       date: anniversary.date,
       repeatType: anniversary.repeatType,
-      mode: anniversary.mode
+      mode: anniversary.mode,
+      categoryId: anniversary.categoryId
     }
     showEditForm.value = true
   }
