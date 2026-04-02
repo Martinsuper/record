@@ -3,6 +3,7 @@ package com.record.sync.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.record.sync.dto.SyncMessage;
 import com.record.sync.entity.*;
+import com.record.sync.service.SpaceService;
 import com.record.sync.websocket.WebSocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class SyncMessageHandler {
 
     private final DataService dataService;
+    private final SpaceService spaceService;
     private final MessagePublisher messagePublisher;
     private final WebSocketSessionManager sessionManager;
     private final ObjectMapper objectMapper;
@@ -73,6 +75,9 @@ public class SyncMessageHandler {
                     break;
                 case "category_delete":
                     handleCategoryDelete(spaceId, deviceId, data);
+                    break;
+                case "heartbeat":
+                    handleHeartbeat(spaceId);
                     break;
                 default:
                     log.warn("Unknown message type: {}", type);
@@ -260,6 +265,19 @@ public class SyncMessageHandler {
             sessionManager.broadcastToSpace(spaceId, json, excludeDeviceId);
         } catch (Exception e) {
             log.error("Error broadcasting message: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理心跳消息
+     * 更新空间的最后活跃时间，不广播心跳消息
+     */
+    private void handleHeartbeat(String spaceId) {
+        try {
+            spaceService.updateLastActive(spaceId);
+            log.debug("Updated last active time for space: {}", spaceId);
+        } catch (Exception e) {
+            log.error("Error handling heartbeat: {}", e.getMessage(), e);
         }
     }
 }

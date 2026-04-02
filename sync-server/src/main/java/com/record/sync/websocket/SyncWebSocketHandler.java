@@ -171,7 +171,7 @@ public class SyncWebSocketHandler extends TextWebSocketHandler {
      */
     private void sendMessage(WebSocketSession session, SyncMessage message) {
         try {
-            String json = objectMapper.writeValueAsString(session);
+            String json = objectMapper.writeValueAsString(message);
             session.sendMessage(new TextMessage(json));
         } catch (Exception e) {
             log.error("Error sending message to session {}: {}", session.getId(), e.getMessage());
