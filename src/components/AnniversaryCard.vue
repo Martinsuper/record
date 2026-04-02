@@ -10,6 +10,10 @@
           {{ displayText }}
         </text>
       </view>
+      <!-- 里程碑标签 -->
+      <view v-if="milestoneText" class="card-milestone">
+        <text class="milestone-text">{{ milestoneText }}</text>
+      </view>
       <view class="card-date">
         <text class="fa-solid">&#xf133;</text>
         <text class="date-text">{{ formattedDate }}</text>
@@ -20,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { calculateAnniversary, formatAnniversaryDate } from '@/utils/anniversary'
+import { calculateAnniversary, formatAnniversaryDate, getMilestone } from '@/utils/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 
 const props = defineProps({
@@ -75,6 +79,17 @@ const displayText = computed(() => calcResult.value.displayText)
 // 格式化日期
 const formattedDate = computed(() => formatAnniversaryDate(props.date))
 
+// 计算里程碑（仅正计时模式）
+const milestone = computed(() => {
+  if (props.mode !== 'elapsed') return null
+  return getMilestone(calcResult.value.days)
+})
+
+const milestoneText = computed(() => {
+  if (!milestone.value) return null
+  return `${milestone.value.emoji} ${milestone.value.text}`
+})
+
 function handleClick() {
   emit('click', props.id)
 }
@@ -125,6 +140,19 @@ function handleClick() {
         &.elapsed {
           color: $accent-purple;
         }
+      }
+    }
+
+    .card-milestone {
+      margin-bottom: $spacing-sm;
+
+      .milestone-text {
+        display: inline-block;
+        font-size: 20rpx;
+        color: $accent-rose;
+        background: rgba(236, 72, 153, 0.1);
+        padding: 4rpx 12rpx;
+        border-radius: $radius-xs;
       }
     }
 
