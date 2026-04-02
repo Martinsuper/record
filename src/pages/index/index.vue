@@ -25,6 +25,14 @@
       </view>
     </view>
 
+    <!-- Anniversary Reminder -->
+    <AnniversaryReminder
+      :visible="showReminder"
+      :upcomingList="upcomingAnniversaries"
+      @close="onReminderClose"
+      @navigate="onReminderNavigate"
+    />
+
     <!-- Filter bar -->
     <view class="filter-section">
       <FilterBar />
@@ -67,17 +75,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
+import { useAnniversaryStore } from '@/store/anniversary'
+import { getUpcomingAnniversaries } from '@/utils/anniversary'
 import FilterBar from '@/components/FilterBar.vue'
 import EventList from '@/components/EventList.vue'
 import EventForm from '@/components/EventForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import TypeManager from '@/components/TypeManager.vue'
+import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
+const anniversaryStore = useAnniversaryStore()
+
+// 即将到来的纪念日列表
+const upcomingAnniversaries = computed(() => {
+  return getUpcomingAnniversaries(anniversaryStore.anniversaries, 3)
+})
+
+const showReminder = ref(true)
+
+// 页面加载时初始化数据
+onMounted(() => {
+  anniversaryStore.loadFromStorage()
+})
 
 // 动态计算导航栏高度
 const navBarHeight = computed(() => {
@@ -103,6 +127,17 @@ function onEventSaved() {
 function onEditEvent(event: { id: string; name: string; typeId: string; time: number }) {
   editingEvent.value = event
   showEditForm.value = true
+}
+
+function onReminderClose() {
+  showReminder.value = false
+}
+
+function onReminderNavigate() {
+  showReminder.value = false
+  uni.switchTab({
+    url: '/pages/anniversary/anniversary'
+  })
 }
 </script>
 
