@@ -1,7 +1,7 @@
 /**
  * 纪念日时间计算工具
  */
-import { AnniversaryData } from './storage'
+import type { AnniversaryData } from './storage'
 
 export interface AnniversaryCalcResult {
   mode: 'countdown' | 'elapsed'  // 显示模式
