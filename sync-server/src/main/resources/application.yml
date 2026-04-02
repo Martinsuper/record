@@ -1,0 +1,34 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sync-server
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/sync_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # password: 如果有密码则配置
+
+# WebSocket 配置
+websocket:
+  path: /ws/sync
+
+# Redis Pub/Sub channel 前缀
+sync:
+  channel-prefix: space:
