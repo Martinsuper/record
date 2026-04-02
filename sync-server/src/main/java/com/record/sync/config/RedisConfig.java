@@ -18,7 +18,6 @@ public class RedisConfig {
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        template.setChannelSerializer(new StringRedisSerializer());
         return template;
     }
 
