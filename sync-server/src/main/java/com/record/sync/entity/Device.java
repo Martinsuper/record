@@ -2,9 +2,11 @@ package com.record.sync.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import java.time.LocalDateTime;
 
 @Data
+@ToString(exclude = {"space"})
 @Entity
 @Table(name = "device")
 public class Device {

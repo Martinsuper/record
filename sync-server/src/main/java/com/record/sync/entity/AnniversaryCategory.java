@@ -2,8 +2,10 @@ package com.record.sync.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString(exclude = {"space"})
 @Entity
 @Table(name = "anniversary_category")
 public class AnniversaryCategory {
