@@ -32,6 +32,17 @@
         </view>
         <view class="stat-glow"></view>
       </view>
+
+      <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.3s">
+        <view class="stat-icon">
+          <text class="fa-solid">&#xf004;</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ totalAnniversaries }}</text>
+          <text class="stat-label">纪念日</text>
+        </view>
+        <view class="stat-glow"></view>
+      </view>
     </view>
 
     <!-- Export data section -->
@@ -57,6 +68,32 @@
       <button class="action-btn gradient-btn" @click="handleImport">
         <text class="fa-solid">&#xf093;</text>
         <text class="btn-text">导入数据</text>
+      </button>
+    </view>
+
+    <!-- Export anniversary data section -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.5s">
+      <view class="section-header">
+        <text class="fa-solid">&#xf004;</text>
+        <text class="section-title">导出纪念日数据</text>
+      </view>
+      <text class="section-desc">将纪念日和分类数据导出为 JSON 格式，并复制到剪贴板</text>
+      <button class="action-btn gradient-btn" @click="handleExportAnniversaries">
+        <text class="fa-solid">&#xf093;</text>
+        <text class="btn-text">导出纪念日数据</text>
+      </button>
+    </view>
+
+    <!-- Import anniversary data section -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.6s">
+      <view class="section-header">
+        <text class="fa-solid">&#xf56f;</text>
+        <text class="section-title">导入纪念日数据</text>
+      </view>
+      <text class="section-desc">从剪贴板导入纪念日 JSON 数据，将合并到现有数据中</text>
+      <button class="action-btn gradient-btn" @click="handleImportAnniversaries">
+        <text class="fa-solid">&#xf093;</text>
+        <text class="btn-text">导入纪念日数据</text>
       </button>
     </view>
 
@@ -90,6 +127,36 @@
       </view>
     </view>
 
+    <!-- Anniversary import preview dialog -->
+    <view v-if="showAnniversaryPreview" class="dialog-overlay" @click="closeAnniversaryPreview">
+      <view class="dialog-content" @click.stop>
+        <view class="dialog-header">
+          <text class="fa-solid">&#xf06e;</text>
+          <text class="dialog-title">纪念日导入预览</text>
+        </view>
+        <view class="dialog-body">
+          <view class="preview-item">
+            <text class="preview-label">纪念日数</text>
+            <text class="preview-value">{{ previewAnniversaryData.anniversaryCount }}</text>
+          </view>
+          <view class="preview-item">
+            <text class="preview-label">分类数</text>
+            <text class="preview-value">{{ previewAnniversaryData.categoryCount }}</text>
+          </view>
+        </view>
+        <view class="dialog-footer">
+          <button class="dialog-btn dialog-btn-cancel" @click="closeAnniversaryPreview">
+            <text class="fa-solid">&#xf00d;</text>
+            <text class="btn-text">取消</text>
+          </button>
+          <button class="dialog-btn dialog-btn-confirm gradient-btn" @click="confirmAnniversaryImport">
+            <text class="fa-solid">&#xf00c;</text>
+            <text class="btn-text">确认导入</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
     <!-- Custom TabBar -->
     <CustomTabBar />
   </view>
@@ -99,10 +166,16 @@
 import { ref, computed } from 'vue'
 import { useEventStore, type EventData } from '@/store/event'
 import { useEventTypeStore, type EventTypeData } from '@/store/eventType'
+import { useAnniversaryStore } from '@/store/anniversary'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
+import type { AnniversaryData } from '@/utils/storage'
+import type { AnniversaryCategory } from '@/utils/storage'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
+const anniversaryStore = useAnniversaryStore()
+const categoryStore = useAnniversaryCategoryStore()
 
 // 动态计算导航栏高度
 const navBarHeight = computed(() => {
@@ -114,6 +187,10 @@ const navBarHeight = computed(() => {
 const totalEvents = computed(() => eventStore.totalCount)
 const totalTypes = computed(() => eventTypeStore.typeCount)
 
+// 纪念日统计
+const totalAnniversaries = computed(() => anniversaryStore.totalCount)
+const totalCategories = computed(() => categoryStore.allCategories.length)
+
 // 导入预览状态
 const showPreview = ref(false)
 const previewData = ref({
@@ -123,11 +200,28 @@ const previewData = ref({
   types: [] as EventTypeData[]
 })
 
+// 纪念日导入预览状态
+const showAnniversaryPreview = ref(false)
+const previewAnniversaryData = ref({
+  anniversaryCount: 0,
+  categoryCount: 0,
+  anniversaries: [] as AnniversaryData[],
+  categories: [] as AnniversaryCategory[]
+})
+
 // ExportData 接口定义
 interface ExportData {
   version: number
   events: EventData[]
   types: EventTypeData[]
+  exportedAt: number
+}
+
+// 纪念日导出数据接口定义
+interface AnniversaryExportData {
+  version: number
+  anniversaries: AnniversaryData[]
+  categories: AnniversaryCategory[]
   exportedAt: number
 }
 
@@ -255,6 +349,131 @@ function confirmImport(): void {
     })
   }
 }
+
+/**
+ * 处理导出纪念日数据
+ */
+function handleExportAnniversaries(): void {
+  const exportData: AnniversaryExportData = {
+    version: 2,
+    anniversaries: anniversaryStore.anniversaries,
+    categories: categoryStore.categories,
+    exportedAt: Date.now()
+  }
+
+  const jsonString = JSON.stringify(exportData, null, 2)
+
+  uni.setClipboardData({
+    data: jsonString,
+    success: () => {
+      uni.showToast({
+        title: '纪念日数据已复制',
+        icon: 'success'
+      })
+    },
+    fail: () => {
+      uni.showToast({
+        title: '复制失败',
+        icon: 'none'
+      })
+    }
+  })
+}
+
+/**
+ * 处理导入纪念日数据
+ */
+function handleImportAnniversaries(): void {
+  uni.getClipboardData({
+    success: (res) => {
+      try {
+        const data = JSON.parse(res.data) as AnniversaryExportData
+
+        // 校验版本
+        if (data.version !== 2) {
+          uni.showToast({
+            title: '数据版本不兼容',
+            icon: 'none'
+          })
+          return
+        }
+
+        // 校验 JSON 格式
+        if (!data.anniversaries || !Array.isArray(data.anniversaries)) {
+          throw new Error('无效的纪念日数据')
+        }
+        if (!data.categories || !Array.isArray(data.categories)) {
+          throw new Error('无效的分类数据')
+        }
+
+        // 更新预览数据
+        previewAnniversaryData.value = {
+          anniversaryCount: data.anniversaries.length,
+          categoryCount: data.categories.length,
+          anniversaries: data.anniversaries,
+          categories: data.categories
+        }
+
+        // 显示预览弹窗
+        showAnniversaryPreview.value = true
+      } catch (error) {
+        uni.showToast({
+          title: 'JSON 格式无效',
+          icon: 'none'
+        })
+      }
+    },
+    fail: () => {
+      uni.showToast({
+        title: '读取剪贴板失败',
+        icon: 'none'
+      })
+    }
+  })
+}
+
+/**
+ * 关闭纪念日预览弹窗
+ */
+function closeAnniversaryPreview(): void {
+  showAnniversaryPreview.value = false
+  previewAnniversaryData.value = {
+    anniversaryCount: 0,
+    categoryCount: 0,
+    anniversaries: [],
+    categories: []
+  }
+}
+
+/**
+ * 确认导入纪念日数据
+ */
+function confirmAnniversaryImport(): void {
+  try {
+    // 合并分类
+    const categoryResult = categoryStore.mergeCategories(previewAnniversaryData.value.categories)
+
+    // 合并纪念日
+    const anniversaryResult = anniversaryStore.mergeAnniversaries(previewAnniversaryData.value.anniversaries)
+
+    // 显示导入结果
+    const message = `导入完成！\n纪念日：新增${anniversaryResult.added}，更新${anniversaryResult.updated}\n分类：新增${categoryResult.added}，跳过${categoryResult.skipped}`
+
+    uni.showToast({
+      title: message,
+      icon: 'none',
+      duration: 2000
+    })
+
+    // 关闭预览弹窗
+    closeAnniversaryPreview()
+  } catch (error) {
+    uni.showToast({
+      title: '导入失败',
+      icon: 'none'
+    })
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -305,11 +524,13 @@ function confirmImport(): void {
 
   .overview-section {
     display: flex;
+    flex-wrap: wrap;
     gap: $spacing-md;
     padding: $spacing-md;
 
     .stat-card {
       flex: 1;
+      min-width: 200rpx;
       position: relative;
       padding: $spacing-lg;
       border-radius: $radius-lg;
@@ -325,6 +546,11 @@ function confirmImport(): void {
 
       &.gradient-cool {
         background: $gradient-cool;
+        color: #ffffff;
+      }
+
+      &.gradient-warm {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
         color: #ffffff;
       }
 
