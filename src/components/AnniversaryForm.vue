@@ -32,6 +32,18 @@
           </view>
         </view>
 
+        <!-- Category -->
+        <view class="form-item">
+          <view class="form-label">
+            <text class="fa-solid">&#xf02b;</text>
+            <text>分类</text>
+          </view>
+          <view class="category-select" @click="showCategoryPicker = true">
+            <text class="category-text">{{ selectedCategoryDisplay }}</text>
+            <text class="fa-solid">&#xf054;</text>
+          </view>
+        </view>
+
         <!-- Date -->
         <view class="form-item">
           <view class="form-label">
@@ -149,6 +161,14 @@
     </view>
   </u-popup>
 
+  <!-- Category Picker -->
+  <AnniversaryCategoryPicker
+    :visible="showCategoryPicker"
+    :selectedId="selectedCategoryId"
+    @close="showCategoryPicker = false"
+    @select="onCategorySelect"
+  />
+
   <!-- Delete confirm modal -->
   <u-modal
     :show="showDeleteConfirm"
@@ -163,6 +183,8 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useAnniversaryStore } from '@/store/anniversary'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
+import AnniversaryCategoryPicker from './AnniversaryCategoryPicker.vue'
 import { formatAnniversaryDate } from '@/utils/anniversary'
 
 interface EditData {
@@ -171,6 +193,7 @@ interface EditData {
   date: number
   repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
   mode: 'countdown' | 'elapsed'
+  categoryId: string
 }
 
 const props = defineProps({
@@ -182,6 +205,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save'])
 
 const anniversaryStore = useAnniversaryStore()
+const categoryStore = useAnniversaryCategoryStore()
 
 const anniversaryName = ref('')
 const anniversaryDate = ref(Date.now())
@@ -189,6 +213,16 @@ const repeatType = ref<'none' | 'year' | 'month' | 'week' | 'day'>('year')
 const displayMode = ref<'countdown' | 'elapsed'>('countdown')
 const showDatePicker = ref(false)
 const showDeleteConfirm = ref(false)
+
+// Category state
+const showCategoryPicker = ref(false)
+const selectedCategoryId = ref('other')
+
+// Get category display text
+const selectedCategoryDisplay = computed(() => {
+  const category = categoryStore.getCategoryById(selectedCategoryId.value)
+  return category ? `${category.icon} ${category.name}` : '选择分类'
+})
 
 const formattedDate = computed(() => {
   return formatAnniversaryDate(anniversaryDate.value)
@@ -201,6 +235,7 @@ watch(() => props.visible, (val) => {
     anniversaryDate.value = Date.now()
     repeatType.value = 'year'
     displayMode.value = 'countdown'
+    selectedCategoryId.value = 'other'
 
     // 编辑模式填充数据
     if (props.isEditMode && props.editData) {
@@ -208,6 +243,7 @@ watch(() => props.visible, (val) => {
       anniversaryDate.value = props.editData.date
       repeatType.value = props.editData.repeatType
       displayMode.value = props.editData.mode
+      selectedCategoryId.value = props.editData.categoryId || 'other'
     }
   }
 })
@@ -215,6 +251,11 @@ watch(() => props.visible, (val) => {
 function onDateConfirm(e: { value: number }) {
   anniversaryDate.value = e.value
   showDatePicker.value = false
+}
+
+function onCategorySelect(id: string) {
+  selectedCategoryId.value = id
+  showCategoryPicker.value = false
 }
 
 function onSave() {
@@ -230,7 +271,8 @@ function onSave() {
       name: anniversaryName.value.trim(),
       date: anniversaryDate.value,
       repeatType: repeatType.value,
-      mode: displayMode.value
+      mode: displayMode.value,
+      categoryId: selectedCategoryId.value
     })
     uni.showToast({ title: '纪念日已更新', icon: 'success' })
   } else {
@@ -240,7 +282,7 @@ function onSave() {
       date: anniversaryDate.value,
       repeatType: repeatType.value,
       mode: displayMode.value,
-      categoryId: ''
+      categoryId: selectedCategoryId.value
     })
     uni.showToast({ title: '纪念日已添加', icon: 'success' })
   }
@@ -373,6 +415,28 @@ function onClose() {
             color: $text-primary;
             font-weight: 500;
           }
+        }
+      }
+
+      .category-select {
+        display: flex;
+        align-items: center;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: $radius-lg;
+        padding: $spacing-md;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        gap: $spacing-md;
+
+        .category-text {
+          flex: 1;
+          font-size: 32rpx;
+          color: $text-primary;
+          font-weight: 500;
+        }
+
+        .fa-solid {
+          font-size: 16rpx;
+          color: $text-muted;
         }
       }
 
