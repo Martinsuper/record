@@ -3,9 +3,10 @@
     <view class="card-content">
       <view class="card-header">
         <text class="card-name">{{ name }}</text>
+        <text v-if="categoryIcon" class="fa-solid category-icon">{{ categoryIcon }}</text>
       </view>
       <view class="card-time">
-        <text class="time-text" :class="{ 'countdown': isFuture, 'elapsed': !isFuture }">
+        <text class="time-text" :class="{ 'countdown': isCountdown, 'elapsed': !isCountdown }">
           {{ displayText }}
         </text>
       </view>
@@ -20,6 +21,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { calculateAnniversary, formatAnniversaryDate } from '@/utils/anniversary'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 
 const props = defineProps({
   id: {
@@ -37,18 +39,35 @@ const props = defineProps({
   repeatType: {
     type: String as () => 'none' | 'year' | 'month' | 'week' | 'day',
     default: 'year'
+  },
+  mode: {
+    type: String as () => 'countdown' | 'elapsed',
+    default: 'countdown'
+  },
+  categoryId: {
+    type: String,
+    default: ''
   }
+})
+
+const categoryStore = useAnniversaryCategoryStore()
+
+// 计算分类图标
+const categoryIcon = computed(() => {
+  if (!props.categoryId) return null
+  const category = categoryStore.getCategoryById(props.categoryId)
+  return category?.icon || null
 })
 
 const emit = defineEmits(['click'])
 
 // 计算纪念日
 const calcResult = computed(() => {
-  return calculateAnniversary(props.date, props.repeatType)
+  return calculateAnniversary(props.date, props.mode, props.repeatType)
 })
 
-// 是否未发生
-const isFuture = computed(() => calcResult.value.isFuture)
+// 是否为倒计时模式
+const isCountdown = computed(() => calcResult.value.mode === 'countdown')
 
 // 显示文本
 const displayText = computed(() => calcResult.value.displayText)
@@ -75,12 +94,20 @@ function handleClick() {
 
   .card-content {
     .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: $spacing-sm;
 
       .card-name {
         font-size: 32rpx;
         font-weight: 600;
         color: $text-primary;
+      }
+
+      .category-icon {
+        font-size: 24rpx;
+        color: $text-muted;
       }
     }
 
