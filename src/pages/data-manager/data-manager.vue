@@ -168,8 +168,7 @@ import { useEventStore, type EventData } from '@/store/event'
 import { useEventTypeStore, type EventTypeData } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
-import type { AnniversaryData } from '@/utils/storage'
-import type { AnniversaryCategory } from '@/utils/storage'
+import type { AnniversaryData, AnniversaryCategory } from '@/utils/storage'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
@@ -189,7 +188,6 @@ const totalTypes = computed(() => eventTypeStore.typeCount)
 
 // 纪念日统计
 const totalAnniversaries = computed(() => anniversaryStore.totalCount)
-const totalCategories = computed(() => categoryStore.allCategories.length)
 
 // 导入预览状态
 const showPreview = ref(false)
