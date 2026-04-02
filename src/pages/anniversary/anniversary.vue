@@ -9,6 +9,25 @@
           <text class="header-title">纪念日</text>
           <text class="header-subtitle">记录重要时刻</text>
         </view>
+        <!-- 搜索按钮 -->
+        <view class="search-btn" @click="toggleSearch">
+          <text class="fa-solid">{{ showSearch ? '&#xf00d;' : '&#xf002;' }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Search box -->
+    <view v-if="showSearch" class="search-section">
+      <view class="search-box glass-card">
+        <text class="fa-solid">&#xf002;</text>
+        <u-input
+          v-model="searchInput"
+          placeholder="请输入纪念日名称"
+          border="none"
+          :customStyle="{ fontSize: '28rpx', color: '#1E1B4B' }"
+          :placeholderStyle="{ color: '#9CA3AF' }"
+          :focus="showSearch"
+        />
       </view>
     </view>
 
@@ -81,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAnniversaryStore } from '@/store/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCard from '@/components/AnniversaryCard.vue'
@@ -90,6 +109,24 @@ import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const anniversaryStore = useAnniversaryStore()
 const categoryStore = useAnniversaryCategoryStore()
+
+// 搜索状态
+const showSearch = ref(false)
+const searchInput = ref('')
+
+// 监听搜索输入，实时筛选
+watch(searchInput, (val) => {
+  anniversaryStore.setSearchKeyword(val)
+})
+
+// 切换搜索显示
+function toggleSearch() {
+  showSearch.value = !showSearch.value
+  if (!showSearch.value) {
+    searchInput.value = ''
+    anniversaryStore.clearSearch()
+  }
+}
 
 // 计算筛选后的列表
 const displayAnniversaries = computed(() => anniversaryStore.filteredAnniversaries)
@@ -193,6 +230,21 @@ function onFormSaved() {
           display: block;
         }
       }
+
+      .search-btn {
+        width: 56rpx;
+        height: 56rpx;
+        border-radius: $radius-full;
+        background: rgba(99, 102, 241, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .fa-solid {
+          font-size: 18rpx;
+          color: $text-secondary;
+        }
+      }
     }
   }
 
@@ -236,6 +288,22 @@ function onFormSaved() {
         &:active {
           transform: scale(0.96);
         }
+      }
+    }
+  }
+
+  .search-section {
+    padding: $spacing-sm $spacing-md;
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      padding: $spacing-md;
+
+      .fa-solid {
+        font-size: 18rpx;
+        color: $text-muted;
       }
     }
   }
