@@ -33,7 +33,7 @@
 
     <!-- Anniversary list -->
     <view class="list-section">
-      <view v-if="anniversaries.length === 0" class="empty-state">
+      <view v-if="displayAnniversaries.length === 0" class="empty-state">
         <text class="fa-solid">&#xf004;</text>
         <text class="empty-text">还没有纪念日</text>
         <text class="empty-hint">点击右下角按钮添加</text>
@@ -105,8 +105,6 @@ const navBarHeight = computed(() => {
   return height || 88
 })
 
-// 纪念日列表
-const anniversaries = computed(() => anniversaryStore.sortedAnniversaries)
 
 // 表单状态
 const showForm = ref(false)
