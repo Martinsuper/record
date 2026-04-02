@@ -28,7 +28,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { UpcomingAnniversary } from '@/utils/anniversary'
 
 const props = defineProps<{
