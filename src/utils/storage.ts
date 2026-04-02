@@ -127,6 +127,15 @@ export interface AnniversaryData {
   updatedAt: number
 }
 
+// 纪念日分类类型定义
+export interface AnniversaryCategory {
+  id: string
+  name: string
+  icon: string         // Font Awesome 图标编码
+  isPreset: boolean    // 是否为预设分类
+  sortOrder: number    // 排序权重
+}
+
 /**
  * 获取纪念日列表
  * @returns 纪念日数组
@@ -141,4 +150,20 @@ export function getAnniversaries(): AnniversaryData[] {
  */
 export function saveAnniversaries(anniversaries: AnniversaryData[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARIES, anniversaries)
+}
+
+/**
+ * 获取纪念日分类列表
+ * @returns 分类数组
+ */
+export function getAnniversaryCategories(): AnniversaryCategory[] {
+  return getStorage<AnniversaryCategory[]>(STORAGE_KEYS.ANNIVERSARY_CATEGORIES) || []
+}
+
+/**
+ * 保存纪念日分类列表
+ * @param categories 分类数组
+ */
+export function saveAnniversaryCategories(categories: AnniversaryCategory[]): void {
+  setStorage(STORAGE_KEYS.ANNIVERSARY_CATEGORIES, categories)
 }
