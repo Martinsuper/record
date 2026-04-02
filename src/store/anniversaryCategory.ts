@@ -118,6 +118,31 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
      */
     getCategoryById(id: string): AnniversaryCategory | undefined {
       return this.categories.find(c => c.id === id)
+    },
+
+    /**
+     * 合并导入的分类数据
+     * @param imported 导入的分类列表
+     * @returns 新增和跳过的数量
+     */
+    mergeCategories(imported: AnniversaryCategory[]): { added: number, skipped: number } {
+      let added = 0
+      let skipped = 0
+
+      for (const item of imported) {
+        const existing = this.categories.find(c => c.id === item.id)
+        if (existing) {
+          // 已存在的分类跳过（预设分类不可修改，自定义分类保留本地）
+          skipped++
+        } else if (!item.isPreset) {
+          // 仅新增自定义分类
+          this.categories.push(item)
+          added++
+        }
+      }
+
+      this.saveToStorage()
+      return { added, skipped }
     }
   }
 })

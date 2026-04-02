@@ -16,7 +16,8 @@ export const useAnniversaryStore = defineStore('anniversary', {
   state: () => ({
     anniversaries: [] as AnniversaryData[],
     isLoaded: false,
-    selectedCategoryId: null as string | null
+    selectedCategoryId: null as string | null,
+    searchKeyword: ''  // 新增：搜索关键词
   }),
 
   getters: {
@@ -41,13 +42,23 @@ export const useAnniversaryStore = defineStore('anniversary', {
 
     /**
      * 筛选后的纪念日列表
-     * 根据选中的分类进行过滤
+     * 同时考虑分类筛选和搜索关键词
      */
     filteredAnniversaries: (state): AnniversaryData[] => {
-      if (!state.selectedCategoryId) {
-        return state.anniversaries
+      let result = state.anniversaries
+
+      // 分类筛选
+      if (state.selectedCategoryId) {
+        result = result.filter(a => a.categoryId === state.selectedCategoryId)
       }
-      return state.anniversaries.filter(a => a.categoryId === state.selectedCategoryId)
+
+      // 名称搜索（实时搜索）
+      if (state.searchKeyword.trim()) {
+        const keyword = state.searchKeyword.trim().toLowerCase()
+        result = result.filter(a => a.name.toLowerCase().includes(keyword))
+      }
+
+      return result
     }
   },
 
@@ -135,6 +146,49 @@ export const useAnniversaryStore = defineStore('anniversary', {
      */
     setCategoryFilter(categoryId: string | null): void {
       this.selectedCategoryId = categoryId
+    },
+
+    /**
+     * 设置搜索关键词
+     * @param keyword 搜索关键词
+     */
+    setSearchKeyword(keyword: string): void {
+      this.searchKeyword = keyword
+    },
+
+    /**
+     * 清空搜索
+     */
+    clearSearch(): void {
+      this.searchKeyword = ''
+    },
+
+    /**
+     * 合并导入的纪念日数据
+     * @param imported 导入的纪念日列表
+     * @returns 新增和更新的数量
+     */
+    mergeAnniversaries(imported: AnniversaryData[]): { added: number, updated: number } {
+      let added = 0
+      let updated = 0
+
+      for (const item of imported) {
+        const existing = this.anniversaries.find(a => a.id === item.id)
+        if (existing) {
+          // 更新现有数据（保留较新的 updatedAt）
+          if (item.updatedAt > existing.updatedAt) {
+            Object.assign(existing, item)
+            updated++
+          }
+        } else {
+          // 新增数据
+          this.anniversaries.push(item)
+          added++
+        }
+      }
+
+      this.saveToStorage()
+      return { added, updated }
     }
   }
 })
