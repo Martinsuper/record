@@ -12,6 +12,25 @@
       </view>
     </view>
 
+    <!-- Category filter -->
+    <view class="filter-bar">
+      <scroll-view scroll-x class="filter-scroll">
+        <view class="filter-item" :class="{ active: !anniversaryStore.selectedCategoryId }" @click="onFilterChange(null)">
+          <text>全部</text>
+        </view>
+        <view
+          v-for="category in categoryStore.allCategories"
+          :key="category.id"
+          class="filter-item"
+          :class="{ active: anniversaryStore.selectedCategoryId === category.id }"
+          @click="onFilterChange(category.id)"
+        >
+          <text class="fa-solid">{{ category.icon }}</text>
+          <text>{{ category.name }}</text>
+        </view>
+      </scroll-view>
+    </view>
+
     <!-- Anniversary list -->
     <view class="list-section">
       <view v-if="anniversaries.length === 0" class="empty-state">
@@ -22,12 +41,14 @@
 
       <view v-else class="anniversary-list">
         <AnniversaryCard
-          v-for="item in anniversaries"
+          v-for="item in displayAnniversaries"
           :key="item.id"
           :id="item.id"
           :name="item.name"
           :date="item.date"
           :repeatType="item.repeatType"
+          :mode="item.mode"
+          :categoryId="item.categoryId"
           @click="onCardClick"
         />
       </view>
@@ -62,11 +83,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAnniversaryStore } from '@/store/anniversary'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCard from '@/components/AnniversaryCard.vue'
 import AnniversaryForm from '@/components/AnniversaryForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const anniversaryStore = useAnniversaryStore()
+const categoryStore = useAnniversaryCategoryStore()
+
+// 计算筛选后的列表
+const displayAnniversaries = computed(() => anniversaryStore.filteredAnniversaries)
+
+// 筛选变更
+function onFilterChange(categoryId: string | null) {
+  anniversaryStore.setCategoryFilter(categoryId)
+}
 
 // 动态计算导航栏高度
 const navBarHeight = computed(() => {
@@ -80,11 +111,12 @@ const anniversaries = computed(() => anniversaryStore.sortedAnniversaries)
 // 表单状态
 const showForm = ref(false)
 const showEditForm = ref(false)
-const editingAnniversary = ref<{ id: string; name: string; date: number; repeatType: 'none' | 'year' | 'month' | 'week' | 'day' } | null>(null)
+const editingAnniversary = ref<{ id: string; name: string; date: number; repeatType: 'none' | 'year' | 'month' | 'week' | 'day'; mode: 'countdown' | 'elapsed' } | null>(null)
 
 // 加载数据
 onMounted(() => {
   anniversaryStore.loadFromStorage()
+  categoryStore.loadFromStorage()
 })
 
 function onCardClick(id: string) {
@@ -94,7 +126,8 @@ function onCardClick(id: string) {
       id: anniversary.id,
       name: anniversary.name,
       date: anniversary.date,
-      repeatType: anniversary.repeatType
+      repeatType: anniversary.repeatType,
+      mode: anniversary.mode
     }
     showEditForm.value = true
   }
@@ -159,6 +192,50 @@ function onFormSaved() {
           color: $text-secondary;
           margin-top: $spacing-xs;
           display: block;
+        }
+      }
+    }
+  }
+
+  .filter-bar {
+    padding: $spacing-sm $spacing-md;
+
+    .filter-scroll {
+      white-space: nowrap;
+
+      .filter-item {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-xs;
+        padding: $spacing-sm $spacing-md;
+        margin-right: $spacing-sm;
+        border-radius: $radius-full;
+        background: rgba(99, 102, 241, 0.05);
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        transition: all $transition-fast;
+
+        .fa-solid {
+          font-size: 18rpx;
+          color: $text-secondary;
+        }
+
+        text {
+          font-size: 26rpx;
+          color: $text-secondary;
+        }
+
+        &.active {
+          background: $gradient-cool;
+          border-color: transparent;
+
+          .fa-solid,
+          text {
+            color: #ffffff;
+          }
+        }
+
+        &:active {
+          transform: scale(0.96);
         }
       }
     }
