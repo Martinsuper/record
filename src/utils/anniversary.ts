@@ -1,12 +1,21 @@
 /**
  * 纪念日时间计算工具
  */
+import { AnniversaryData } from './storage'
 
 export interface AnniversaryCalcResult {
   mode: 'countdown' | 'elapsed'  // 显示模式
   days: number                   // 天数
   displayText: string            // 显示文本
   nextDate: number               // 下次日期时间戳
+}
+
+export interface UpcomingAnniversary {
+  id: string
+  name: string
+  days: number        // 剩余天数（0=今天，负数=已过）
+  displayText: string // 显示文本
+  mode: 'countdown' | 'elapsed'
 }
 
 /**
@@ -224,4 +233,35 @@ export function formatAnniversaryDate(timestamp: number): string {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}.${month}.${day}`
+}
+
+/**
+ * 获取即将到来的纪念日
+ * @param anniversaries 纪念日列表
+ * @param daysRange 范围天数（默认3）
+ * @returns 筛选后的列表，按天数排序
+ */
+export function getUpcomingAnniversaries(
+  anniversaries: AnniversaryData[],
+  daysRange: number = 3
+): UpcomingAnniversary[] {
+  const result: UpcomingAnniversary[] = []
+
+  for (const anniversary of anniversaries) {
+    const calc = calculateAnniversary(anniversary.date, anniversary.mode, anniversary.repeatType)
+
+    // 只关注倒计时模式，且在范围内
+    if (calc.mode === 'countdown' && calc.days >= 0 && calc.days <= daysRange) {
+      result.push({
+        id: anniversary.id,
+        name: anniversary.name,
+        days: calc.days,
+        displayText: calc.displayText,
+        mode: calc.mode
+      })
+    }
+  }
+
+  // 按天数升序排序
+  return result.sort((a, b) => a.days - b.days)
 }
