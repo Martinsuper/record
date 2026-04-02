@@ -111,6 +111,14 @@ function onSave() {
     return
   }
 
+  const existingCategory = categoryStore.customCategories.find(
+    c => c.name === categoryName.value.trim()
+  )
+  if (existingCategory) {
+    uni.showToast({ title: '分类名称已存在', icon: 'none' })
+    return
+  }
+
   const newCategory = categoryStore.addCategory({
     name: categoryName.value.trim(),
     icon: selectedIcon.value
