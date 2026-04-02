@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCategoryForm from './AnniversaryCategoryForm.vue'
 
@@ -82,6 +82,12 @@ const showCategoryForm = ref(false)
 
 const presetCategories = computed(() => categoryStore.presetCategories)
 const customCategories = computed(() => categoryStore.customCategories)
+
+watch(() => props.visible, (val) => {
+  if (!val) {
+    showCategoryForm.value = false
+  }
+})
 
 function onClose() {
   emit('close')
