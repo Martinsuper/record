@@ -31,4 +31,4 @@ websocket:
 
 # Redis Pub/Sub channel 前缀
 sync:
-  channel-prefix: space:
+  channel-prefix: "space:"
