@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { getEventTypes, saveEventTypes } from '@/utils/storage'
+import { sendMessage } from '@/utils/syncManager'
 
 export interface EventTypeData {
   id: string
@@ -112,6 +113,7 @@ export const useEventTypeStore = defineStore('eventType', {
       }
       this.types.push(newType)
       this.saveToStorage()
+      sendMessage('event_type_add', newType)
     },
 
     /**
@@ -123,6 +125,7 @@ export const useEventTypeStore = defineStore('eventType', {
       if (index !== -1) {
         this.types.splice(index, 1)
         this.saveToStorage()
+        sendMessage('event_type_delete', { id })
       }
     },
 
@@ -136,6 +139,7 @@ export const useEventTypeStore = defineStore('eventType', {
       if (type) {
         Object.assign(type, data)
         this.saveToStorage()
+        sendMessage('event_type_update', type)
       }
     },
 

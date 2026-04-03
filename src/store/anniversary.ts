@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { getAnniversaries, saveAnniversaries } from '@/utils/storage'
 import type { AnniversaryData } from '@/utils/storage'
 import { calculateAnniversary } from '@/utils/anniversary'
+import { sendMessage } from '@/utils/syncManager'
 
 /**
  * 生成唯一的纪念日 ID
@@ -105,6 +106,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
       }
       this.anniversaries.push(newAnniversary)
       this.saveToStorage()
+      sendMessage('anniversary_add', newAnniversary)
     },
 
     /**
@@ -116,6 +118,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
       if (index !== -1) {
         this.anniversaries.splice(index, 1)
         this.saveToStorage()
+        sendMessage('anniversary_delete', { id })
       }
     },
 
@@ -129,6 +132,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
       if (target) {
         Object.assign(target, data, { updatedAt: Date.now() })
         this.saveToStorage()
+        sendMessage('anniversary_update', target)
       }
     },
 
