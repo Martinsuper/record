@@ -4,7 +4,7 @@
       <!-- 选择模式 -->
       <view v-if="mode === 'select'" class="select-mode">
         <text class="dialog-title">开启数据同步</text>
-        <button class="option-btn create" @tap="createSpace">创建新空间</button>
+        <button class="option-btn create" @tap="handleCreateSpace">创建新空间</button>
         <button class="option-btn join" @tap="mode = 'join'">加入已有空间</button>
         <button class="option-btn cancel" @tap="close">取消</button>
       </view>
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { createSpace, verifyShareCode, connectWebSocket } from '@/utils/syncManager'
+import { createSpace as apiCreateSpace, verifyShareCode, connectWebSocket } from '@/utils/syncManager'
 import { useSyncStore } from '@/store/sync'
 import { setStorage, STORAGE_KEYS } from '@/utils/storage'
 
@@ -63,8 +63,8 @@ function close() {
   popup.value?.close()
 }
 
-async function createSpace() {
-  const result = await createSpace()
+async function handleCreateSpace() {
+  const result = await apiCreateSpace()
   if (result) {
     newShareCode.value = result.shareCode
     mode.value = 'created'
@@ -102,11 +102,13 @@ async function joinSpace() {
 
   verifying.value = false
 
-  if (result) {
+  if (result && result.valid) {
     setStorage(STORAGE_KEYS.SYNC_SHARE_CODE, inputCode.value.toUpperCase())
-    setStorage(STORAGE_KEYS.SYNC_SPACE_ID, result.spaceId)
+    if (result.spaceId) {
+      setStorage(STORAGE_KEYS.SYNC_SPACE_ID, result.spaceId)
+      syncStore.setSpaceId(result.spaceId)
+    }
     syncStore.setShareCode(inputCode.value.toUpperCase())
-    syncStore.setSpaceId(result.spaceId)
     connectWebSocket(inputCode.value.toUpperCase())
     close()
     uni.showToast({ title: '已加入', icon: 'success' })

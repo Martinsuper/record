@@ -241,7 +241,10 @@ export function disconnectWebSocket(): void {
   stopHeartbeat()
 
   if (ws) {
-    ws.close()
+    ws.close({
+      code: 1000,
+      reason: 'User disconnect'
+    })
     ws = null
   }
 

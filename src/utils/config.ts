@@ -14,7 +14,8 @@ export const SYNC_CONFIG = {
 
 export function getWsUrl(): string {
   // #ifdef H5
-  if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
     return SYNC_CONFIG.DEV_WS_URL
   }
   // #endif
@@ -23,7 +24,8 @@ export function getWsUrl(): string {
 
 export function getApiUrl(): string {
   // #ifdef H5
-  if (process.env.NODE_ENV === 'development') {
+  // @ts-ignore
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
     return SYNC_CONFIG.DEV_API_URL
   }
   // #endif
