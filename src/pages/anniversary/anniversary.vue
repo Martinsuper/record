@@ -1,5 +1,8 @@
 <template>
   <view class="page-anniversary" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
+    <!-- Sync Status Bar -->
+    <SyncStatusBar />
+
     <!-- Gradient header -->
     <view class="header">
       <view class="header-bg"></view>
@@ -106,6 +109,7 @@ import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCard from '@/components/AnniversaryCard.vue'
 import AnniversaryForm from '@/components/AnniversaryForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import SyncStatusBar from '@/components/SyncStatusBar.vue'
 
 const anniversaryStore = useAnniversaryStore()
 const categoryStore = useAnniversaryCategoryStore()

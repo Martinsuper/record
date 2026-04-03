@@ -1,5 +1,8 @@
 <template>
   <view class="page-index" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
+    <!-- Sync Status Bar -->
+    <SyncStatusBar />
+
     <!-- Glassmorphism Header -->
     <view class="header glass-card">
       <view class="header-content">
@@ -86,6 +89,7 @@ import EventForm from '@/components/EventForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import TypeManager from '@/components/TypeManager.vue'
 import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
+import SyncStatusBar from '@/components/SyncStatusBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
