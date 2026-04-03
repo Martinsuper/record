@@ -1,6 +1,6 @@
 <template>
-  <uni-popup ref="popup" type="center">
-    <view class="dialog-content">
+  <view v-if="visible" class="dialog-overlay" @tap="handleOverlayClick">
+    <view class="dialog-content" @tap.stop>
       <!-- 选择模式 -->
       <view v-if="mode === 'select'" class="select-mode">
         <text class="dialog-title">开启数据同步</text>
@@ -34,7 +34,7 @@
         <button class="back-btn" @tap="mode = 'select'">返回</button>
       </view>
     </view>
-  </uni-popup>
+  </view>
 </template>
 
 <script setup lang="ts">
@@ -43,7 +43,7 @@ import { createSpace as apiCreateSpace, verifyShareCode, connectWebSocket } from
 import { useSyncStore } from '@/store/sync'
 import { setStorage, STORAGE_KEYS } from '@/utils/storage'
 
-const popup = ref()
+const visible = ref(false)
 const mode = ref<'select' | 'created' | 'join'>('select')
 const inputCode = ref('')
 const error = ref('')
@@ -56,11 +56,16 @@ function open() {
   mode.value = 'select'
   inputCode.value = ''
   error.value = ''
-  popup.value?.open()
+  visible.value = true
 }
 
 function close() {
-  popup.value?.close()
+  visible.value = false
+  mode.value = 'select'
+}
+
+function handleOverlayClick() {
+  // 点击遮罩层不关闭，避免误操作
 }
 
 async function handleCreateSpace() {
@@ -121,6 +126,19 @@ defineExpose({ open })
 </script>
 
 <style scoped lang="scss">
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
 .dialog-content {
   width: 600rpx;
   padding: 40rpx;
@@ -133,6 +151,7 @@ defineExpose({ open })
   font-weight: bold;
   text-align: center;
   margin-bottom: 30rpx;
+  display: block;
 }
 
 .select-mode {
@@ -165,12 +184,14 @@ defineExpose({ open })
     letter-spacing: 8rpx;
     color: #1976d2;
     margin: 20rpx 0;
+    display: block;
   }
 
   .hint {
     font-size: 24rpx;
     color: #999;
     margin-bottom: 20rpx;
+    display: block;
   }
 
   .copy-btn {
@@ -200,6 +221,7 @@ defineExpose({ open })
     color: #c62828;
     font-size: 24rpx;
     margin-bottom: 16rpx;
+    display: block;
   }
 
   .confirm-btn {

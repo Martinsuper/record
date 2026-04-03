@@ -12,22 +12,34 @@ export const SYNC_CONFIG = {
   MAX_RETRY_COUNT: 3
 }
 
-export function getWsUrl(): string {
-  // #ifdef H5
+function isDev(): boolean {
+  // H5 环境：检查 hostname
   // @ts-ignore
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+  if (typeof window !== 'undefined' && typeof location !== 'undefined') {
+    const hostname = location.hostname
+    // localhost 或 127.0.0.1 视为开发环境
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
+      return true
+    }
+  }
+  // 非浏览器环境默认开发
+  // @ts-ignore
+  if (typeof window === 'undefined') {
+    return true
+  }
+  return false
+}
+
+export function getWsUrl(): string {
+  if (isDev()) {
     return SYNC_CONFIG.DEV_WS_URL
   }
-  // #endif
   return SYNC_CONFIG.PROD_WS_URL
 }
 
 export function getApiUrl(): string {
-  // #ifdef H5
-  // @ts-ignore
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+  if (isDev()) {
     return SYNC_CONFIG.DEV_API_URL
   }
-  // #endif
   return SYNC_CONFIG.PROD_API_URL
 }

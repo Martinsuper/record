@@ -305,12 +305,11 @@ export function verifyShareCode(code: string): Promise<{ valid: boolean; spaceId
     const apiUrl = getApiUrl()
 
     uni.request({
-      url: `${apiUrl}/space/verify`,
-      method: 'POST',
-      data: { shareCode: code },
+      url: `${apiUrl}/space/verify?code=${encodeURIComponent(code)}`,
+      method: 'GET',
       success: (res: any) => {
-        if (res.statusCode === 200 && res.data) {
-          resolve({ valid: res.data.valid, spaceId: res.data.spaceId })
+        if (res.statusCode === 200 && res.data?.success) {
+          resolve({ valid: true, spaceId: res.data.data?.spaceId })
         } else {
           resolve({ valid: false })
         }
