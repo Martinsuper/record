@@ -7,7 +7,13 @@ export const STORAGE_KEYS = {
   EVENTS: 'events',
   EVENT_TYPES: 'eventTypes',
   ANNIVERSARIES: 'anniversaries',
-  ANNIVERSARY_CATEGORIES: 'anniversaryCategories'
+  ANNIVERSARY_CATEGORIES: 'anniversaryCategories',
+  // 新增同步相关
+  SYNC_SHARE_CODE: 'syncShareCode',
+  SYNC_SPACE_ID: 'syncSpaceId',
+  SYNC_DEVICE_ID: 'syncDeviceId',
+  SYNC_LAST_SYNC_TIME: 'syncLastSyncTime',
+  OFFLINE_QUEUE: 'offlineQueue'
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
