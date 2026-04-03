@@ -41,6 +41,15 @@
 				"navigationBarTextStyle": "black",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/settings/settings",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {
@@ -67,6 +76,10 @@
 			{
 				"pagePath": "pages/anniversary/anniversary",
 				"text": "纪念日"
+			},
+			{
+				"pagePath": "pages/settings/settings",
+				"text": "设置"
 			}
 		]
 	}

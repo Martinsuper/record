@@ -24,6 +24,14 @@
       <text class="fa-solid">&#xf004;</text>
       <text class="tab-text">纪念日</text>
     </view>
+    <view
+      class="tab-item"
+      :class="{ active: currentIndex === 3 }"
+      @click="switchTab(3)"
+    >
+      <text class="fa-solid">&#xf013;</text>
+      <text class="tab-text">设置</text>
+    </view>
   </view>
 </template>
 
@@ -36,7 +44,8 @@ const currentIndex = ref(0)
 const pages = [
   '/pages/index/index',
   '/pages/stats/stats',
-  '/pages/anniversary/anniversary'
+  '/pages/anniversary/anniversary',
+  '/pages/settings/settings'
 ]
 
 function getCurrentPageIndex(): number {
@@ -47,6 +56,7 @@ function getCurrentPageIndex(): number {
 
   if (route === 'pages/stats/stats') return 1
   if (route === 'pages/anniversary/anniversary') return 2
+  if (route === 'pages/settings/settings') return 3
   return 0
 }
 
