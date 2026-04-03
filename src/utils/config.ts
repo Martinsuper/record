@@ -3,10 +3,12 @@
  */
 
 export const SYNC_CONFIG = {
-  DEV_WS_URL: 'ws://localhost:8080/ws/sync',
-  DEV_API_URL: 'http://localhost:8080/api',
-  PROD_WS_URL: 'ws://your-server.com/ws/sync',
-  PROD_API_URL: 'https://your-server.com/api',
+  // 开发环境连接服务器测试
+  DEV_WS_URL: 'wss://brecord.younote.top/ws/sync',
+  DEV_API_URL: 'https://brecord.younote.top/api',
+  // 生产环境（GitHub Pages）
+  PROD_WS_URL: 'wss://brecord.younote.top/ws/sync',
+  PROD_API_URL: 'https://brecord.younote.top/api',
   HEARTBEAT_INTERVAL: 30000,
   MAX_RECONNECT_INTERVAL: 30000,
   MAX_RETRY_COUNT: 3

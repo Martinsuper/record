@@ -1,25 +1,30 @@
 package com.record.sync.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 public class CorsConfig {
+
+    @Value("${cors.allowed-origins:http://localhost:5173,http://localhost:5182,http://localhost:8080}")
+    private String allowedOrigins;
 
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 允许的来源（开发环境）
-        config.addAllowedOrigin("http://localhost:5182");
-        config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("http://localhost:8080");
-        config.addAllowedOrigin("http://127.0.0.1:5182");
-        config.addAllowedOrigin("http://127.0.0.1:5173");
-        config.addAllowedOrigin("http://192.168.*.*"); // 支持局域网测试
+        // 从环境变量读取允许的来源
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        for (String origin : origins) {
+            config.addAllowedOrigin(origin.trim());
+        }
 
         // 允许的请求方法
         config.addAllowedMethod("*");

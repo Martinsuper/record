@@ -38,6 +38,10 @@ websocket:
 sync:
   channel-prefix: "space:"
 
+# CORS 配置（生产环境）
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://record.younote.top}
+
 # 日志配置
 logging:
   level:
