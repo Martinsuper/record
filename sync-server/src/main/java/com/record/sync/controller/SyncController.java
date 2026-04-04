@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/sync")
+@RequestMapping("/api/sync")
 @RequiredArgsConstructor
 public class SyncController {
 

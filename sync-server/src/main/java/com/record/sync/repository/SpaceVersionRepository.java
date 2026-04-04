@@ -17,6 +17,6 @@ public interface SpaceVersionRepository extends JpaRepository<SpaceVersion, Stri
     void updateMaxVersion(String spaceId, Long version, Long updatedAt);
 
     @Modifying
-    @Query("INSERT INTO SpaceVersion (spaceId, maxVersion, updatedAt) VALUES (:spaceId, 0, :updatedAt) ON DUPLICATE KEY UPDATE updatedAt = :updatedAt")
+    @Query(value = "INSERT INTO space_version (space_id, max_version, updated_at) VALUES (:spaceId, 0, :updatedAt) ON DUPLICATE KEY UPDATE updated_at = :updatedAt", nativeQuery = true)
     void initSpaceVersion(String spaceId, Long updatedAt);
 }
