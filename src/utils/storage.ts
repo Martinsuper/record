@@ -13,6 +13,9 @@ export const STORAGE_KEYS = {
   SYNC_SPACE_ID: 'syncSpaceId',
   SYNC_DEVICE_ID: 'syncDeviceId',
   SYNC_LAST_SYNC_TIME: 'syncLastSyncTime',
+  SYNC_ENABLED: 'syncEnabled',
+  SYNC_LAST_VERSION: 'syncLastVersion',
+  PENDING_CHANGES: 'pendingChanges',
   OFFLINE_QUEUE: 'offlineQueue'
 } as const
 
@@ -78,6 +81,8 @@ export interface TimelineEvent {
   typeId?: string
   createdAt: string
   updatedAt: string
+  version: number
+  deleted: boolean
 }
 
 export interface EventType {
@@ -86,6 +91,8 @@ export interface EventType {
   color: string
   icon?: string
   createdAt?: number
+  version: number
+  deleted: boolean
 }
 
 /**
@@ -131,6 +138,8 @@ export interface AnniversaryData {
   sortOrder: number
   createdAt: number
   updatedAt: number
+  version: number
+  deleted: boolean
 }
 
 // 纪念日分类类型定义
@@ -140,6 +149,8 @@ export interface AnniversaryCategory {
   icon: string         // Font Awesome 图标编码
   isPreset: boolean    // 是否为预设分类
   sortOrder: number    // 排序权重
+  version: number
+  deleted: boolean
 }
 
 /**
@@ -172,4 +183,25 @@ export function getAnniversaryCategories(): AnniversaryCategory[] {
  */
 export function saveAnniversaryCategories(categories: AnniversaryCategory[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARY_CATEGORIES, categories)
+}
+
+// 同步状态定义
+export interface SyncState {
+  lastSyncVersion: number
+  lastSyncTime: number
+  syncEnabled: boolean
+}
+
+export function getSyncState(): SyncState {
+  return {
+    lastSyncVersion: getStorage<number>(STORAGE_KEYS.SYNC_LAST_VERSION) || 0,
+    lastSyncTime: getStorage<number>(STORAGE_KEYS.SYNC_LAST_SYNC_TIME) || 0,
+    syncEnabled: getStorage<boolean>(STORAGE_KEYS.SYNC_ENABLED) || false
+  }
+}
+
+export function saveSyncState(state: SyncState): void {
+  setStorage(STORAGE_KEYS.SYNC_LAST_VERSION, state.lastSyncVersion)
+  setStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME, state.lastSyncTime)
+  setStorage(STORAGE_KEYS.SYNC_ENABLED, state.syncEnabled)
 }
