@@ -439,7 +439,7 @@ export async function triggerSync(): Promise<boolean> {
  * 执行全量同步
  */
 async function triggerFullSync(): Promise<boolean> {
-  if (!currentShareCode) {
+  if (!currentShareCode || !currentSpaceId) {
     return false
   }
 
@@ -455,11 +455,8 @@ async function triggerFullSync(): Promise<boolean> {
       categories: any[]
       version: number
     }>({
-      url: `${apiBase}/sync/full`,
-      method: 'POST',
-      data: {
-        deviceId: getDeviceId()
-      }
+      url: `${apiBase}/sync/full?spaceId=${encodeURIComponent(currentSpaceId)}`,
+      method: 'GET'
     })
 
     if (result) {
@@ -533,7 +530,7 @@ async function pushChanges(): Promise<boolean> {
  * 从服务端拉取变更
  */
 async function pullChanges(): Promise<boolean> {
-  if (!currentShareCode) {
+  if (!currentShareCode || !currentSpaceId) {
     return false
   }
 
@@ -547,11 +544,8 @@ async function pullChanges(): Promise<boolean> {
     version: number
     hasMore: boolean
   }>({
-    url: `${apiBase}/sync/pull`,
-    method: 'GET',
-    data: {
-      version: lastSyncVersion
-    }
+    url: `${apiBase}/sync/pull?spaceId=${encodeURIComponent(currentSpaceId)}&sinceVersion=${lastSyncVersion}`,
+    method: 'GET'
   })
 
   if (result) {
