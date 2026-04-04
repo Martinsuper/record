@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { getEventTypes, saveEventTypes } from '@/utils/storage'
-import { sendMessage } from '@/utils/syncManager'
+import { recordChange } from '@/utils/syncManager'
 
 export interface EventTypeData {
   id: string
   name: string
   color: string
   createdAt: number
+  version: number
+  deleted: boolean
 }
 
 /**
@@ -89,7 +91,9 @@ export const useEventTypeStore = defineStore('eventType', {
         id: type.id,
         name: type.name,
         color: type.color,
-        createdAt: type.createdAt || Date.now()
+        createdAt: type.createdAt || Date.now(),
+        version: type.version || 1,
+        deleted: type.deleted ?? false
       }))
       this.isLoaded = true
     },
@@ -105,15 +109,20 @@ export const useEventTypeStore = defineStore('eventType', {
      * 添加新的事件类型
      * @param type 事件类型数据（除id和createdAt外）
      */
-    addType(type: Omit<EventTypeData, 'id' | 'createdAt'>): void {
+    addType(type: {
+      name: string
+      color: string
+    }): void {
       const newType: EventTypeData = {
         ...type,
         id: generateTypeId(),
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        version: 1,
+        deleted: false
       }
       this.types.push(newType)
       this.saveToStorage()
-      sendMessage('event_type_add', newType)
+      recordChange('eventType', 'create', newType)
     },
 
     /**
@@ -125,7 +134,7 @@ export const useEventTypeStore = defineStore('eventType', {
       if (index !== -1) {
         this.types.splice(index, 1)
         this.saveToStorage()
-        sendMessage('event_type_delete', { id })
+        recordChange('eventType', 'delete', { id })
       }
     },
 
@@ -139,7 +148,7 @@ export const useEventTypeStore = defineStore('eventType', {
       if (type) {
         Object.assign(type, data)
         this.saveToStorage()
-        sendMessage('event_type_update', type)
+        recordChange('eventType', 'update', type)
       }
     },
 
@@ -166,7 +175,9 @@ export const useEventTypeStore = defineStore('eventType', {
             id: imported.id,
             name: imported.name || '',
             color: imported.color || '#999999',
-            createdAt: imported.createdAt || Date.now()
+            createdAt: imported.createdAt || Date.now(),
+            version: imported.version || 1,
+            deleted: imported.deleted ?? false
           })
           added++
         }

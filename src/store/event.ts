@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { getEvents, saveEvents } from '@/utils/storage'
 import { filterByTimeRange, getMonthStart, getRecentDays } from '@/utils/time'
-import { sendMessage } from '@/utils/syncManager'
+import { recordChange } from '@/utils/syncManager'
 
 export interface EventData {
   id: string
@@ -9,6 +9,8 @@ export interface EventData {
   typeId: string
   time: number
   createdAt: number
+  version: number
+  deleted: boolean
 }
 
 export type TimeRangeFilter = 'all' | 'today' | 'week' | 'month'
@@ -180,7 +182,9 @@ export const useEventStore = defineStore('event', {
           name: event.name || '',
           typeId: event.typeId || '',
           time,
-          createdAt
+          createdAt,
+          version: event.version || 1,
+          deleted: event.deleted ?? false
         }
       })
       this.isLoaded = true
@@ -199,7 +203,9 @@ export const useEventStore = defineStore('event', {
         typeId: event.typeId,
         time: String(event.time),
         createdAt: String(event.createdAt),
-        updatedAt: String(Date.now())
+        updatedAt: String(Date.now()),
+        version: event.version ?? 1,
+        deleted: event.deleted ?? false
       }))
       saveEvents(storageData)
     },
@@ -208,15 +214,21 @@ export const useEventStore = defineStore('event', {
      * 添加新事件
      * @param event 事件数据（除id和createdAt外）
      */
-    addEvent(event: Omit<EventData, 'id' | 'createdAt'>): void {
+    addEvent(event: {
+      name: string
+      typeId: string
+      time: number
+    }): void {
       const newEvent: EventData = {
         ...event,
         id: generateEventId(),
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        version: 1,
+        deleted: false
       }
       this.events.push(newEvent)
       this.saveToStorage()
-      sendMessage('event_add', newEvent)
+      recordChange('event', 'create', newEvent)
     },
 
     /**
@@ -228,7 +240,7 @@ export const useEventStore = defineStore('event', {
       if (index !== -1) {
         this.events.splice(index, 1)
         this.saveToStorage()
-        sendMessage('event_delete', { id })
+        recordChange('event', 'delete', { id })
       }
     },
 
@@ -242,7 +254,7 @@ export const useEventStore = defineStore('event', {
       if (target) {
         Object.assign(target, event)
         this.saveToStorage()
-        sendMessage('event_update', target)
+        recordChange('event', 'update', target)
       }
     },
 
@@ -343,7 +355,9 @@ export const useEventStore = defineStore('event', {
             name: imported.name || '',
             typeId: imported.typeId || '',
             time: imported.time || Date.now(),
-            createdAt: imported.createdAt || Date.now()
+            createdAt: imported.createdAt || Date.now(),
+            version: imported.version || 1,
+            deleted: imported.deleted ?? false
           })
           added++
         }

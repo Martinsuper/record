@@ -14,7 +14,7 @@ import {
   removeBatchChanges,
   isPendingEmpty,
   getPendingCount,
-  PendingChange
+  type PendingChange
 } from './pendingChanges'
 import { useEventStore } from '@/store/event'
 import { useAnniversaryStore } from '@/store/anniversary'
@@ -762,4 +762,31 @@ export function getPendingChangesCount(): number {
  */
 export function hasPendingChanges(): boolean {
   return !isPendingEmpty()
+}
+
+/**
+ * 验证分享码（验证并返回结果，不自动加入）
+ * @param shareCode 分享码
+ */
+export async function verifyShareCode(shareCode: string): Promise<{ valid: boolean; spaceId: string | null } | null> {
+  const apiBase = getApiBase()
+  return httpRequest({
+    url: `${apiBase}/space/verify?code=${encodeURIComponent(shareCode)}`,
+    method: 'GET',
+    skipAuth: true
+  })
+}
+
+/**
+ * 连接WebSocket（已废弃，使用 createSpace/joinSpace 代替）
+ * 保留此函数以兼容旧代码调用
+ * @param shareCode 分享码（已废弃参数）
+ * @deprecated 使用 createSpace() 或 joinSpace() 代替
+ */
+export function connectWebSocket(shareCode: string): void {
+  console.log('[Sync] connectWebSocket is deprecated, use createSpace() or joinSpace() instead')
+  // 如果当前没有同步模式但有shareCode，尝试加入空间
+  if (currentMode !== 'sync' && shareCode) {
+    joinSpace(shareCode).catch(console.error)
+  }
 }

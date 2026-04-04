@@ -1,18 +1,18 @@
 import { defineStore } from 'pinia'
 import { getAnniversaryCategories, saveAnniversaryCategories } from '@/utils/storage'
 import type { AnniversaryCategory } from '@/utils/storage'
-import { sendMessage } from '@/utils/syncManager'
+import { recordChange } from '@/utils/syncManager'
 
 // 预设分类
 const PRESET_CATEGORIES: AnniversaryCategory[] = [
-  { id: 'birthday', name: '生日', icon: '\uf1fd', isPreset: true, sortOrder: 1 },
-  { id: 'love', name: '恋爱', icon: '\uf004', isPreset: true, sortOrder: 2 },
-  { id: 'wedding', name: '结婚', icon: '\uf802', isPreset: true, sortOrder: 3 },
-  { id: 'festival', name: '节日', icon: '\uf56b', isPreset: true, sortOrder: 4 },
-  { id: 'work', name: '工作', icon: '\uf0b1', isPreset: true, sortOrder: 5 },
-  { id: 'onboard', name: '入职', icon: '\uf073', isPreset: true, sortOrder: 6 },
-  { id: 'memorial', name: '纪念日', icon: '\uf4e3', isPreset: true, sortOrder: 7 },
-  { id: 'other', name: '其他', icon: '\uf02d', isPreset: true, sortOrder: 8 }
+  { id: 'birthday', name: '生日', icon: '\uf1fd', isPreset: true, sortOrder: 1, version: 1, deleted: false },
+  { id: 'love', name: '恋爱', icon: '\uf004', isPreset: true, sortOrder: 2, version: 1, deleted: false },
+  { id: 'wedding', name: '结婚', icon: '\uf802', isPreset: true, sortOrder: 3, version: 1, deleted: false },
+  { id: 'festival', name: '节日', icon: '\uf56b', isPreset: true, sortOrder: 4, version: 1, deleted: false },
+  { id: 'work', name: '工作', icon: '\uf0b1', isPreset: true, sortOrder: 5, version: 1, deleted: false },
+  { id: 'onboard', name: '入职', icon: '\uf073', isPreset: true, sortOrder: 6, version: 1, deleted: false },
+  { id: 'memorial', name: '纪念日', icon: '\uf4e3', isPreset: true, sortOrder: 7, version: 1, deleted: false },
+  { id: 'other', name: '其他', icon: '\uf02d', isPreset: true, sortOrder: 8, version: 1, deleted: false }
 ]
 
 export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
@@ -77,17 +77,19 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
     /**
      * 添加自定义分类
      */
-    addCategory(data: Omit<AnniversaryCategory, 'id' | 'isPreset' | 'sortOrder'>): AnniversaryCategory {
+    addCategory(data: { name: string; icon: string }): AnniversaryCategory {
       const maxSortOrder = Math.max(0, ...this.customCategories.map(c => c.sortOrder))
       const newCategory: AnniversaryCategory = {
         ...data,
         id: `custom_${Date.now()}`,
         isPreset: false,
-        sortOrder: maxSortOrder + 1
+        sortOrder: maxSortOrder + 1,
+        version: 1,
+        deleted: false
       }
       this.categories.push(newCategory)
       this.saveToStorage()
-      sendMessage('category_add', newCategory)
+      recordChange('category', 'create', newCategory)
       return newCategory
     },
 
@@ -99,7 +101,7 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
       if (target && !target.isPreset) {
         Object.assign(target, data)
         this.saveToStorage()
-        sendMessage('category_update', target)
+        recordChange('category', 'update', target)
       }
     },
 
@@ -111,7 +113,7 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
       if (index !== -1 && !this.categories[index].isPreset) {
         this.categories.splice(index, 1)
         this.saveToStorage()
-        sendMessage('category_delete', { id })
+        recordChange('category', 'delete', { id })
         return true
       }
       return false

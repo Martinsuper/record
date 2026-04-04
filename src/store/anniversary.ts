@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { getAnniversaries, saveAnniversaries } from '@/utils/storage'
 import type { AnniversaryData } from '@/utils/storage'
 import { calculateAnniversary } from '@/utils/anniversary'
-import { sendMessage } from '@/utils/syncManager'
+import { recordChange } from '@/utils/syncManager'
 
 /**
  * 生成唯一的纪念日 ID
@@ -80,7 +80,9 @@ export const useAnniversaryStore = defineStore('anniversary', {
         categoryId: item.categoryId || '',
         sortOrder: item.sortOrder || 0,
         createdAt: item.createdAt || Date.now(),
-        updatedAt: item.updatedAt || Date.now()
+        updatedAt: item.updatedAt || Date.now(),
+        version: item.version || 1,
+        deleted: item.deleted ?? false
       }))
       this.isLoaded = true
     },
@@ -96,17 +98,25 @@ export const useAnniversaryStore = defineStore('anniversary', {
      * 添加新纪念日
      * @param data 纪念日数据
      */
-    addAnniversary(data: Omit<AnniversaryData, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>): void {
+    addAnniversary(data: {
+      name: string
+      date: number
+      repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
+      mode: 'countdown' | 'elapsed'
+      categoryId: string
+    }): void {
       const newAnniversary: AnniversaryData = {
         ...data,
         id: generateAnniversaryId(),
         sortOrder: 0,
         createdAt: Date.now(),
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        version: 1,
+        deleted: false
       }
       this.anniversaries.push(newAnniversary)
       this.saveToStorage()
-      sendMessage('anniversary_add', newAnniversary)
+      recordChange('anniversary', 'create', newAnniversary)
     },
 
     /**
@@ -118,7 +128,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
       if (index !== -1) {
         this.anniversaries.splice(index, 1)
         this.saveToStorage()
-        sendMessage('anniversary_delete', { id })
+        recordChange('anniversary', 'delete', { id })
       }
     },
 
@@ -132,7 +142,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
       if (target) {
         Object.assign(target, data, { updatedAt: Date.now() })
         this.saveToStorage()
-        sendMessage('anniversary_update', target)
+        recordChange('anniversary', 'update', target)
       }
     },
 
