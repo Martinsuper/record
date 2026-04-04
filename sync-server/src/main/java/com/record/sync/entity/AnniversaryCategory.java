@@ -11,10 +11,10 @@ import lombok.ToString;
 public class AnniversaryCategory {
 
     @Id
-    @Column(length = 32)
+    @Column(length = 64)
     private String id;
 
-    @Column(name = "space_id", length = 32, nullable = false)
+    @Column(name = "space_id", length = 64, nullable = false)
     private String spaceId;
 
     @Column(length = 50, nullable = false)
@@ -28,6 +28,12 @@ public class AnniversaryCategory {
 
     @Column(name = "sort_order")
     private Integer sortOrder = 0;
+
+    @Column(nullable = false)
+    private Long version = 1L;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "space_id", insertable = false, updatable = false)
