@@ -1,343 +1,771 @@
+/**
+ * HTTP REST + 定时轮询同步管理器
+ * 替换 WebSocket 方案为 HTTP REST API + 8秒轮询
+ */
+
 import { getStorage, setStorage, removeStorage, STORAGE_KEYS } from './storage'
-import { getWsUrl, getApiUrl, SYNC_CONFIG } from './config'
+import { getApiUrl, SYNC_CONFIG } from './config'
 import { getOrCreateDeviceId } from './deviceId'
 import {
-  addToOfflineQueue,
-  getOfflineQueue,
-  removeFromOfflineQueue,
-  isOfflineQueueEmpty,
-  clearOfflineQueue
-} from './offlineQueue'
+  getPendingChanges,
+  addPendingChange,
+  clearPendingChanges,
+  getBatchChanges,
+  removeBatchChanges,
+  isPendingEmpty,
+  getPendingCount,
+  PendingChange
+} from './pendingChanges'
+import { useEventStore } from '@/store/event'
+import { useAnniversaryStore } from '@/store/anniversary'
+import { useEventTypeStore } from '@/store/eventType'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 
-// 连接状态
-type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting'
+// 同步模式
+export type SyncMode = 'local' | 'sync'
 
-// 内部状态
-let ws: UniApp.SocketTask | null = null
-let currentStatus: ConnectionStatus = 'disconnected'
+// 同步状态
+type SyncStatus = 'idle' | 'syncing' | 'error'
+
+// 轮询定时器
+let pollTimer: ReturnType<typeof setInterval> | null = null
+let currentMode: SyncMode = 'local'
+let currentStatus: SyncStatus = 'idle'
 let currentShareCode: string | null = null
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null
-let heartbeatTimer: ReturnType<typeof setInterval> | null = null
-let reconnectAttempts = 0
+let currentSpaceId: string | null = null
+let lastSyncVersion: number = 0
 
 // 状态回调
-const statusListeners: Set<(status: ConnectionStatus) => void> = new Set()
-const messageListeners: Set<(type: string, data: any) => void> = new Set()
+const modeListeners: Set<(mode: SyncMode) => void> = new Set()
+const statusListeners: Set<(status: SyncStatus) => void> = new Set()
+const syncInfoListeners: Set<(info: SyncInfo) => void> = new Set()
 
-// 获取连接状态
-export function getConnectionStatus(): ConnectionStatus {
-  return currentStatus
+// 同步信息接口
+export interface SyncInfo {
+  mode: SyncMode
+  status: SyncStatus
+  shareCode: string | null
+  spaceId: string | null
+  lastSyncVersion: number
+  lastSyncTime: number
+  pendingCount: number
 }
 
-// 获取当前 Share Code
-export function getCurrentShareCode(): string | null {
-  return currentShareCode
+// ==================== 基础工具函数 ====================
+
+function getApiBase(): string {
+  return getApiUrl()
 }
 
-// 监听连接状态变化
-export function onConnectionStatusChange(callback: (status: ConnectionStatus) => void): () => void {
-  statusListeners.add(callback)
-  return () => statusListeners.delete(callback)
+function getDeviceId(): string {
+  return getOrCreateDeviceId()
 }
 
-// 监听同步消息
-export function onSyncMessage(callback: (type: string, data: any) => void): () => void {
-  messageListeners.add(callback)
-  return () => messageListeners.delete(callback)
-}
-
-// 更新连接状态
-function setConnectionStatus(status: ConnectionStatus): void {
-  currentStatus = status
-  statusListeners.forEach(cb => cb(status))
-}
-
-// 发送 WebSocket 消息
-function sendWsMessage(data: any): boolean {
-  if (!ws || currentStatus !== 'connected') {
-    return false
-  }
-  try {
-    ws.send({
-      data: JSON.stringify(data),
-      fail: (err) => {
-        console.error('WebSocket send error:', err)
-        handleDisconnected()
-      }
-    })
-    return true
-  } catch (e) {
-    console.error('WebSocket send exception:', e)
-    return false
-  }
-}
-
-// 处理断开连接
-function handleDisconnected(): void {
-  if (currentStatus === 'disconnected') return
-
-  setConnectionStatus('disconnected')
-  stopHeartbeat()
-
-  // 尝试重连
-  if (currentShareCode) {
-    scheduleReconnect()
-  }
-}
-
-// 调度重连（指数退避）
-function scheduleReconnect(): void {
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer)
-  }
-
-  setConnectionStatus('reconnecting')
-
-  // 指数退避: 1s → 2s → 4s → 8s → max 30s
-  const delay = Math.min(
-    SYNC_CONFIG.HEARTBEAT_INTERVAL * Math.pow(2, reconnectAttempts),
-    SYNC_CONFIG.MAX_RECONNECT_INTERVAL
-  )
-
-  reconnectAttempts++
-
-  reconnectTimer = setTimeout(() => {
-    if (currentShareCode) {
-      connectWebSocket(currentShareCode)
-    }
-  }, delay)
-}
-
-// 启动心跳
-function startHeartbeat(): void {
-  if (heartbeatTimer) {
-    clearInterval(heartbeatTimer)
-  }
-
-  heartbeatTimer = setInterval(() => {
-    if (currentStatus === 'connected') {
-      sendWsMessage({ type: 'ping', timestamp: Date.now() })
-    }
-  }, SYNC_CONFIG.HEARTBEAT_INTERVAL)
-}
-
-// 停止心跳
-function stopHeartbeat(): void {
-  if (heartbeatTimer) {
-    clearInterval(heartbeatTimer)
-    heartbeatTimer = null
-  }
-}
-
-// 处理接收到的消息
-function handleMessage(data: any): void {
-  try {
-    const msg = typeof data === 'string' ? JSON.parse(data) : data
-
-    if (msg.type === 'pong') {
-      return // 心跳响应
-    }
-
-    // 触发消息监听器
-    messageListeners.forEach(cb => cb(msg.type, msg.data))
-
-    // 更新最后同步时间
-    setStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME, Date.now())
-  } catch (e) {
-    console.error('Failed to parse sync message:', e)
-  }
-}
-
-// 处理离线队列
-function processOfflineQueue(): void {
-  if (currentStatus !== 'connected') return
-
-  const queue = getOfflineQueue()
-  queue.forEach(msg => {
-    const success = sendWsMessage({ type: msg.type, data: msg.data, timestamp: msg.timestamp })
-    if (success) {
-      removeFromOfflineQueue(msg.timestamp)
-    }
-  })
-}
-
-// 建立 WebSocket 连接
-export function connectWebSocket(shareCode: string): Promise<boolean> {
+// HTTP 请求封装
+function httpRequest<T = any>(options: {
+  url: string
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  data?: any
+  skipAuth?: boolean
+}): Promise<T | null> {
   return new Promise((resolve) => {
-    // 如果已连接，先断开
-    if (ws) {
-      disconnectWebSocket()
+    const header: Record<string, string> = {
+      'Content-Type': 'application/json'
     }
 
-    setConnectionStatus('connecting')
-    currentShareCode = shareCode
-    reconnectAttempts = 0
-
-    const url = getWsUrl()
-    const deviceId = getOrCreateDeviceId()
-
-    ws = uni.connectSocket({
-      url: `${url}?shareCode=${shareCode}&deviceId=${deviceId}`,
-      success: () => {
-        console.log('WebSocket connecting...')
-      },
-      fail: (err) => {
-        console.error('WebSocket connection failed:', err)
-        setConnectionStatus('disconnected')
-        resolve(false)
-      }
-    })
-
-    if (!ws) {
-      setConnectionStatus('disconnected')
-      resolve(false)
-      return
+    if (!options.skipAuth && currentShareCode) {
+      header['X-Share-Code'] = currentShareCode
     }
-
-    // 监听打开
-    ws.onOpen(() => {
-      console.log('WebSocket connected')
-      setConnectionStatus('connected')
-      reconnectAttempts = 0
-
-      // 保存 share code
-      setStorage(STORAGE_KEYS.SYNC_SHARE_CODE, shareCode)
-
-      // 启动心跳
-      startHeartbeat()
-
-      // 处理离线队列
-      processOfflineQueue()
-
-      resolve(true)
-    })
-
-    // 监听消息
-    ws.onMessage((res) => {
-      handleMessage(res.data)
-    })
-
-    // 监听关闭
-    ws.onClose(() => {
-      console.log('WebSocket closed')
-      handleDisconnected()
-    })
-
-    // 监听错误
-    ws.onError((err) => {
-      console.error('WebSocket error:', err)
-      handleDisconnected()
-    })
-  })
-}
-
-// 断开 WebSocket 连接
-export function disconnectWebSocket(): void {
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer)
-    reconnectTimer = null
-  }
-
-  stopHeartbeat()
-
-  if (ws) {
-    ws.close({
-      code: 1000,
-      reason: 'User disconnect'
-    })
-    ws = null
-  }
-
-  currentShareCode = null
-  setConnectionStatus('disconnected')
-}
-
-// 发送同步消息
-export function sendMessage(type: string, data: any): boolean {
-  const message = { type, data, timestamp: Date.now() }
-
-  if (currentStatus === 'connected') {
-    const success = sendWsMessage(message)
-    if (!success) {
-      // 发送失败，加入离线队列
-      addToOfflineQueue(type, data)
-    }
-    return success
-  } else {
-    // 离线状态，加入离线队列
-    addToOfflineQueue(type, data)
-    return false
-  }
-}
-
-// 创建新空间
-export function createSpace(): Promise<{ shareCode: string; spaceId: string } | null> {
-  return new Promise((resolve) => {
-    const apiUrl = getApiUrl()
-    const deviceId = getOrCreateDeviceId()
 
     uni.request({
-      url: `${apiUrl}/space/create`,
-      method: 'POST',
-      data: { deviceId },
+      url: options.url,
+      method: options.method || 'GET',
+      data: options.data,
+      header,
       success: (res: any) => {
-        if (res.statusCode === 200 && res.data) {
-          const { shareCode, spaceId } = res.data
-          setStorage(STORAGE_KEYS.SYNC_SHARE_CODE, shareCode)
-          setStorage(STORAGE_KEYS.SYNC_SPACE_ID, spaceId)
-          resolve({ shareCode, spaceId })
+        if (res.statusCode >= 200 && res.statusCode < 300 && res.data?.success) {
+          resolve(res.data.data)
         } else {
-          console.error('Create space failed:', res)
+          console.error('[Sync] HTTP error:', res.statusCode, res.data)
           resolve(null)
         }
       },
       fail: (err) => {
-        console.error('Create space error:', err)
+        console.error('[Sync] HTTP request failed:', err)
         resolve(null)
       }
     })
   })
 }
 
-// 验证分享码
-export function verifyShareCode(code: string): Promise<{ valid: boolean; spaceId?: string }> {
-  return new Promise((resolve) => {
-    const apiUrl = getApiUrl()
+// ==================== 状态管理 ====================
 
-    uni.request({
-      url: `${apiUrl}/space/verify?code=${encodeURIComponent(code)}`,
-      method: 'GET',
-      success: (res: any) => {
-        if (res.statusCode === 200 && res.data?.success) {
-          resolve({ valid: true, spaceId: res.data.data?.spaceId })
-        } else {
-          resolve({ valid: false })
-        }
-      },
-      fail: () => {
-        resolve({ valid: false })
+/**
+ * 获取当前同步模式
+ */
+export function getSyncMode(): SyncMode {
+  return currentMode
+}
+
+/**
+ * 获取同步状态
+ */
+export function getSyncStatus(): SyncStatus {
+  return currentStatus
+}
+
+/**
+ * 获取当前 Share Code
+ */
+export function getCurrentShareCode(): string | null {
+  return currentShareCode
+}
+
+/**
+ * 获取当前 Space ID
+ */
+export function getCurrentSpaceId(): string | null {
+  return currentSpaceId
+}
+
+/**
+ * 获取同步信息
+ */
+export function getSyncInfo(): SyncInfo {
+  return {
+    mode: currentMode,
+    status: currentStatus,
+    shareCode: currentShareCode,
+    spaceId: currentSpaceId,
+    lastSyncVersion,
+    lastSyncTime: getStorage<number>(STORAGE_KEYS.SYNC_LAST_SYNC_TIME) || 0,
+    pendingCount: getPendingCount()
+  }
+}
+
+// 监听模式变化
+export function onSyncModeChange(callback: (mode: SyncMode) => void): () => void {
+  modeListeners.add(callback)
+  return () => modeListeners.delete(callback)
+}
+
+// 监听状态变化
+export function onSyncStatusChange(callback: (status: SyncStatus) => void): () => void {
+  statusListeners.add(callback)
+  return () => statusListeners.delete(callback)
+}
+
+// 监听同步信息变化
+export function onSyncInfoChange(callback: (info: SyncInfo) => void): () => void {
+  syncInfoListeners.add(callback)
+  return () => syncInfoListeners.delete(callback)
+}
+
+// 触发状态更新
+function notifyStatusChange(status: SyncStatus): void {
+  currentStatus = status
+  statusListeners.forEach(cb => cb(status))
+  notifySyncInfoChange()
+}
+
+// 触发模式更新
+function notifyModeChange(mode: SyncMode): void {
+  currentMode = mode
+  modeListeners.forEach(cb => cb(mode))
+  notifySyncInfoChange()
+}
+
+// 触发同步信息更新
+function notifySyncInfoChange(): void {
+  syncInfoListeners.forEach(cb => cb(getSyncInfo()))
+}
+
+// ==================== 轮询控制 ====================
+
+/**
+ * 启动轮询
+ */
+function startPolling(): void {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+  }
+
+  // 每 8 秒轮询一次
+  pollTimer = setInterval(() => {
+    if (currentMode === 'sync' && currentShareCode) {
+      triggerSync().catch(console.error)
+    }
+  }, 8000)
+
+  console.log('[Sync] Polling started (8s interval)')
+}
+
+/**
+ * 停止轮询
+ */
+function stopPolling(): void {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+    console.log('[Sync] Polling stopped')
+  }
+}
+
+// ==================== 同步核心功能 ====================
+
+/**
+ * 初始化同步管理器
+ */
+export function initSyncManager(): void {
+  console.log('[Sync] Initializing sync manager...')
+
+  // 从本地存储恢复状态
+  const savedShareCode = getStorage<string>(STORAGE_KEYS.SYNC_SHARE_CODE)
+  const savedSpaceId = getStorage<string>(STORAGE_KEYS.SYNC_SPACE_ID)
+  const savedEnabled = getStorage<boolean>(STORAGE_KEYS.SYNC_ENABLED)
+  lastSyncVersion = getStorage<number>(STORAGE_KEYS.SYNC_LAST_VERSION) || 0
+
+  if (savedShareCode && savedSpaceId && savedEnabled) {
+    currentShareCode = savedShareCode
+    currentSpaceId = savedSpaceId
+    currentMode = 'sync'
+    notifyModeChange('sync')
+    startPolling()
+
+    // 立即执行一次全量同步
+    triggerSync().catch(console.error)
+  } else {
+    currentMode = 'local'
+    notifyModeChange('local')
+  }
+
+  console.log('[Sync] Initialized, mode:', currentMode)
+}
+
+/**
+ * 设置同步是否启用
+ * @param enabled 是否启用同步
+ */
+export function setSyncEnabled(enabled: boolean): void {
+  setStorage(STORAGE_KEYS.SYNC_ENABLED, enabled)
+
+  if (enabled) {
+    if (currentShareCode && currentSpaceId) {
+      currentMode = 'sync'
+      notifyModeChange('sync')
+      startPolling()
+      triggerSync().catch(console.error)
+    }
+  } else {
+    currentMode = 'local'
+    notifyModeChange('local')
+    stopPolling()
+  }
+}
+
+/**
+ * 记录本地变更
+ * @param entity 实体类型
+ * @param operation 操作类型
+ * @param data 变更数据
+ */
+export function recordChange(
+  entity: 'event' | 'anniversary' | 'eventType' | 'category',
+  operation: 'create' | 'update' | 'delete',
+  data: any
+): void {
+  // 获取当前客户端版本号
+  const clientVersion = data.version || 1
+
+  // 添加到待推送队列
+  addPendingChange(entity, operation, data, clientVersion)
+
+  console.log('[Sync] Change recorded:', entity, operation, data.id)
+
+  // 如果是同步模式，立即触发一次同步
+  if (currentMode === 'sync' && currentShareCode) {
+    triggerSync().catch(console.error)
+  }
+}
+
+/**
+ * 创建新空间
+ */
+export function createSpace(): Promise<{ shareCode: string; spaceId: string } | null> {
+  return new Promise((resolve) => {
+    const apiBase = getApiBase()
+    const deviceId = getDeviceId()
+
+    httpRequest({
+      url: `${apiBase}/space/create`,
+      method: 'POST',
+      data: { deviceId },
+      skipAuth: true
+    }).then((data: any) => {
+      if (data) {
+        const { shareCode, spaceId } = data
+        currentShareCode = shareCode
+        currentSpaceId = spaceId
+
+        // 保存到本地存储
+        setStorage(STORAGE_KEYS.SYNC_SHARE_CODE, shareCode)
+        setStorage(STORAGE_KEYS.SYNC_SPACE_ID, spaceId)
+        setStorage(STORAGE_KEYS.SYNC_ENABLED, true)
+
+        // 切换到同步模式
+        currentMode = 'sync'
+        notifyModeChange('sync')
+        startPolling()
+
+        // 执行全量同步
+        triggerFullSync().then(() => {
+          resolve({ shareCode, spaceId })
+        }).catch(() => {
+          resolve({ shareCode, spaceId })
+        })
+      } else {
+        resolve(null)
       }
     })
   })
 }
 
-// 初始化同步管理器
-export function initSyncManager(): void {
-  // 从本地存储读取 share code
-  const savedShareCode = getStorage<string>(STORAGE_KEYS.SYNC_SHARE_CODE)
+/**
+ * 加入空间
+ * @param shareCode 分享码
+ */
+export function joinSpace(shareCode: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const apiBase = getApiBase()
 
-  if (savedShareCode) {
-    currentShareCode = savedShareCode
-    // 自动连接
-    connectWebSocket(savedShareCode)
+    // 先验证分享码
+    httpRequest({
+      url: `${apiBase}/space/verify?code=${encodeURIComponent(shareCode)}`,
+      method: 'GET',
+      skipAuth: true
+    }).then((data: any) => {
+      if (data && data.valid && data.spaceId) {
+        currentShareCode = shareCode
+        currentSpaceId = data.spaceId
+
+        // 保存到本地存储
+        setStorage(STORAGE_KEYS.SYNC_SHARE_CODE, shareCode)
+        setStorage(STORAGE_KEYS.SYNC_SPACE_ID, data.spaceId)
+        setStorage(STORAGE_KEYS.SYNC_ENABLED, true)
+
+        // 切换到同步模式
+        currentMode = 'sync'
+        notifyModeChange('sync')
+        startPolling()
+
+        // 执行全量同步
+        triggerFullSync().then(() => {
+          resolve(true)
+        }).catch(() => {
+          resolve(true)
+        })
+      } else {
+        resolve(false)
+      }
+    })
+  })
+}
+
+/**
+ * 离开空间
+ */
+export function leaveSpace(): void {
+  // 停止轮询
+  stopPolling()
+
+  // 清除状态
+  currentShareCode = null
+  currentSpaceId = null
+  currentMode = 'local'
+
+  // 清除本地存储
+  removeStorage(STORAGE_KEYS.SYNC_SHARE_CODE)
+  removeStorage(STORAGE_KEYS.SYNC_SPACE_ID)
+  removeStorage(STORAGE_KEYS.SYNC_ENABLED)
+  removeStorage(STORAGE_KEYS.SYNC_LAST_VERSION)
+  removeStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME)
+
+  // 清除待推送队列
+  clearPendingChanges()
+
+  // 重置版本号
+  lastSyncVersion = 0
+
+  // 通知状态变化
+  notifyModeChange('local')
+  notifyStatusChange('idle')
+
+  console.log('[Sync] Left space, switched to local mode')
+}
+
+/**
+ * 触发同步
+ * 先推送本地变更，再拉取远程变更
+ */
+export async function triggerSync(): Promise<boolean> {
+  if (currentMode !== 'sync' || !currentShareCode) {
+    return false
+  }
+
+  if (currentStatus === 'syncing') {
+    console.log('[Sync] Sync already in progress, skipping...')
+    return false
+  }
+
+  notifyStatusChange('syncing')
+
+  try {
+    // 1. 推送本地变更
+    await pushChanges()
+
+    // 2. 拉取远程变更
+    await pullChanges()
+
+    notifyStatusChange('idle')
+    return true
+  } catch (error) {
+    console.error('[Sync] Sync failed:', error)
+    notifyStatusChange('error')
+    return false
   }
 }
 
-// 清除同步数据
+/**
+ * 执行全量同步
+ */
+async function triggerFullSync(): Promise<boolean> {
+  if (!currentShareCode) {
+    return false
+  }
+
+  notifyStatusChange('syncing')
+
+  try {
+    const apiBase = getApiBase()
+
+    const result = await httpRequest<{
+      events: any[]
+      anniversaries: any[]
+      eventTypes: any[]
+      categories: any[]
+      version: number
+    }>({
+      url: `${apiBase}/sync/full`,
+      method: 'POST',
+      data: {
+        deviceId: getDeviceId()
+      }
+    })
+
+    if (result) {
+      // 应用全量数据
+      applyFullData(result)
+
+      // 更新版本号
+      lastSyncVersion = result.version || 0
+      setStorage(STORAGE_KEYS.SYNC_LAST_VERSION, lastSyncVersion)
+      setStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME, Date.now())
+
+      // 清除待推送队列（全量同步后本地数据已与服务端一致）
+      clearPendingChanges()
+
+      notifyStatusChange('idle')
+      notifySyncInfoChange()
+
+      console.log('[Sync] Full sync completed, version:', lastSyncVersion)
+      return true
+    }
+
+    notifyStatusChange('error')
+    return false
+  } catch (error) {
+    console.error('[Sync] Full sync failed:', error)
+    notifyStatusChange('error')
+    return false
+  }
+}
+
+/**
+ * 推送本地变更到服务端
+ */
+async function pushChanges(): Promise<boolean> {
+  if (!currentShareCode) {
+    return false
+  }
+
+  const pending = getBatchChanges(50)
+
+  if (pending.length === 0) {
+    return true
+  }
+
+  const apiBase = getApiBase()
+
+  const result = await httpRequest<{
+    success: boolean
+    processedCount: number
+    conflicts: any[]
+  }>({
+    url: `${apiBase}/sync/push`,
+    method: 'POST',
+    data: {
+      changes: pending,
+      deviceId: getDeviceId()
+    }
+  })
+
+  if (result && result.success) {
+    // 移除已处理的变更
+    removeBatchChanges(result.processedCount || pending.length)
+    console.log('[Sync] Pushed', result.processedCount || pending.length, 'changes')
+    return true
+  }
+
+  return false
+}
+
+/**
+ * 从服务端拉取变更
+ */
+async function pullChanges(): Promise<boolean> {
+  if (!currentShareCode) {
+    return false
+  }
+
+  const apiBase = getApiBase()
+
+  const result = await httpRequest<{
+    events: any[]
+    anniversaries: any[]
+    eventTypes: any[]
+    categories: any[]
+    version: number
+    hasMore: boolean
+  }>({
+    url: `${apiBase}/sync/pull`,
+    method: 'GET',
+    data: {
+      version: lastSyncVersion
+    }
+  })
+
+  if (result) {
+    // 应用增量数据
+    applyIncrementalData(result)
+
+    // 更新版本号
+    if (result.version && result.version > lastSyncVersion) {
+      lastSyncVersion = result.version
+      setStorage(STORAGE_KEYS.SYNC_LAST_VERSION, lastSyncVersion)
+      setStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME, Date.now())
+    }
+
+    notifySyncInfoChange()
+
+    // 如果还有更多数据，继续拉取
+    if (result.hasMore) {
+      return pullChanges()
+    }
+
+    return true
+  }
+
+  return false
+}
+
+/**
+ * 获取同步状态
+ */
+export async function getSyncStatusFromServer(): Promise<{
+  connected: boolean
+  spaceId: string
+  memberCount: number
+  lastUpdate: number
+} | null> {
+  if (!currentShareCode) {
+    return null
+  }
+
+  const apiBase = getApiBase()
+
+  return httpRequest({
+    url: `${apiBase}/sync/status`,
+    method: 'GET'
+  })
+}
+
+// ==================== 数据应用 ====================
+
+/**
+ * 应用全量数据
+ */
+function applyFullData(data: {
+  events: any[]
+  anniversaries: any[]
+  eventTypes: any[]
+  categories: any[]
+}): void {
+  const eventStore = useEventStore()
+  const anniversaryStore = useAnniversaryStore()
+  const eventTypeStore = useEventTypeStore()
+  const categoryStore = useAnniversaryCategoryStore()
+
+  // 应用事件
+  if (data.events && data.events.length > 0) {
+    eventStore.events = data.events
+    eventStore.saveToStorage()
+  }
+
+  // 应用纪念日
+  if (data.anniversaries && data.anniversaries.length > 0) {
+    anniversaryStore.anniversaries = data.anniversaries
+    anniversaryStore.saveToStorage()
+  }
+
+  // 应用事件类型
+  if (data.eventTypes && data.eventTypes.length > 0) {
+    eventTypeStore.types = data.eventTypes
+    eventTypeStore.saveToStorage()
+  }
+
+  // 应用分类
+  if (data.categories && data.categories.length > 0) {
+    categoryStore.categories = data.categories
+    categoryStore.saveToStorage()
+  }
+
+  console.log('[Sync] Applied full data')
+}
+
+/**
+ * 应用增量数据（Last-Write-Wins 策略）
+ */
+function applyIncrementalData(data: {
+  events: any[]
+  anniversaries: any[]
+  eventTypes: any[]
+  categories: any[]
+}): void {
+  const eventStore = useEventStore()
+  const anniversaryStore = useAnniversaryStore()
+  const eventTypeStore = useEventTypeStore()
+  const categoryStore = useAnniversaryCategoryStore()
+
+  // 处理事件
+  if (data.events) {
+    data.events.forEach((remoteEvent: any) => {
+      if (remoteEvent.deleted) {
+        // 删除操作
+        const index = eventStore.events.findIndex((e: any) => e.id === remoteEvent.id)
+        if (index !== -1) {
+          eventStore.events.splice(index, 1)
+        }
+      } else {
+        // 新增或更新 - Last-Write-Wins
+        const localEvent = eventStore.events.find((e: any) => e.id === remoteEvent.id)
+        if (!localEvent) {
+          // 新增
+          eventStore.events.push(remoteEvent)
+        } else if (remoteEvent.version > localEvent.version) {
+          // 远程版本更新，覆盖本地
+          const index = eventStore.events.findIndex((e: any) => e.id === remoteEvent.id)
+          eventStore.events[index] = remoteEvent
+        }
+      }
+    })
+    eventStore.saveToStorage()
+  }
+
+  // 处理纪念日
+  if (data.anniversaries) {
+    data.anniversaries.forEach((remoteAnniversary: any) => {
+      if (remoteAnniversary.deleted) {
+        const index = anniversaryStore.anniversaries.findIndex((a: any) => a.id === remoteAnniversary.id)
+        if (index !== -1) {
+          anniversaryStore.anniversaries.splice(index, 1)
+        }
+      } else {
+        const localAnniversary = anniversaryStore.anniversaries.find((a: any) => a.id === remoteAnniversary.id)
+        if (!localAnniversary) {
+          anniversaryStore.anniversaries.push(remoteAnniversary)
+        } else if (remoteAnniversary.version > localAnniversary.version) {
+          const index = anniversaryStore.anniversaries.findIndex((a: any) => a.id === remoteAnniversary.id)
+          anniversaryStore.anniversaries[index] = remoteAnniversary
+        }
+      }
+    })
+    anniversaryStore.saveToStorage()
+  }
+
+  // 处理事件类型
+  if (data.eventTypes) {
+    data.eventTypes.forEach((remoteType: any) => {
+      if (remoteType.deleted) {
+        const index = eventTypeStore.types.findIndex((t: any) => t.id === remoteType.id)
+        if (index !== -1) {
+          eventTypeStore.types.splice(index, 1)
+        }
+      } else {
+        const localType = eventTypeStore.types.find((t: any) => t.id === remoteType.id)
+        if (!localType) {
+          eventTypeStore.types.push(remoteType)
+        } else if (remoteType.version > localType.version) {
+          const index = eventTypeStore.types.findIndex((t: any) => t.id === remoteType.id)
+          eventTypeStore.types[index] = remoteType
+        }
+      }
+    })
+    eventTypeStore.saveToStorage()
+  }
+
+  // 处理分类
+  if (data.categories) {
+    data.categories.forEach((remoteCategory: any) => {
+      if (remoteCategory.deleted) {
+        const index = categoryStore.categories.findIndex((c: any) => c.id === remoteCategory.id)
+        if (index !== -1) {
+          categoryStore.categories.splice(index, 1)
+        }
+      } else {
+        const localCategory = categoryStore.categories.find((c: any) => c.id === remoteCategory.id)
+        if (!localCategory) {
+          categoryStore.categories.push(remoteCategory)
+        } else if (remoteCategory.version > localCategory.version) {
+          const index = categoryStore.categories.findIndex((c: any) => c.id === remoteCategory.id)
+          categoryStore.categories[index] = remoteCategory
+        }
+      }
+    })
+    categoryStore.saveToStorage()
+  }
+
+  console.log('[Sync] Applied incremental data')
+}
+
+// ==================== 清除同步数据 ====================
+
+/**
+ * 清除所有同步数据
+ */
 export function clearSyncData(): void {
-  disconnectWebSocket()
-  removeStorage(STORAGE_KEYS.SYNC_SHARE_CODE)
-  removeStorage(STORAGE_KEYS.SYNC_SPACE_ID)
-  clearOfflineQueue()
-  currentShareCode = null
+  leaveSpace()
+}
+
+/**
+ * 导出待推送变更数量
+ */
+export function getPendingChangesCount(): number {
+  return getPendingCount()
+}
+
+/**
+ * 检查是否有待推送的变更
+ */
+export function hasPendingChanges(): boolean {
+  return !isPendingEmpty()
 }
