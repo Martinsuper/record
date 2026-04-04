@@ -11,20 +11,26 @@ import lombok.ToString;
 public class Event {
 
     @Id
-    @Column(length = 32)
+    @Column(length = 64)
     private String id;
 
-    @Column(name = "space_id", length = 32, nullable = false)
+    @Column(name = "space_id", length = 64, nullable = false)
     private String spaceId;
 
     @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(name = "type_id", length = 32)
+    @Column(name = "type_id", length = 64)
     private String typeId;
 
     @Column(nullable = false)
     private Long time;
+
+    @Column(nullable = false)
+    private Long version = 1L;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
 
     @Column(name = "created_at")
     private Long createdAt;
