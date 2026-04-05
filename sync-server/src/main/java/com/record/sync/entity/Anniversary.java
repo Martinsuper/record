@@ -2,10 +2,8 @@ package com.record.sync.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 
 @Data
-@ToString(exclude = {"space"})
 @Entity
 @Table(name = "anniversary")
 public class Anniversary {
@@ -46,8 +44,4 @@ public class Anniversary {
 
     @Column(name = "updated_at")
     private Long updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "space_id", insertable = false, updatable = false)
-    private Space space;
 }

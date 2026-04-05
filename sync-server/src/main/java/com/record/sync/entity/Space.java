@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class Space {
 
     @Id
-    @Column(length = 32)
+    @Column(length = 64)
     private String id;
 
     @Column(name = "share_code", length = 6, unique = true, nullable = false)

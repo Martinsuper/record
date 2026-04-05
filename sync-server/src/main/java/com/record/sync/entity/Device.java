@@ -2,20 +2,18 @@ package com.record.sync.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 import java.time.LocalDateTime;
 
 @Data
-@ToString(exclude = {"space"})
 @Entity
 @Table(name = "device")
 public class Device {
 
     @Id
-    @Column(length = 32)
+    @Column(length = 64)
     private String id;
 
-    @Column(name = "space_id", length = 32, nullable = false)
+    @Column(name = "space_id", length = 64, nullable = false)
     private String spaceId;
 
     @Column(name = "device_name", length = 50)
@@ -26,10 +24,6 @@ public class Device {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "space_id", insertable = false, updatable = false)
-    private Space space;
 
     @PrePersist
     protected void onCreate() {
