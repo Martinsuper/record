@@ -94,3 +94,41 @@ CREATE TABLE IF NOT EXISTS anniversary_category (
     INDEX idx_space_id (space_id),
     INDEX idx_space_version (space_id, version)
 );
+
+-- 操作日志表
+CREATE TABLE IF NOT EXISTS operation_log (
+    id VARCHAR(64) PRIMARY KEY,
+    space_id VARCHAR(64) NOT NULL,
+    entity VARCHAR(20) NOT NULL,
+    entity_id VARCHAR(64) NOT NULL,
+    operation VARCHAR(10) NOT NULL,
+    changed_fields JSON,
+    new_values JSON,
+    client_version BIGINT,
+    server_version BIGINT,
+    device_id VARCHAR(64),
+    created_at BIGINT
+);
+CREATE INDEX idx_op_space_version ON operation_log(space_id, server_version);
+CREATE INDEX idx_op_space_entity_id ON operation_log(space_id, entity, entity_id);
+
+-- 数据快照表
+CREATE TABLE IF NOT EXISTS data_snapshot (
+    id VARCHAR(64) PRIMARY KEY,
+    space_id VARCHAR(64) NOT NULL,
+    version BIGINT NOT NULL,
+    data_hash VARCHAR(64),
+    snapshot_data MEDIUMTEXT,
+    created_at BIGINT
+);
+CREATE INDEX idx_snap_space_version ON data_snapshot(space_id, version);
+
+-- 设备同步状态表
+CREATE TABLE IF NOT EXISTS device_sync_state (
+    device_id VARCHAR(64) PRIMARY KEY,
+    space_id VARCHAR(64) NOT NULL,
+    last_sync_version BIGINT,
+    last_sync_time BIGINT,
+    pending_operations INT,
+    status VARCHAR(20)
+);
