@@ -76,6 +76,9 @@ public class SyncMessageHandler {
                 case "category_delete":
                     handleCategoryDelete(spaceId, deviceId, data);
                     break;
+                case "ping":
+                    handlePing(spaceId, deviceId);
+                    break;
                 case "heartbeat":
                     handleHeartbeat(spaceId);
                     break;
@@ -265,6 +268,25 @@ public class SyncMessageHandler {
             sessionManager.broadcastToSpace(spaceId, json, excludeDeviceId);
         } catch (Exception e) {
             log.error("Error broadcasting message: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 处理 ping 心跳消息
+     * 返回 pong 响应并更新空间活跃时间
+     */
+    private void handlePing(String spaceId, String deviceId) {
+        try {
+            // 发送 pong 响应
+            SyncMessage pong = SyncMessage.of("pong", null, deviceId);
+            String json = objectMapper.writeValueAsString(pong);
+            sessionManager.sendToDevice(deviceId, json);
+
+            // 更新空间活跃时间
+            spaceService.updateLastActive(spaceId);
+            log.debug("Ping handled, pong sent to device: {} in space: {}", deviceId, spaceId);
+        } catch (Exception e) {
+            log.error("Error handling ping: {}", e.getMessage(), e);
         }
     }
 

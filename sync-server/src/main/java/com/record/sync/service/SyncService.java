@@ -98,15 +98,27 @@ public class SyncService {
         data.setUpdatedAt(System.currentTimeMillis());
 
         if ("create".equals(change.getOperation())) {
-            if (eventRepository.existsById(data.getId())) {
-                String newId = generateNewId();
-                data.setId(newId);
+            Event existing = eventRepository.findById(data.getId()).orElse(null);
+            if (existing != null && !Boolean.TRUE.equals(existing.getDeleted())) {
+                // ID 已存在且未删除，转为更新操作
+                if (data.getUpdatedAt() > existing.getUpdatedAt()) {
+                    data.setCreatedAt(existing.getCreatedAt());
+                    eventRepository.save(data);
+                    accepted.add(data.getId());
+                } else {
+                    conflicts.add(new ConflictInfo(data.getId(), "server_win", existing));
+                }
+            } else {
+                // 新建或覆盖已删除的记录
+                if (existing == null) {
+                    data.setCreatedAt(System.currentTimeMillis());
+                } else {
+                    data.setCreatedAt(existing.getCreatedAt());
+                }
+                data.setDeleted(false);
+                eventRepository.save(data);
+                accepted.add(data.getId());
             }
-            data.setCreatedAt(System.currentTimeMillis());
-            data.setDeleted(false);
-            eventRepository.save(data);
-            accepted.add(data.getId());
-            log.debug("Created event: {}", data.getId());
 
         } else if ("update".equals(change.getOperation())) {
             Event current = eventRepository.findById(data.getId()).orElse(null);
@@ -152,14 +164,27 @@ public class SyncService {
         data.setUpdatedAt(System.currentTimeMillis());
 
         if ("create".equals(change.getOperation())) {
-            if (anniversaryRepository.existsById(data.getId())) {
-                String newId = generateNewId();
-                data.setId(newId);
+            Anniversary existing = anniversaryRepository.findById(data.getId()).orElse(null);
+            if (existing != null && !Boolean.TRUE.equals(existing.getDeleted())) {
+                // ID 已存在且未删除，转为更新操作
+                if (data.getUpdatedAt() > existing.getUpdatedAt()) {
+                    data.setCreatedAt(existing.getCreatedAt()); // 保留原创建时间
+                    anniversaryRepository.save(data);
+                    accepted.add(data.getId());
+                } else {
+                    conflicts.add(new ConflictInfo(data.getId(), "server_win", existing));
+                }
+            } else {
+                // 新建或覆盖已删除的记录
+                if (existing == null) {
+                    data.setCreatedAt(System.currentTimeMillis());
+                } else {
+                    data.setCreatedAt(existing.getCreatedAt());
+                }
+                data.setDeleted(false);
+                anniversaryRepository.save(data);
+                accepted.add(data.getId());
             }
-            data.setCreatedAt(System.currentTimeMillis());
-            data.setDeleted(false);
-            anniversaryRepository.save(data);
-            accepted.add(data.getId());
 
         } else if ("update".equals(change.getOperation())) {
             Anniversary current = anniversaryRepository.findById(data.getId()).orElse(null);
@@ -200,14 +225,21 @@ public class SyncService {
         data.setVersion(newVersion);
 
         if ("create".equals(change.getOperation())) {
-            if (eventTypeRepository.existsById(data.getId())) {
-                String newId = generateNewId();
-                data.setId(newId);
+            EventType existing = eventTypeRepository.findById(data.getId()).orElse(null);
+            if (existing != null && !Boolean.TRUE.equals(existing.getDeleted())) {
+                // ID 已存在且未删除，转为更新操作
+                conflicts.add(new ConflictInfo(data.getId(), "already_exists", existing));
+            } else {
+                // 新建或覆盖已删除的记录
+                if (existing == null) {
+                    data.setCreatedAt(System.currentTimeMillis());
+                } else {
+                    data.setCreatedAt(existing.getCreatedAt());
+                }
+                data.setDeleted(false);
+                eventTypeRepository.save(data);
+                accepted.add(data.getId());
             }
-            data.setCreatedAt(System.currentTimeMillis());
-            data.setDeleted(false);
-            eventTypeRepository.save(data);
-            accepted.add(data.getId());
 
         } else if ("update".equals(change.getOperation())) {
             EventType current = eventTypeRepository.findById(data.getId()).orElse(null);
@@ -242,13 +274,16 @@ public class SyncService {
         data.setVersion(newVersion);
 
         if ("create".equals(change.getOperation())) {
-            if (categoryRepository.existsById(data.getId())) {
-                String newId = generateNewId();
-                data.setId(newId);
+            AnniversaryCategory existing = categoryRepository.findById(data.getId()).orElse(null);
+            if (existing != null && !Boolean.TRUE.equals(existing.getDeleted())) {
+                // ID 已存在且未删除，跳过
+                conflicts.add(new ConflictInfo(data.getId(), "already_exists", existing));
+            } else {
+                // 新建或覆盖已删除的记录
+                data.setDeleted(false);
+                categoryRepository.save(data);
+                accepted.add(data.getId());
             }
-            data.setDeleted(false);
-            categoryRepository.save(data);
-            accepted.add(data.getId());
 
         } else if ("update".equals(change.getOperation())) {
             AnniversaryCategory current = categoryRepository.findById(data.getId()).orElse(null);
@@ -313,9 +348,5 @@ public class SyncService {
         result.setCategoryCount(categoryRepository.findBySpaceIdAndDeletedFalse(spaceId).size());
 
         return result;
-    }
-
-    private String generateNewId() {
-        return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 }

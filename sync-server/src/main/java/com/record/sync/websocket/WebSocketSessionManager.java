@@ -112,6 +112,29 @@ public class WebSocketSessionManager {
     }
 
     /**
+     * 发送消息给特定设备
+     */
+    public void sendToDevice(String deviceId, String message) {
+        // 根据 deviceId 找到对应的 session
+        for (Map.Entry<String, String> entry : sessionToDevice.entrySet()) {
+            if (entry.getValue().equals(deviceId)) {
+                String sessionId = entry.getKey();
+                WebSocketSession session = sessions.get(sessionId);
+                if (session != null && session.isOpen()) {
+                    try {
+                        session.sendMessage(new TextMessage(message));
+                        log.debug("Message sent to device: {}", deviceId);
+                        return;
+                    } catch (IOException e) {
+                        log.error("Failed to send message to device {}: {}", deviceId, e.getMessage());
+                    }
+                }
+            }
+        }
+        log.warn("No active session found for device: {}", deviceId);
+    }
+
+    /**
      * 获取空间当前连接数
      */
     public int getConnectionCount(String spaceId) {
