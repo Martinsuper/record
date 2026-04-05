@@ -9,8 +9,9 @@ import { recordChange } from '@/utils/syncManager'
  */
 function generateAnniversaryId(): string {
   const timestamp = Date.now()
-  const random = Math.random().toString(36).substring(2, 8)
-  return `anniversary_${timestamp}_${random}`
+  const random = Math.random().toString(36).substring(2, 10)
+  const random2 = Math.random().toString(36).substring(2, 10)
+  return `anniversary_${timestamp}_${random}${random2}`
 }
 
 export const useAnniversaryStore = defineStore('anniversary', {
@@ -43,7 +44,7 @@ export const useAnniversaryStore = defineStore('anniversary', {
 
     /**
      * 筛选后的纪念日列表
-     * 同时考虑分类筛选和搜索关键词
+     * 同时考虑分类筛选和搜索关键词，并应用排序
      */
     filteredAnniversaries: (state): AnniversaryData[] => {
       let result = state.anniversaries
@@ -59,7 +60,12 @@ export const useAnniversaryStore = defineStore('anniversary', {
         result = result.filter(a => a.name.toLowerCase().includes(keyword))
       }
 
-      return result
+      // 应用排序：最近要发生的排前面
+      return result.sort((a, b) => {
+        const calcA = calculateAnniversary(a.date, a.mode, a.repeatType)
+        const calcB = calculateAnniversary(b.date, b.mode, b.repeatType)
+        return calcA.days - calcB.days
+      })
     }
   },
 

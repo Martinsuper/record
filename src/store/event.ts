@@ -20,8 +20,9 @@ export type TimeRangeFilter = 'all' | 'today' | 'week' | 'month'
  */
 function generateEventId(): string {
   const timestamp = Date.now()
-  const random = Math.random().toString(36).substring(2, 8)
-  return `event_${timestamp}_${random}`
+  const random = Math.random().toString(36).substring(2, 10)
+  const random2 = Math.random().toString(36).substring(2, 10)
+  return `event_${timestamp}_${random}${random2}`
 }
 
 export const useEventStore = defineStore('event', {
@@ -43,9 +44,10 @@ export const useEventStore = defineStore('event', {
      * 过滤后的事件列表（按时间倒序，支持分页）
      */
     filteredEvents: (state): EventData[] => {
-      // 生成缓存 key：包含过滤条件和数据变化标识
-      const totalEventTime = state.events.reduce((sum, e) => sum + e.time, 0)
-      const cacheKey = `${state.filterType}|${state.filterTimeRange}|${state.events.length}|${totalEventTime}|${state.loadedCount}`
+      // 生成缓存 key：使用 length 和最后更新时间避免 O(n) 遍历
+      const lastEvent = state.events[state.events.length - 1]
+      const lastUpdated = lastEvent?.createdAt || 0
+      const cacheKey = `${state.filterType}|${state.filterTimeRange}|${state.events.length}|${lastUpdated}|${state.loadedCount}`
 
       // 缓存命中时直接返回
       if (state._cacheKey === cacheKey && state._filteredEventsCache) {
@@ -87,13 +89,6 @@ export const useEventStore = defineStore('event', {
       }
       result = filterByTimeRange(result, state.filterTimeRange)
       return state.loadedCount < result.length
-    },
-
-    /**
-     * 事件总数
-     */
-    totalCount: (state): number => {
-      return state.events.length
     },
 
     /**

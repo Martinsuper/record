@@ -2,13 +2,6 @@
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 
-// FontAwesome CDN 字体 URL
-const FA_FONT_URLS = {
-  solid: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-solid-900.ttf',
-  regular: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-regular-400.ttf',
-  brands: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/fa-brands-400.ttf'
-}
-
 export default {
   onLaunch() {
     console.log('App Launch')
@@ -18,7 +11,7 @@ export default {
     eventStore.loadFromStorage()
     eventTypeStore.loadFromStorage()
 
-    // 小程序环境：使用 wx.loadFontFace 加载网络字体
+    // 小程序环境：使用 wx.loadFontFace 加载本地字体
     // #ifdef MP-WEIXIN
     // 计算导航栏高度（胶囊按钮底部 + 胶囊按钮距状态栏的间距）
     const menuButton = uni.getMenuButtonBoundingClientRect()
@@ -27,9 +20,10 @@ export default {
     console.log('导航栏高度:', navBarHeight)
     uni.setStorageSync('navBarHeight', navBarHeight)
 
+    const fontBase = '/static/fonts'
     wx.loadFontFace({
       family: 'Font Awesome 6 Free',
-      source: `url("${FA_FONT_URLS.solid}")`,
+      source: `url("${fontBase}/fa-solid-900.ttf")`,
       weight: '900',
       global: true,
       scopes: ['webview', 'native'],
@@ -38,7 +32,7 @@ export default {
     })
     wx.loadFontFace({
       family: 'Font Awesome 6 Free',
-      source: `url("${FA_FONT_URLS.regular}")`,
+      source: `url("${fontBase}/fa-regular-400.ttf")`,
       weight: '400',
       global: true,
       scopes: ['webview', 'native'],
@@ -47,12 +41,20 @@ export default {
     })
     wx.loadFontFace({
       family: 'Font Awesome 6 Brands',
-      source: `url("${FA_FONT_URLS.brands}")`,
+      source: `url("${fontBase}/fa-brands-400.ttf")`,
       global: true,
       scopes: ['webview', 'native'],
       success: () => console.log('FontAwesome Brands 加载成功'),
       fail: (err) => console.error('FontAwesome Brands 加载失败', err)
     })
+    // #endif
+
+    // #ifdef H5
+    // H5 端使用安全区域高度作为导航栏高度的近似值
+    const sysInfo = uni.getSystemInfoSync()
+    const safeAreaTop = sysInfo.safeAreaInsets?.top || 0
+    const navBarHeight = safeAreaTop + 44
+    uni.setStorageSync('navBarHeight', navBarHeight)
     // #endif
   },
   onShow() {
@@ -89,11 +91,35 @@ text {
   line-height: 1.6;
 }
 
-/* Font Awesome icon styles */
+/* Font Awesome icon styles - 使用本地字体 */
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  src: url('/static/fonts/fa-solid-900.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Font Awesome 6 Free';
+  src: url('/static/fonts/fa-regular-400.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Font Awesome 6 Brands';
+  src: url('/static/fonts/fa-brands-400.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 .fa-solid,
 .fa-regular,
 .fa-brands {
-  font-family: 'Font Awesome 6 Free' !important;
+  font-family: 'Font Awesome 6 Free', sans-serif !important;
   font-weight: 900;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -105,7 +131,7 @@ text {
 }
 
 .fa-brands {
-  font-family: 'Font Awesome 6 Brands' !important;
+  font-family: 'Font Awesome 6 Brands', sans-serif !important;
   font-weight: 400;
 }
 
@@ -233,10 +259,60 @@ button {
 }
 
 /* Accessibility - Focus states */
-view:focus,
-text:focus,
-button:focus {
+view:focus:not(:focus-visible),
+text:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
   outline: none;
+}
+
+view:focus-visible,
+text:focus-visible,
+button:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+view:focus-visible,
+text:focus-visible,
+button:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+view:focus-visible,
+text:focus-visible,
+button:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
+}
+
+view:focus-visible,
+text:focus-visible,
+button:focus-visible {
+  outline: 2px solid $primary-color;
+  outline-offset: 2px;
 }
 
 /* Reduced motion support */

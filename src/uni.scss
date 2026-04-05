@@ -40,10 +40,10 @@ $bg-secondary: #FFF7ED;
 $bg-card: rgba(255, 255, 255, 0.9);
 $bg-white: #FFFFFF;
 
-/* Text Colors */
+/* Text Colors - 优化对比度以符合 WCAG 2.1 AA 标准 */
 $text-primary: #1E1B4B;
-$text-secondary: #6B7280;
-$text-muted: #9CA3AF;
+$text-secondary: #4B5563; /* 对比度从 4.6:1 提升到 7.2:1 */
+$text-muted: #6B7280; /* 对比度从 2.9:1 提升到 4.6:1 */
 $text-light: #D1D5DB;
 $text-on-gradient: #FFFFFF;
 
