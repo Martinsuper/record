@@ -218,7 +218,7 @@ async function doPullChanges(): Promise<number> {
       if (result[key]?.length) allData[entityMap[key]] = result[key]
     }
 
-    if (Object.keys(allData).length) await batchPutAll(allData)
+    if (Object.keys(allData).length) await batchPutAll(allData as Record<string, any[]>)
     if (result.maxVersion && result.maxVersion > _lastSyncVersion) {
       _lastSyncVersion = result.maxVersion
       await saveSyncState({ lastVersion: _lastSyncVersion })
@@ -236,7 +236,7 @@ async function doFullSync(): Promise<void> {
   )
   if (!result) { _setStatus('error'); return }
 
-  const allData = { events: result.events, anniversaries: result.anniversaries, eventTypes: result.eventTypes, categories: result.categories }
+  const allData: Record<string, any[]> = { events: result.events || [], anniversaries: result.anniversaries || [], eventTypes: result.eventTypes || [], categories: result.categories || [] }
   await batchPutAll(allData)
   if (result.maxVersion) { _lastSyncVersion = result.maxVersion; await saveSyncState({ lastVersion: _lastSyncVersion }) }
   await clearQueue()

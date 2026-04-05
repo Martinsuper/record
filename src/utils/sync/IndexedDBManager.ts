@@ -1,8 +1,8 @@
 // src/utils/sync/IndexedDBManager.ts
 
-import Dexie, { Table } from 'dexie'
-import type { PendingChange, SyncMeta, OperationLog, EntityName } from './types'
-import type { ChangeStatus } from './types'
+import Dexie from 'dexie'
+import type { Table } from 'dexie'
+import type { PendingChange, SyncMeta, OperationLog } from './types'
 import { DB_CONFIG } from './constants'
 
 class RecordSyncDatabase extends Dexie {
@@ -46,40 +46,49 @@ export async function closeDB(): Promise<void> {
 
 // ===== Entity CRUD helpers =====
 
-export async function bulkPut<Entity extends EntityName>(
-  store: Entity,
+// Table name mapping
+const STORE_MAP: Record<string, keyof RecordSyncDatabase> = {
+  event: 'events',
+  anniversary: 'anniversaries',
+  eventType: 'eventTypes',
+  category: 'categories'
+} as const
+
+export async function bulkPut(
+  store: 'event' | 'anniversary' | 'eventType' | 'category',
   items: any[]
 ): Promise<void> {
-  const table = getDB()[store] as Table<any, string>
+  const table = getDB()[STORE_MAP[store]] as Table<any, string>
   await table.bulkPut(items)
 }
 
-export async function getAll<Entity extends EntityName>(
-  store: Entity
+export async function getAll(
+  store: 'event' | 'anniversary' | 'eventType' | 'category'
 ): Promise<any[]> {
-  const table = getDB()[store] as Table<any, string>
+  const table = getDB()[STORE_MAP[store]] as Table<any, string>
   return table.toArray()
 }
 
-export async function deleteById<Entity extends EntityName>(
-  store: Entity,
+export async function deleteById(
+  store: 'event' | 'anniversary' | 'eventType' | 'category',
   id: string
 ): Promise<void> {
-  const table = getDB()[store] as Table<any, string>
+  const table = getDB()[STORE_MAP[store]] as Table<any, string>
   await table.delete(id)
 }
 
-export async function clearStore<Entity extends EntityName>(
-  store: Entity
+export async function clearStore(
+  store: 'event' | 'anniversary' | 'eventType' | 'category'
 ): Promise<void> {
-  const table = getDB()[store] as Table<any, string>
+  const table = getDB()[STORE_MAP[store]] as Table<any, string>
   await table.clear()
 }
 
 // ===== SyncMeta helpers =====
 
 export async function getSyncState(): Promise<SyncMeta | null> {
-  return getDB().syncMeta.get('sync_state') || null
+  const result = await getDB().syncMeta.get('sync_state')
+  return result ?? null
 }
 
 export async function saveSyncState(state: Partial<SyncMeta>): Promise<void> {
@@ -94,14 +103,24 @@ export async function saveSyncState(state: Partial<SyncMeta>): Promise<void> {
 
 // ===== Batch operations =====
 
+const ENTITY_STORES: Record<string, string> = {
+  events: 'event',
+  anniversaries: 'anniversary',
+  eventTypes: 'eventType',
+  categories: 'category'
+}
+
 export async function batchPutAll(
-  data: Partial<Record<EntityName, any[]>>
+  data: Record<string, any[]>
 ): Promise<void> {
   const store = getDB()
-  for (const [entity, items] of Object.entries(data)) {
+  for (const [key, items] of Object.entries(data)) {
     if (items && items.length > 0) {
-      const table = store[entity as EntityName] as Table<any, string>
-      await table.bulkPut(items)
+      const storeName = ENTITY_STORES[key]
+      if (storeName) {
+        const table = store[STORE_MAP[storeName]] as Table<any, string>
+        await table.bulkPut(items)
+      }
     }
   }
 }
