@@ -2,6 +2,7 @@
   <view class="settings-page">
     <SyncSettingsPanel @showSyncDialog="openSyncDialog" />
     <SyncCodeDialog ref="syncDialog" />
+    <CustomTabBar />
   </view>
 </template>
 
@@ -9,6 +10,7 @@
 import { ref } from 'vue'
 import SyncSettingsPanel from '@/components/SyncSettingsPanel.vue'
 import SyncCodeDialog from '@/components/SyncCodeDialog.vue'
+import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const syncDialog = ref()
 
