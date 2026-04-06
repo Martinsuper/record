@@ -1,4 +1,5 @@
 // src/utils/sync/NetworkMonitor.ts
+// 手动同步模式 — 网络监听仅保留基础在线状态检测，不自动ping
 
 import { NETWORK_CONFIG } from './constants'
 import { getApiBase } from './NetworkClient'
@@ -26,11 +27,13 @@ export function getNetworkQuality(): 'good' | 'fair' | 'poor' {
   return 'poor'
 }
 
-/** 启动网络监听 */
+/**
+ * 启动网络监听（手动同步模式下仅监听在线/离线事件，不启动ping）
+ */
 export function startNetworkMonitor(): void {
   // H5 平台事件
   if (typeof window !== 'undefined') {
-    window.addEventListener('online', () => { _isOnline = true; _onlineListeners.forEach(cb => cb(true)); _ping() })
+    window.addEventListener('online', () => { _isOnline = true; _onlineListeners.forEach(cb => cb(true)) })
     window.addEventListener('offline', () => { _isOnline = false; _onlineListeners.forEach(cb => cb(false)) })
     _isOnline = navigator.onLine
   }
@@ -40,12 +43,13 @@ export function startNetworkMonitor(): void {
     uni.onNetworkStatusChange((res: any) => {
       const wasOnline = _isOnline
       _isOnline = res.isConnected
-      if (!wasOnline && _isOnline) { _onlineListeners.forEach(cb => cb(true)); _ping() }
+      if (!wasOnline && _isOnline) { _onlineListeners.forEach(cb => cb(true)) }
       else if (wasOnline && !_isOnline) { _onlineListeners.forEach(cb => cb(false)) }
     })
   } catch {}
 
-  _startPingInterval()
+  // 不启动自动ping定时器
+  // _startPingInterval() 已移除
 }
 
 /** 停止网络监听 */
@@ -59,7 +63,10 @@ export function onOnlineChange(callback: (online: boolean) => void): () => void 
   return () => _onlineListeners.delete(callback)
 }
 
-function _ping(): Promise<number> {
+/**
+ * 手动ping检测网络延迟（用户主动触发时调用）
+ */
+export async function manualPing(): Promise<number> {
   const start = Date.now()
   return new Promise((resolve) => {
     try {
@@ -74,7 +81,7 @@ function _ping(): Promise<number> {
   })
 }
 
-function _startPingInterval(): void {
-  if (pingTimer) clearTimeout(pingTimer)
-  pingTimer = setInterval(() => { if (_isOnline) _ping() }, NETWORK_CONFIG.pingInterval)
+// _ping 和 _startPingInterval 已移除自动调用
+function _ping(): Promise<number> {
+  return manualPing()
 }

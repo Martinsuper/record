@@ -1,6 +1,7 @@
 package com.record.sync.controller;
 
 import com.record.sync.dto.*;
+import com.record.sync.service.SnapshotService;
 import com.record.sync.service.SyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.List;
 public class SyncController {
 
     private final SyncService syncService;
+    private final SnapshotService snapshotService;
 
     @GetMapping("/pull")
     public ResponseEntity<ApiResponse<SyncPullResult>> pull(
@@ -204,6 +206,23 @@ public class SyncController {
         } catch (Exception e) {
             log.error("Recover error: {}", e.getMessage(), e);
             return ResponseEntity.ok(ApiResponse.error("数据恢复失败"));
+        }
+    }
+
+    // ===== 手动同步端点 =====
+
+    /**
+     * 手动创建数据快照（用户主动触发）
+     */
+    @PostMapping("/snapshot")
+    public ResponseEntity<ApiResponse<String>> createSnapshot(
+            @RequestParam String spaceId) {
+        try {
+            snapshotService.createSnapshot(spaceId);
+            return ResponseEntity.ok(ApiResponse.success("快照创建成功"));
+        } catch (Exception e) {
+            log.error("Snapshot creation error: {}", e.getMessage(), e);
+            return ResponseEntity.ok(ApiResponse.error("快照创建失败：" + e.getMessage()));
         }
     }
 }

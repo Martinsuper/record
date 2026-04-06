@@ -1,4 +1,5 @@
 // src/utils/sync/BackupManager.ts
+// 手动同步模式 — 备份仅由用户主动触发或退出时保存
 
 import { getStorage, setStorage } from '@/utils/storage'
 import { BACKUP_CONFIG } from './constants'
@@ -77,14 +78,22 @@ export async function restorePendingFromBackup(): Promise<number> {
   return fresh.length
 }
 
-/** 启动定期备份 */
+/**
+ * 启动定期备份（手动同步模式下已禁用）
+ * @deprecated 自动备份已移除，请使用 manualBackup() 手动触发
+ */
 export function startPeriodicBackup(): void {
-  if (backupInterval) return
+  // 手动同步模式下不启动自动备份定时器
+  // 仅在首次调用时执行一次备份
   backupRecentPending().catch(() => {})
-  backupInterval = setInterval(() => {
-    backupRecentPending().catch(() => {})
-    backupIndexedDB().catch(() => {})
-  }, BACKUP_CONFIG.periodicBackupInterval)
+}
+
+/**
+ * 手动触发备份（用户主动触发时调用）
+ */
+export async function manualBackup(): Promise<void> {
+  await backupRecentPending()
+  await backupIndexedDB()
 }
 
 /** 停止定期备份 */

@@ -5,9 +5,7 @@ import com.record.sync.entity.DataSnapshot;
 import com.record.sync.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
 import java.util.*;
@@ -26,7 +24,9 @@ public class SnapshotService {
     private final DataSnapshotRepository dataSnapshotRepository;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(cron = "0 */30 * * * ?")
+    /**
+     * 手动创建快照（由管理员或用户主动触发）
+     */
     public void createSnapshots() {
         try {
             List<String> spaceIds = spaceVersionRepository.findAll().stream()

@@ -1,4 +1,5 @@
 // src/utils/sync/SyncScheduler.ts
+// 手动同步模式 — 调度器不再自动运行，仅保留手动触发能力
 
 import { POLL_CONFIG } from './constants'
 import { getNetworkQuality, getOnline } from './NetworkMonitor'
@@ -31,11 +32,15 @@ export function setHasPending(val: boolean): void {
   _hasPending = val
 }
 
-/** 启动轮询调度器 */
+/**
+ * 启动轮询调度器（手动同步模式下已禁用）
+ * @deprecated 自动同步已移除，请使用 triggerSync() 手动触发
+ */
 export function startScheduler(callback: () => Promise<void>): void {
+  // 手动同步模式下不启动自动调度器
+  // 仅保存回调以便手动触发时使用
   _onTick = callback
-  if (timer) clearTimeout(timer)
-  _scheduleNext()
+  // timer 不再启动
 }
 
 /** 停止轮询调度器 */
@@ -45,11 +50,22 @@ export function stopScheduler(): void {
   _onTick = null
 }
 
-/** 手动触发一次同步 */
-export function triggerNow(): void {
-  if (timer) clearTimeout(timer)
+/**
+ * 手动触发一次同步
+ * 在手动同步模式下，这是唯一的触发方式
+ */
+export async function triggerNow(): Promise<void> {
   if (_onTick && !_isRunning) {
-    _onTick().then(() => { _currentInterval = POLL_CONFIG.defaultInterval; _scheduleNext() }).catch(() => _scheduleNext())
+    _isRunning = true
+    try {
+      await _onTick()
+      onSyncSuccess()
+    } catch (e) {
+      onSyncFailure()
+      throw e
+    } finally {
+      _isRunning = false
+    }
   }
 }
 
@@ -61,15 +77,9 @@ export function onSyncSuccess(): void {
 /** 同步失败后调用 */
 export function onSyncFailure(): void {
   _currentInterval *= POLL_CONFIG.adaptiveFactors.syncFailed
-  _scheduleNext()
 }
 
+// _scheduleNext 已禁用，不再自动调度
 function _scheduleNext(): void {
-  if (!_onTick) return
-  _currentInterval = calcInterval()
-  timer = setTimeout(async () => {
-    _isRunning = true
-    try { await _onTick?.(); onSyncSuccess() } catch { onSyncFailure() }
-    finally { _isRunning = false; _scheduleNext() }
-  }, _currentInterval)
+  // 自动调度已移除
 }

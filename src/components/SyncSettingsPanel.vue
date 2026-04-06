@@ -19,18 +19,32 @@
       <text class="last-sync" v-if="syncStore.lastSyncTime">
         最近同步：{{ formatLastSyncTime }}
       </text>
+
+      <!-- 手动同步按钮 -->
+      <button
+        class="manual-sync-btn"
+        :disabled="isSyncing"
+        @tap="handleManualSync"
+      >
+        {{ isSyncing ? '同步中...' : '手动同步' }}
+      </button>
+
+      <text class="sync-message" v-if="syncMessage">{{ syncMessage }}</text>
       <button class="exit-btn" @tap="exitSpace">退出空间</button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useSyncStore } from '@/store/sync'
-import { clearSyncData } from '@/utils/syncManager'
+import { clearSyncData, manualSync } from '@/utils/syncManager'
 
 const syncStore = useSyncStore()
 const emit = defineEmits(['showSyncDialog'])
+
+const isSyncing = ref(false)
+const syncMessage = ref('')
 
 const formatLastSyncTime = computed(() => {
   if (!syncStore.lastSyncTime) return ''
@@ -53,6 +67,28 @@ function copyShareCode() {
         uni.showToast({ title: '已复制', icon: 'success' })
       }
     })
+  }
+}
+
+async function handleManualSync() {
+  if (isSyncing.value) return
+
+  isSyncing.value = true
+  syncMessage.value = '同步中...'
+
+  try {
+    const result = await manualSync()
+    if (result.success) {
+      syncStore.setLastSyncTime(Date.now())
+      syncMessage.value = `同步成功！推送 ${result.pushed} 条，拉取 ${result.pulled} 条`
+      setTimeout(() => { syncMessage.value = '' }, 3000)
+    } else {
+      syncMessage.value = '同步失败，请检查网络连接'
+    }
+  } catch (error) {
+    syncMessage.value = '同步出错：' + (error instanceof Error ? error.message : '未知错误')
+  } finally {
+    isSyncing.value = false
   }
 }
 
@@ -132,6 +168,28 @@ function exitSpace() {
     font-size: 24rpx;
     color: #999;
     margin-top: 8rpx;
+  }
+
+  .manual-sync-btn {
+    margin-top: 20rpx;
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    color: #fff;
+    font-weight: 500;
+
+    &:disabled {
+      background: #ccc;
+      color: #999;
+    }
+  }
+
+  .sync-message {
+    font-size: 24rpx;
+    color: #4caf50;
+    margin-top: 12rpx;
+
+    &:has-error {
+      color: #f44336;
+    }
   }
 
   .exit-btn {
