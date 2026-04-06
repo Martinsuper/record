@@ -1,6 +1,7 @@
 package com.record.sync.controller;
 
 import com.record.sync.dto.*;
+import com.record.sync.service.DataCleanupService;
 import com.record.sync.service.SnapshotService;
 import com.record.sync.service.SyncService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class SyncController {
 
     private final SyncService syncService;
     private final SnapshotService snapshotService;
+    private final DataCleanupService dataCleanupService;
 
     @GetMapping("/pull")
     public ResponseEntity<ApiResponse<SyncPullResult>> pull(
@@ -223,6 +225,20 @@ public class SyncController {
         } catch (Exception e) {
             log.error("Snapshot creation error: {}", e.getMessage(), e);
             return ResponseEntity.ok(ApiResponse.error("快照创建失败：" + e.getMessage()));
+        }
+    }
+
+    /**
+     * 手动清理软删除数据（管理员主动触发）
+     */
+    @PostMapping("/cleanup")
+    public ResponseEntity<ApiResponse<String>> cleanup() {
+        try {
+            dataCleanupService.cleanupSoftDeletedData();
+            return ResponseEntity.ok(ApiResponse.success("数据清理成功"));
+        } catch (Exception e) {
+            log.error("Cleanup error: {}", e.getMessage(), e);
+            return ResponseEntity.ok(ApiResponse.error("数据清理失败：" + e.getMessage()));
         }
     }
 }

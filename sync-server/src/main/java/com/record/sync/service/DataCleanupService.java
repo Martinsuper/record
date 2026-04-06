@@ -3,7 +3,6 @@ package com.record.sync.service;
 import com.record.sync.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,9 @@ public class DataCleanupService {
     private final EventTypeRepository eventTypeRepository;
     private final AnniversaryCategoryRepository categoryRepository;
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    /**
+     * 手动清理软删除数据（由管理员主动触发）
+     */
     @Transactional
     public void cleanupSoftDeletedData() {
         log.info("Starting soft deleted data cleanup...");
