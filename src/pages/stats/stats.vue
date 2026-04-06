@@ -1,12 +1,216 @@
 <template>
   <view class="page-stats" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
     <!-- Gradient header -->
-    <view class="header">
+    <view class="header" role="banner">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid">&#xf200;</text>
+        <text class="fa-solid" aria-hidden="true">&#xf200;</text>
         <text class="header-title">统计概览</text>
       </view>
+    </view>
+
+    <!-- Overview cards with gradients -->
+    <view class="overview-section" role="region" aria-label="概览数据">
+      <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.1s">
+        <view class="stat-icon" aria-hidden="true">
+          <text class="fa-solid">&#xf5fd;</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ totalCount }}</text>
+          <text class="stat-label">总事件数</text>
+        </view>
+        <view class="stat-glow"></view>
+      </view>
+
+      <view class="stat-card gradient-cool fade-in-up" style="animation-delay: 0.2s">
+        <view class="stat-icon" aria-hidden="true">
+          <text class="fa-solid">&#xf274;</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ monthCount }}</text>
+          <text class="stat-label">本月新增</text>
+        </view>
+        <view class="stat-glow"></view>
+      </view>
+    </view>
+
+    <!-- Type distribution -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.3s" role="region" aria-label="类型分布">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf02c;</text>
+        <text class="section-title">类型分布</text>
+      </view>
+
+      <view v-if="typeStats.length === 0" class="empty-state" role="status">
+        <text class="fa-solid" aria-hidden="true">&#xf01c;</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
+
+      <view v-else class="type-stats">
+        <view v-for="(stat, index) in typeStats" :key="stat.typeId" class="type-stat-item">
+          <view class="type-header">
+            <view class="type-badge" :style="{ backgroundColor: stat.color }" aria-hidden="true">
+              <text class="fa-solid">&#xf005;</text>
+            </view>
+            <text class="type-name">{{ stat.name }}</text>
+            <text class="type-count">{{ stat.count }}</text>
+          </view>
+          <view class="stat-bar-track" role="progressbar" :aria-valuenow="stat.percent" aria-valuemin="0" aria-valuemax="100">
+            <view class="stat-bar" :style="{ width: stat.percent + '%', backgroundColor: stat.color }" />
+          </view>
+          <text class="stat-percent">{{ stat.percent }}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Recent 7 days trend -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.4s" role="region" aria-label="近7天趋势">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf201;</text>
+        <text class="section-title">近7天趋势</text>
+      </view>
+
+      <view v-if="recentStats.length === 0" class="empty-state" role="status">
+        <text class="fa-solid" aria-hidden="true">&#xf01c;</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
+
+      <view v-else class="trend-chart">
+        <view class="chart-y-axis" aria-hidden="true">
+          <text class="y-label">{{ maxCount }}</text>
+          <view class="y-grid-lines">
+            <view v-for="i in 4" :key="i" class="y-grid-line" />
+          </view>
+          <text class="y-label">0</text>
+        </view>
+        <view class="chart-bars" role="img" aria-label="柱状图显示近7天事件数量">
+          <view v-for="(day, index) in recentStats" :key="index" class="chart-bar-item">
+            <text class="bar-value">{{ day.count }}</text>
+            <view class="bar-container">
+              <view
+                class="bar-visual"
+                :style="{ height: getBarHeight(day.count) + 'rpx', animationDelay: index * 0.08 + 's' }"
+              />
+            </view>
+            <text class="bar-label">{{ day.label }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Data management entry -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.5s" role="button" tabindex="0" @click="goToDataManager" @keydown.enter="goToDataManager">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf0e7;</text>
+        <text class="section-title">数据管理</text>
+      </view>
+      <view class="section-desc">导出或导入数据</view>
+      <view class="entry-arrow" aria-hidden="true">
+        <text class="fa-solid">&#xf054;</text>
+      </view>
+    </view>
+    </view>
+
+    <!-- Overview cards with gradients -->
+    <view class="overview-section" role="region" aria-label="概览数据">
+      <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.1s">
+        <view class="stat-icon" aria-hidden="true">
+          <text class="fa-solid">&#xf5fd;</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ totalCount }}</text>
+          <text class="stat-label">总事件数</text>
+        </view>
+        <view class="stat-glow"></view>
+      </view>
+
+      <view class="stat-card gradient-cool fade-in-up" style="animation-delay: 0.2s">
+        <view class="stat-icon" aria-hidden="true">
+          <text class="fa-solid">&#xf274;</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ monthCount }}</text>
+          <text class="stat-label">本月新增</text>
+        </view>
+        <view class="stat-glow"></view>
+      </view>
+    </view>
+
+    <!-- Type distribution -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.3s" role="region" aria-label="类型分布">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf02c;</text>
+        <text class="section-title">类型分布</text>
+      </view>
+
+      <view v-if="typeStats.length === 0" class="empty-state" role="status">
+        <text class="fa-solid" aria-hidden="true">&#xf01c;</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
+
+      <view v-else class="type-stats">
+        <view v-for="(stat, index) in typeStats" :key="stat.typeId" class="type-stat-item">
+          <view class="type-header">
+            <view class="type-badge" :style="{ backgroundColor: stat.color }" aria-hidden="true">
+              <text class="fa-solid">&#xf005;</text>
+            </view>
+            <text class="type-name">{{ stat.name }}</text>
+            <text class="type-count">{{ stat.count }}</text>
+          </view>
+          <view class="stat-bar-track" role="progressbar" :aria-valuenow="stat.percent" aria-valuemin="0" aria-valuemax="100">
+            <view class="stat-bar" :style="{ width: stat.percent + '%', backgroundColor: stat.color }" />
+          </view>
+          <text class="stat-percent">{{ stat.percent }}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Recent 7 days trend -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.4s" role="region" aria-label="近7天趋势">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf201;</text>
+        <text class="section-title">近7天趋势</text>
+      </view>
+
+      <view v-if="recentStats.length === 0" class="empty-state" role="status">
+        <text class="fa-solid" aria-hidden="true">&#xf01c;</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
+
+      <view v-else class="trend-chart">
+        <view class="chart-y-axis" aria-hidden="true">
+          <text class="y-label">{{ maxCount }}</text>
+          <view class="y-grid-lines">
+            <view v-for="i in 4" :key="i" class="y-grid-line" />
+          </view>
+          <text class="y-label">0</text>
+        </view>
+        <view class="chart-bars" role="img" aria-label="柱状图显示近7天事件数量">
+          <view v-for="(day, index) in recentStats" :key="index" class="chart-bar-item">
+            <text class="bar-value">{{ day.count }}</text>
+            <view class="bar-container">
+              <view
+                class="bar-visual"
+                :style="{ height: getBarHeight(day.count) + 'rpx', animationDelay: index * 0.08 + 's' }"
+              />
+            </view>
+            <text class="bar-label">{{ day.label }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Data management entry -->
+    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.5s" role="button" tabindex="0" @click="goToDataManager" @keydown.enter="goToDataManager">
+      <view class="section-header">
+        <text class="fa-solid" aria-hidden="true">&#xf0e7;</text>
+        <text class="section-title">数据管理</text>
+      </view>
+      <view class="section-desc">导出或导入数据</view>
+      <view class="entry-arrow" aria-hidden="true">
+        <text class="fa-solid">&#xf054;</text>
+      </view>
+    </view>
     </view>
 
     <!-- Overview cards with gradients -->
@@ -78,6 +282,9 @@
       <view v-else class="trend-chart">
         <view class="chart-y-axis">
           <text class="y-label">{{ maxCount }}</text>
+          <view class="y-grid-lines">
+            <view v-for="i in 4" :key="i" class="y-grid-line" />
+          </view>
           <text class="y-label">0</text>
         </view>
         <view class="chart-bars">
@@ -86,10 +293,38 @@
             <view class="bar-container">
               <view
                 class="bar-visual"
-                :style="{ height: getBarHeight(day.count) + 'rpx' }"
+                :style="{ height: getBarHeight(day.count) + 'rpx', animationDelay: index * 0.08 + 's' }"
               />
             </view>
-            <text class="bar-label">{{ day.date }}</text>
+            <text class="bar-label">{{ day.label }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+      <view v-if="recentStats.length === 0" class="empty-state">
+        <text class="fa-solid">&#xf01c;</text>
+        <text class="empty-text">暂无数据</text>
+      </view>
+
+      <view v-else class="trend-chart">
+        <view class="chart-y-axis">
+          <text class="y-label">{{ maxCount }}</text>
+          <view class="y-grid-lines">
+            <view v-for="i in 4" :key="i" class="y-grid-line" />
+          </view>
+          <text class="y-label">0</text>
+        </view>
+        <view class="chart-bars">
+          <view v-for="(day, index) in recentStats" :key="index" class="chart-bar-item">
+            <text class="bar-value">{{ day.count }}</text>
+            <view class="bar-container">
+              <view
+                class="bar-visual"
+                :style="{ height: getBarHeight(day.count) + 'rpx', animationDelay: index * 0.08 + 's' }"
+              />
+            </view>
+            <text class="bar-label">{{ day.label }}</text>
           </view>
         </view>
       </view>
@@ -411,10 +646,30 @@ function goToDataManager() {
         flex-direction: column;
         justify-content: space-between;
         padding: $spacing-lg 0;
+        position: relative;
 
         .y-label {
           font-size: 22rpx;
           color: $text-muted;
+          z-index: 1;
+        }
+
+        .y-grid-lines {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          pointer-events: none;
+
+          .y-grid-line {
+            width: 100%;
+            height: 1px;
+            background: rgba(99, 102, 241, 0.08);
+          }
         }
       }
 
@@ -442,13 +697,16 @@ function goToDataManager() {
             height: 160rpx;
             display: flex;
             align-items: flex-end;
+            position: relative;
 
             .bar-visual {
               width: 100%;
               min-height: 8rpx;
               background: $gradient-cool;
               border-radius: $radius-sm $radius-sm 0 0;
-              transition: height $transition-slow;
+              animation: barGrow 0.6s ease-out forwards;
+              transform-origin: bottom;
+              transform: scaleY(0);
             }
           }
 
@@ -463,4 +721,14 @@ function goToDataManager() {
     }
   }
 }
+
+@keyframes barGrow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 </style>
