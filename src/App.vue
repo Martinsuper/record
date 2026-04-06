@@ -11,50 +11,23 @@ export default {
     eventStore.loadFromStorage()
     eventTypeStore.loadFromStorage()
 
-    // 小程序环境：使用 wx.loadFontFace 加载本地字体
+    // 小程序环境：计算导航栏高度
     // #ifdef MP-WEIXIN
     // 计算导航栏高度（胶囊按钮底部 + 胶囊按钮距状态栏的间距）
     const menuButton = uni.getMenuButtonBoundingClientRect()
     const statusBarHeight = uni.getSystemInfoSync().statusBarHeight
-    const navBarHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
-    console.log('导航栏高度:', navBarHeight)
-    uni.setStorageSync('navBarHeight', navBarHeight)
-
-    const fontBase = '/static/fonts'
-    wx.loadFontFace({
-      family: 'Font Awesome 6 Free',
-      source: `url("${fontBase}/fa-solid-900.ttf")`,
-      weight: '900',
-      global: true,
-      scopes: ['webview', 'native'],
-      success: () => console.log('FontAwesome Solid 加载成功'),
-      fail: (err) => console.error('FontAwesome Solid 加载失败', err)
-    })
-    wx.loadFontFace({
-      family: 'Font Awesome 6 Free',
-      source: `url("${fontBase}/fa-regular-400.ttf")`,
-      weight: '400',
-      global: true,
-      scopes: ['webview', 'native'],
-      success: () => console.log('FontAwesome Regular 加载成功'),
-      fail: (err) => console.error('FontAwesome Regular 加载失败', err)
-    })
-    wx.loadFontFace({
-      family: 'Font Awesome 6 Brands',
-      source: `url("${fontBase}/fa-brands-400.ttf")`,
-      global: true,
-      scopes: ['webview', 'native'],
-      success: () => console.log('FontAwesome Brands 加载成功'),
-      fail: (err) => console.error('FontAwesome Brands 加载失败', err)
-    })
+    const mpNavBarHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
+    console.log('导航栏高度:', mpNavBarHeight)
+    uni.setStorageSync('navBarHeight', mpNavBarHeight)
+    // 注意：小程序不支持本地字体文件加载，使用 CSS unicode 方式显示图标（已在全局样式定义）
     // #endif
 
     // #ifdef H5
     // H5 端使用安全区域高度作为导航栏高度的近似值
     const sysInfo = uni.getSystemInfoSync()
     const safeAreaTop = sysInfo.safeAreaInsets?.top || 0
-    const navBarHeight = safeAreaTop + 44
-    uni.setStorageSync('navBarHeight', navBarHeight)
+    const h5NavBarHeight = safeAreaTop + 44
+    uni.setStorageSync('navBarHeight', h5NavBarHeight)
     // #endif
   },
   onShow() {
@@ -91,7 +64,9 @@ text {
   line-height: 1.6;
 }
 
-/* Font Awesome icon styles - 使用本地字体 */
+/* Font Awesome icon styles - 使用本地字体 (仅 H5 端) */
+/* 小程序端使用 wx.loadFontFace + Unicode 映射，不支持 @font-face */
+/* #ifdef H5 */
 @font-face {
   font-family: 'Font Awesome 6 Free';
   src: url('/static/fonts/fa-solid-900.ttf') format('truetype');
@@ -115,6 +90,7 @@ text {
   font-style: normal;
   font-display: swap;
 }
+/* #endif */
 
 .fa-solid,
 .fa-regular,
@@ -272,50 +248,7 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-view:focus-visible,
-text:focus-visible,
-button:focus-visible {
-  outline: 2px solid $primary-color;
-  outline-offset: 2px;
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-view:focus-visible,
-text:focus-visible,
-button:focus-visible {
-  outline: 2px solid $primary-color;
-  outline-offset: 2px;
-}
-
-view:focus-visible,
-text:focus-visible,
-button:focus-visible {
-  outline: 2px solid $primary-color;
-  outline-offset: 2px;
-}
-
-/* Reduced motion support */
+/* Reduced motion support - 小程序不支持 * 通配符，使用具体元素 */
 @media (prefers-reduced-motion: reduce) {
   view,
   text,

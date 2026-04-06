@@ -1,3 +1,33 @@
+diff --git a/node_modules/uview-plus/components/u-datetime-picker/u-datetime-picker.vue b/node_modules/uview-plus/components/u-datetime-picker/u-datetime-picker.vue
+index 7b12fe9..98ee325 100644
+--- a/node_modules/uview-plus/components/u-datetime-picker/u-datetime-picker.vue
++++ b/node_modules/uview-plus/components/u-datetime-picker/u-datetime-picker.vue
+@@ -7,7 +7,10 @@
+ 				<up-input
+ 					:readonly="!!showByClickInput"
+ 					v-model="inputValue"
+-					v-bind="inputPropsInner"
++					:border="inputBorder"
++					:placeholder="placeholder"
++					:disabled="disabled"
++					:disabledColor="disabledColor"
+ 				></up-input>
+ 				<cover-view class="input-cover">
+ 				</cover-view>
+diff --git a/node_modules/uview-plus/components/u-picker/u-picker.vue b/node_modules/uview-plus/components/u-picker/u-picker.vue
+index 625e8db..40d030e 100644
+--- a/node_modules/uview-plus/components/u-picker/u-picker.vue
++++ b/node_modules/uview-plus/components/u-picker/u-picker.vue
+@@ -9,7 +9,8 @@
+ 				v-if="!$slots['default'] && !$slots['$default'] && !$slots['trigger']"
+ 				:readonly="true"
+ 				v-model="inputLabel"
+-				v-bind="inputPropsInner">
++				:border="inputBorder"
++				:placeholder="placeholder">
+ 			</up-input>
+ 			<cover-view class="input-cover"></cover-view>
+ 		</view>
 diff --git a/node_modules/uview-plus/components/u-swipe-action-item/index.wxs b/node_modules/uview-plus/components/u-swipe-action-item/index.wxs
 index 6bdbc10..0a581d1 100644
 --- a/node_modules/uview-plus/components/u-swipe-action-item/index.wxs

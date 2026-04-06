@@ -41,6 +41,13 @@ export const useEventStore = defineStore('event', {
 
   getters: {
     /**
+     * 事件总数
+     */
+    totalCount: (state): number => {
+      return state.events.length
+    },
+
+    /**
      * 过滤后的事件列表（按时间倒序，支持分页）
      */
     filteredEvents: (state): EventData[] => {
