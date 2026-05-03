@@ -159,7 +159,6 @@ export function onSyncChange(cb: (s: SyncStatus) => void): () => void { _statusL
 export function onSyncModeChange(cb: (m: 'local' | 'sync') => void): () => void { _modeListeners.add(cb); return () => _modeListeners.delete(cb) }
 export function onSyncInfoChange(cb: () => void): () => void { _infoListeners.add(cb); return () => _infoListeners.delete(cb) }
 
-export function getPendingChangesCount(): number { return 0 } // sync, use hasPending
 export async function hasPendingChanges(): Promise<boolean> { return hasPending() }
 export function clearSyncData(): void { leaveSpace() }
 

@@ -16,7 +16,6 @@ import {
   setSyncEnabled,
   recordChange,
   clearSyncData,
-  getPendingChangesCount,
   hasPendingChanges,
   verifyShareCode,
   connectWebSocket,
@@ -52,6 +51,6 @@ export {
   getSyncMode, getSyncStatus, getCurrentShareCode, getCurrentSpaceId,
   getSyncInfo, getSyncStatusFromServer, createSpace, joinSpace, leaveSpace,
   triggerSync, setSyncEnabled, recordChange, clearSyncData,
-  getPendingChangesCount, hasPendingChanges, verifyShareCode, connectWebSocket,
+  hasPendingChanges, verifyShareCode, connectWebSocket,
   onSyncModeChange, onSyncChange as onSyncStatusChange, onSyncInfoChange as onSyncInfoChange
 }

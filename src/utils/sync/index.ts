@@ -19,7 +19,6 @@ export {
   onSyncChange,
   onSyncModeChange,
   onSyncInfoChange,
-  getPendingChangesCount,
   hasPendingChanges,
   clearSyncData,
   verifyShareCode,
@@ -27,16 +26,16 @@ export {
 } from './SyncEngine'
 
 // Network
-export { startNetworkMonitor, stopNetworkMonitor, getOnline, getLastPingLatency, getNetworkQuality, onOnlineChange } from './NetworkMonitor'
+export { startNetworkMonitor, getOnline, getLastPingLatency, getNetworkQuality, onOnlineChange, manualPing } from './NetworkMonitor'
 
 // Scheduler
-export { startScheduler, stopScheduler, triggerNow, onSyncSuccess, onSyncFailure } from './SyncScheduler'
+export { startScheduler, triggerNow } from './SyncScheduler'
 
 // IndexedDB
 export { getDB, closeDB, getSyncState, saveSyncState, batchPutAll } from './IndexedDBManager'
 
 // Backup
-export { startPeriodicBackup, stopPeriodicBackup, restoreFromBackup, restorePendingFromBackup } from './BackupManager'
+export { startPeriodicBackup, restoreFromBackup, restorePendingFromBackup, manualBackup } from './BackupManager'
 
 // Queue
 export { enqueue, getPendingBatch, markAsPushed, markAsFailed, retryFailed, clearQueue, getPendingCount, hasPending } from './PendingQueue'

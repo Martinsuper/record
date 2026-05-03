@@ -7,7 +7,6 @@ import { getApiBase } from './NetworkClient'
 let _isOnline = true
 let _lastPingLatency = 0
 let _onlineListeners: Set<(online: boolean) => void> = new Set()
-let pingTimer: ReturnType<typeof setInterval> | null = null
 
 /** 当前是否在线 */
 export function getOnline(): boolean {
@@ -52,11 +51,6 @@ export function startNetworkMonitor(): void {
   // _startPingInterval() 已移除
 }
 
-/** 停止网络监听 */
-export function stopNetworkMonitor(): void {
-  if (pingTimer) { clearInterval(pingTimer); pingTimer = null }
-}
-
 /** 监听在线/离线事件 */
 export function onOnlineChange(callback: (online: boolean) => void): () => void {
   _onlineListeners.add(callback)
@@ -79,9 +73,4 @@ export async function manualPing(): Promise<number> {
       })
     } catch { _lastPingLatency = Infinity; resolve(Infinity) }
   })
-}
-
-// _ping 和 _startPingInterval 已移除自动调用
-function _ping(): Promise<number> {
-  return manualPing()
 }

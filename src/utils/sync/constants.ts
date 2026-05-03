@@ -10,14 +10,10 @@ export const POLL_CONFIG = {
   maxInterval: 60000,
   defaultInterval: 8000,
   adaptiveFactors: {
-    userActive: 0.5,
-    userIdle: 1.5,
     networkGood: 0.8,
     networkPoor: 2.0,
     hasPending: 0.7,
     noPending: 1.2,
-    syncSuccess: 1.0,
-    syncFailed: 1.5,
   }
 }
 
@@ -53,7 +49,6 @@ export const RETRY_CONFIG = {
 /** 数据备份配置 */
 export const BACKUP_CONFIG = {
   localStorageLimit: 10,
-  periodicBackupInterval: 21600000,  // 6h
   backupRetention: 86400000,          // 24h
 }
 
@@ -77,7 +72,6 @@ export const FULL_SYNC_CONFIG = {
 
 /** 网络质量评估 */
 export const NETWORK_CONFIG = {
-  pingInterval: 30000,       // 30s
   pingTimeout: 5000,         // 5s
   goodLatencyThreshold: 500, // ms
 }

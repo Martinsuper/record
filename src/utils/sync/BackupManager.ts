@@ -6,8 +6,6 @@ import { BACKUP_CONFIG } from './constants'
 import { getDB } from './IndexedDBManager'
 import type { PendingChange } from './types'
 
-let backupInterval: ReturnType<typeof setInterval> | null = null
-
 /** 备份最近 N 条 pending 到 localStorage */
 export async function backupRecentPending(): Promise<void> {
   const db = getDB()
@@ -94,12 +92,4 @@ export function startPeriodicBackup(): void {
 export async function manualBackup(): Promise<void> {
   await backupRecentPending()
   await backupIndexedDB()
-}
-
-/** 停止定期备份 */
-export function stopPeriodicBackup(): void {
-  if (backupInterval) {
-    clearInterval(backupInterval)
-    backupInterval = null
-  }
 }
