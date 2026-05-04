@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { getEvents, saveEvents } from '@/utils/storage'
 import { filterByTimeRange, getMonthStart, getRecentDays } from '@/utils/time'
-import { recordChange } from '@/utils/syncManager'
 
 export interface EventData {
   id: string
@@ -230,7 +229,6 @@ export const useEventStore = defineStore('event', {
       }
       this.events.push(newEvent)
       this.saveToStorage()
-      recordChange('event', 'create', newEvent)
     },
 
     /**
@@ -242,7 +240,6 @@ export const useEventStore = defineStore('event', {
       if (index !== -1) {
         this.events.splice(index, 1)
         this.saveToStorage()
-        recordChange('event', 'delete', { id })
       }
     },
 
@@ -256,7 +253,6 @@ export const useEventStore = defineStore('event', {
       if (target) {
         Object.assign(target, event)
         this.saveToStorage()
-        recordChange('event', 'update', target)
       }
     },
 

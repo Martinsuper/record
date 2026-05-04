@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { getAnniversaryCategories, saveAnniversaryCategories } from '@/utils/storage'
 import type { AnniversaryCategory } from '@/utils/storage'
-import { recordChange } from '@/utils/syncManager'
 
 // 预设分类
 const PRESET_CATEGORIES: AnniversaryCategory[] = [
@@ -89,7 +88,6 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
       }
       this.categories.push(newCategory)
       this.saveToStorage()
-      recordChange('category', 'create', newCategory)
       return newCategory
     },
 
@@ -101,7 +99,6 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
       if (target && !target.isPreset) {
         Object.assign(target, data)
         this.saveToStorage()
-        recordChange('category', 'update', target)
       }
     },
 
@@ -113,7 +110,6 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
       if (index !== -1 && !this.categories[index].isPreset) {
         this.categories.splice(index, 1)
         this.saveToStorage()
-        recordChange('category', 'delete', { id })
         return true
       }
       return false

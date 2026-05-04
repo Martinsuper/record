@@ -1,8 +1,5 @@
 <template>
   <view class="page-index" :style="{ '--nav-bar-height': navBarHeight + 'px' }">
-    <!-- Sync Status Bar -->
-    <SyncStatusBar />
-
     <!-- Glassmorphism Header -->
     <view class="header glass-card">
       <view class="header-content">
@@ -25,6 +22,67 @@
           <text class="fa-solid">&#xf02b;</text>
         </view>
         <text class="btn-text">类型</text>
+      </view>
+    </view>
+
+    <!-- Stats Overview Card (Collapsible) -->
+    <view class="stats-section">
+      <view class="stats-card glass-card" :class="{ expanded: showStatsDetail }">
+        <view class="stats-header" @click="toggleStats">
+          <view class="stats-summary">
+            <view class="stat-item-mini">
+              <text class="stat-value-mini">{{ totalCount }}</text>
+              <text class="stat-label-mini">总计</text>
+            </view>
+            <view class="stat-divider"></view>
+            <view class="stat-item-mini">
+              <text class="stat-value-mini">{{ monthCount }}</text>
+              <text class="stat-label-mini">本月</text>
+            </view>
+            <view class="stat-divider"></view>
+            <view class="stat-item-mini">
+              <text class="stat-value-mini">{{ typeStats.length }}</text>
+              <text class="stat-label-mini">类型</text>
+            </view>
+          </view>
+          <view class="stats-toggle">
+            <text class="fa-solid">{{ showStatsDetail ? '&#xf077;' : '&#xf078;' }}</text>
+          </view>
+        </view>
+
+        <!-- Expanded Stats Detail -->
+        <view v-if="showStatsDetail" class="stats-detail">
+          <!-- Type distribution -->
+          <view class="type-stats-section">
+            <text class="stats-subtitle">类型分布</text>
+            <view v-if="typeStats.length === 0" class="empty-stats">
+              <text class="empty-text">暂无数据</text>
+            </view>
+            <view v-else class="type-stats-mini">
+              <view v-for="stat in typeStats.slice(0, 5)" :key="stat.typeId" class="type-stat-row">
+                <view class="type-badge" :style="{ backgroundColor: stat.color }"></view>
+                <text class="type-name-mini">{{ stat.name }}</text>
+                <view class="stat-bar-mini">
+                  <view class="stat-bar-fill" :style="{ width: stat.percent + '%', backgroundColor: stat.color }"></view>
+                </view>
+                <text class="type-count-mini">{{ stat.count }}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- Recent 7 days -->
+          <view class="trend-section">
+            <text class="stats-subtitle">近7天</text>
+            <view class="trend-mini-chart">
+              <view v-for="(day, index) in recentStats" :key="index" class="trend-bar-item">
+                <view class="trend-bar" :style="{ height: getBarHeight(day.count) + 'px' }">
+                  <text v-if="day.count > 0" class="bar-count">{{ day.count }}</text>
+                </view>
+                <text class="trend-label">{{ day.label }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -89,11 +147,49 @@ import EventForm from '@/components/EventForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import TypeManager from '@/components/TypeManager.vue'
 import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
-import SyncStatusBar from '@/components/SyncStatusBar.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 const anniversaryStore = useAnniversaryStore()
+
+// 统计展开状态
+const showStatsDetail = ref(false)
+
+function toggleStats() {
+  showStatsDetail.value = !showStatsDetail.value
+}
+
+// 统计数据
+const totalCount = computed(() => eventStore.totalCount)
+const monthCount = computed(() => eventStore.monthCount)
+const recentStats = computed(() => eventStore.recentDaysStats)
+
+// 类型统计
+const typeStats = computed(() => {
+  const stats = eventStore.statsByType
+  const total = eventStore.totalCount
+
+  return Object.entries(stats)
+    .map(([typeId, count]) => {
+      const type = eventTypeStore.types.find(t => t.id === typeId)
+      return {
+        typeId,
+        name: type?.name || '未分类',
+        color: type?.color || '#999999',
+        count,
+        percent: total > 0 ? Math.round((count / total) * 100) : 0
+      }
+    })
+    .sort((a, b) => b.count - a.count)
+})
+
+// 柱状图高度计算
+const maxCount = computed(() => Math.max(...recentStats.value.map(d => d.count), 1))
+
+function getBarHeight(count: number): number {
+  if (maxCount.value === 0) return 0
+  return Math.round((count / maxCount.value) * 32)
+}
 
 // 即将到来的纪念日列表
 const upcomingAnniversaries = computed(() => {
@@ -148,7 +244,7 @@ function onReminderNavigate(_id: string) {
 <style lang="scss" scoped>
 .page-index {
   min-height: 100vh;
-  padding-bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-lg);
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom) + $spacing-lg);
 
   .header {
     margin: $spacing-lg $spacing-md;
@@ -279,6 +375,179 @@ function onReminderNavigate(_id: string) {
     }
   }
 
+  // 统计卡片
+  .stats-section {
+    padding: $spacing-sm $spacing-md;
+
+    .stats-card {
+      padding: $spacing-md;
+      transition: all $transition-normal;
+
+      .stats-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .stats-summary {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+
+          .stat-item-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .stat-value-mini {
+              font-size: 32rpx;
+              font-weight: 700;
+              color: $accent-indigo;
+            }
+
+            .stat-label-mini {
+              font-size: 22rpx;
+              color: $text-muted;
+            }
+          }
+
+          .stat-divider {
+            width: 1px;
+            height: 40rpx;
+            background: $border-color;
+          }
+        }
+
+        .stats-toggle {
+          width: 40rpx;
+          height: 40rpx;
+          border-radius: $radius-full;
+          background: rgba(99, 102, 241, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .fa-solid {
+            font-size: 16rpx;
+            color: $text-secondary;
+          }
+        }
+      }
+
+      .stats-detail {
+        margin-top: $spacing-md;
+        padding-top: $spacing-md;
+        border-top: 1px solid $border-color;
+
+        .stats-subtitle {
+          font-size: 26rpx;
+          font-weight: 600;
+          color: $text-primary;
+          margin-bottom: $spacing-sm;
+          display: block;
+        }
+
+        .type-stats-section {
+          margin-bottom: $spacing-md;
+
+          .empty-stats {
+            padding: $spacing-sm;
+            text-align: center;
+
+            .empty-text {
+              font-size: 24rpx;
+              color: $text-muted;
+            }
+          }
+
+          .type-stats-mini {
+            .type-stat-row {
+              display: flex;
+              align-items: center;
+              gap: $spacing-sm;
+              margin-bottom: $spacing-xs;
+
+              .type-badge {
+                width: 24rpx;
+                height: 24rpx;
+                border-radius: $radius-sm;
+              }
+
+              .type-name-mini {
+                font-size: 24rpx;
+                color: $text-secondary;
+                min-width: 80rpx;
+              }
+
+              .stat-bar-mini {
+                flex: 1;
+                height: 12rpx;
+                background: rgba(99, 102, 241, 0.1);
+                border-radius: $radius-full;
+                overflow: hidden;
+
+                .stat-bar-fill {
+                  height: 100%;
+                  border-radius: $radius-full;
+                  transition: width $transition-slow;
+                }
+              }
+
+              .type-count-mini {
+                font-size: 24rpx;
+                font-weight: 600;
+                color: $accent-indigo;
+                min-width: 40rpx;
+                text-align: right;
+              }
+            }
+          }
+        }
+
+        .trend-section {
+          .trend-mini-chart {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 60px;
+            padding-top: $spacing-sm;
+
+            .trend-bar-item {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+
+              .trend-bar {
+                width: 24rpx;
+                min-height: 4px;
+                background: $gradient-cool;
+                border-radius: $radius-xs $radius-xs 0 0;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                position: relative;
+
+                .bar-count {
+                  font-size: 18rpx;
+                  font-weight: 600;
+                  color: $text-primary;
+                  position: absolute;
+                  top: -20rpx;
+                }
+              }
+
+              .trend-label {
+                font-size: 20rpx;
+                color: $text-muted;
+                margin-top: 6rpx;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   .filter-section {
     padding: $spacing-sm $spacing-md;
   }
@@ -290,7 +559,7 @@ function onReminderNavigate(_id: string) {
   .add-btn {
     position: fixed;
     right: $spacing-xl;
-    bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-xl);
+    bottom: calc(120rpx + env(safe-area-inset-bottom) + $spacing-xl);
     width: 120rpx;
     height: 120rpx;
     border-radius: $radius-full;

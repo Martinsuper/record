@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { getEventTypes, saveEventTypes } from '@/utils/storage'
-import { recordChange } from '@/utils/syncManager'
 import { useEventStore } from './event'
 
 export interface EventTypeData {
@@ -124,7 +123,6 @@ export const useEventTypeStore = defineStore('eventType', {
       }
       this.types.push(newType)
       this.saveToStorage()
-      recordChange('eventType', 'create', newType)
     },
 
     /**
@@ -136,7 +134,6 @@ export const useEventTypeStore = defineStore('eventType', {
       if (index !== -1) {
         this.types.splice(index, 1)
         this.saveToStorage()
-        recordChange('eventType', 'delete', { id })
 
         // 更新关联事件的 typeId 为空字符串
         const eventStore = useEventStore()
@@ -159,7 +156,6 @@ export const useEventTypeStore = defineStore('eventType', {
       if (type) {
         Object.assign(type, data)
         this.saveToStorage()
-        recordChange('eventType', 'update', type)
       }
     },
 

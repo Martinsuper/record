@@ -5,7 +5,9 @@
       :class="{ active: currentIndex === 0 }"
       @click="switchTab(0)"
     >
-      <text class="fa-solid">&#xf0ae;</text>
+      <view class="tab-icon-wrap">
+        <text class="fa-solid">&#xf0ae;</text>
+      </view>
       <text class="tab-text">事件</text>
     </view>
     <view
@@ -13,23 +15,19 @@
       :class="{ active: currentIndex === 1 }"
       @click="switchTab(1)"
     >
-      <text class="fa-solid">&#xf200;</text>
-      <text class="tab-text">统计</text>
+      <view class="tab-icon-wrap">
+        <text class="fa-solid">&#xf004;</text>
+      </view>
+      <text class="tab-text">纪念日</text>
     </view>
     <view
       class="tab-item"
       :class="{ active: currentIndex === 2 }"
       @click="switchTab(2)"
     >
-      <text class="fa-solid">&#xf004;</text>
-      <text class="tab-text">纪念日</text>
-    </view>
-    <view
-      class="tab-item"
-      :class="{ active: currentIndex === 3 }"
-      @click="switchTab(3)"
-    >
-      <text class="fa-solid">&#xf013;</text>
+      <view class="tab-icon-wrap">
+        <text class="fa-solid">&#xf013;</text>
+      </view>
       <text class="tab-text">设置</text>
     </view>
   </view>
@@ -43,7 +41,6 @@ const currentIndex = ref(0)
 
 const pages = [
   '/pages/index/index',
-  '/pages/stats/stats',
   '/pages/anniversary/anniversary',
   '/pages/settings/settings'
 ]
@@ -54,9 +51,8 @@ function getCurrentPageIndex(): number {
   const currentPage = pageStack[pageStack.length - 1]
   const route = currentPage.route || ''
 
-  if (route === 'pages/stats/stats') return 1
-  if (route === 'pages/anniversary/anniversary') return 2
-  if (route === 'pages/settings/settings') return 3
+  if (route === 'pages/anniversary/anniversary') return 1
+  if (route === 'pages/settings/settings') return 2
   return 0
 }
 
@@ -82,7 +78,7 @@ function switchTab(index: number) {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 100rpx;
+  height: 120rpx;
   padding-bottom: env(safe-area-inset-bottom);
   background: $glass-bg;
   backdrop-filter: blur(20px);
@@ -99,25 +95,42 @@ function switchTab(index: number) {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8rpx;
+    gap: 10rpx;
     padding: 16rpx 0;
     transition: all $transition-fast;
 
-    .fa-solid {
-      font-size: 40rpx;
-      color: $text-muted;
-      transition: color $transition-fast;
+    .tab-icon-wrap {
+      width: 64rpx;
+      height: 64rpx;
+      border-radius: $radius-lg;
+      background: rgba(99, 102, 241, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all $transition-normal;
+
+      .fa-solid {
+        font-size: 28rpx;
+        color: $text-muted;
+        transition: color $transition-fast;
+      }
     }
 
     .tab-text {
-      font-size: 24rpx;
+      font-size: 26rpx;
       color: $text-muted;
       transition: color $transition-fast;
+      font-weight: 500;
     }
 
     &.active {
-      .fa-solid {
-        color: $accent-indigo;
+      .tab-icon-wrap {
+        background: $gradient-primary;
+        box-shadow: 0 8rpx 24rpx rgba(255, 107, 107, 0.25);
+
+        .fa-solid {
+          color: #ffffff;
+        }
       }
 
       .tab-text {
@@ -127,7 +140,8 @@ function switchTab(index: number) {
     }
 
     &:active {
-      opacity: 0.7;
+      opacity: 0.8;
+      transform: scale(0.96);
     }
   }
 }

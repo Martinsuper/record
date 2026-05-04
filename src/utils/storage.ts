@@ -7,16 +7,7 @@ export const STORAGE_KEYS = {
   EVENTS: 'events',
   EVENT_TYPES: 'eventTypes',
   ANNIVERSARIES: 'anniversaries',
-  ANNIVERSARY_CATEGORIES: 'anniversaryCategories',
-  // 新增同步相关
-  SYNC_SHARE_CODE: 'syncShareCode',
-  SYNC_SPACE_ID: 'syncSpaceId',
-  SYNC_DEVICE_ID: 'syncDeviceId',
-  SYNC_LAST_SYNC_TIME: 'syncLastSyncTime',
-  SYNC_ENABLED: 'syncEnabled',
-  SYNC_LAST_VERSION: 'syncLastVersion',
-  PENDING_CHANGES: 'pendingChanges',
-  OFFLINE_QUEUE: 'offlineQueue'
+  ANNIVERSARY_CATEGORIES: 'anniversaryCategories'
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
@@ -183,25 +174,4 @@ export function getAnniversaryCategories(): AnniversaryCategory[] {
  */
 export function saveAnniversaryCategories(categories: AnniversaryCategory[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARY_CATEGORIES, categories)
-}
-
-// 同步状态定义
-export interface SyncState {
-  lastSyncVersion: number
-  lastSyncTime: number
-  syncEnabled: boolean
-}
-
-export function getSyncState(): SyncState {
-  return {
-    lastSyncVersion: getStorage<number>(STORAGE_KEYS.SYNC_LAST_VERSION) || 0,
-    lastSyncTime: getStorage<number>(STORAGE_KEYS.SYNC_LAST_SYNC_TIME) || 0,
-    syncEnabled: getStorage<boolean>(STORAGE_KEYS.SYNC_ENABLED) || false
-  }
-}
-
-export function saveSyncState(state: SyncState): void {
-  setStorage(STORAGE_KEYS.SYNC_LAST_VERSION, state.lastSyncVersion)
-  setStorage(STORAGE_KEYS.SYNC_LAST_SYNC_TIME, state.lastSyncTime)
-  setStorage(STORAGE_KEYS.SYNC_ENABLED, state.syncEnabled)
 }
