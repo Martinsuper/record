@@ -11,7 +11,7 @@
 
     <!-- Stats overview -->
     <view class="overview-section">
-      <view class="stat-card gradient-primary fade-in-up" style="animation-delay: 0.1s">
+      <view class="stat-card gradient-primary">
         <view class="stat-icon">
           <text class="fa-solid">&#xf5fd;</text>
         </view>
@@ -22,7 +22,7 @@
         <view class="stat-glow"></view>
       </view>
 
-      <view class="stat-card gradient-cool fade-in-up" style="animation-delay: 0.2s">
+      <view class="stat-card gradient-cool">
         <view class="stat-icon">
           <text class="fa-solid">&#xf02c;</text>
         </view>
@@ -33,7 +33,7 @@
         <view class="stat-glow"></view>
       </view>
 
-      <view class="stat-card gradient-warm fade-in-up" style="animation-delay: 0.3s">
+      <view class="stat-card gradient-warm">
         <view class="stat-icon">
           <text class="fa-solid">&#xf004;</text>
         </view>
@@ -46,7 +46,7 @@
     </view>
 
     <!-- Export data section -->
-    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.3s">
+    <view class="section-card glass-card">
       <view class="section-header">
         <text class="fa-solid">&#xf56e;</text>
         <text class="section-title">导出数据</text>
@@ -59,7 +59,7 @@
     </view>
 
     <!-- Import data section -->
-    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.4s">
+    <view class="section-card glass-card">
       <view class="section-header">
         <text class="fa-solid">&#xf56f;</text>
         <text class="section-title">导入数据</text>
@@ -72,7 +72,7 @@
     </view>
 
     <!-- Export anniversary data section -->
-    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.5s">
+    <view class="section-card glass-card">
       <view class="section-header">
         <text class="fa-solid">&#xf004;</text>
         <text class="section-title">导出纪念日数据</text>
@@ -85,7 +85,7 @@
     </view>
 
     <!-- Import anniversary data section -->
-    <view class="section-card glass-card fade-in-up" style="animation-delay: 0.6s">
+    <view class="section-card glass-card">
       <view class="section-header">
         <text class="fa-solid">&#xf56f;</text>
         <text class="section-title">导入纪念日数据</text>
