@@ -34,14 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
-// 动态计算导航栏高度
-const navBarHeight = computed(() => {
-  const height = uni.getStorageSync('navBarHeight')
-  return height || 88
-})
+// 导航栏高度
+const { navBarHeight } = useNavBarHeight()
 
 function goToDataManager() {
   uni.navigateTo({

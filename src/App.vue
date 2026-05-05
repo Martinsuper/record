@@ -1,15 +1,22 @@
 <script>
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
+import { useAnniversaryStore } from '@/store/anniversary'
+import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 
 export default {
   onLaunch() {
     console.log('App Launch')
-    // 集中初始化 store 数据
+    // 集中初始化所有 store 数据
     const eventStore = useEventStore()
     const eventTypeStore = useEventTypeStore()
+    const anniversaryStore = useAnniversaryStore()
+    const anniversaryCategoryStore = useAnniversaryCategoryStore()
+
     eventStore.loadFromStorage()
     eventTypeStore.loadFromStorage()
+    anniversaryStore.loadFromStorage()
+    anniversaryCategoryStore.loadFromStorage()
 
     // 小程序环境：计算导航栏高度
     // #ifdef MP-WEIXIN
