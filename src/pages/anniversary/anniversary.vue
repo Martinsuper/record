@@ -335,7 +335,7 @@ function onFormSaved() {
   .add-btn {
     position: fixed;
     right: $spacing-xl;
-    bottom: calc(100rpx + env(safe-area-inset-bottom) + $spacing-xl);
+    bottom: calc(140rpx + env(safe-area-inset-bottom) + $spacing-xl);
     width: 120rpx;
     height: 120rpx;
     border-radius: $radius-full;

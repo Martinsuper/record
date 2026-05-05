@@ -26,9 +26,11 @@
               v-model="eventName"
               placeholder="请输入事件名称"
               border="none"
+              :maxlength="50"
               :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
               :placeholderStyle="{ color: '#9CA3AF' }"
             />
+            <text class="char-count">{{ eventName.length }}/50</text>
           </view>
         </view>
 
@@ -38,7 +40,7 @@
             <text class="fa-solid">&#xf02c;</text>
             <text>事件类型</text>
           </view>
-          <TypePicker v-model="eventTypeId" />
+          <TypePicker v-model="eventTypeId" :showClear="isEditMode" />
         </view>
 
         <!-- Time picker -->
@@ -172,7 +174,23 @@ function onSave() {
 }
 
 function onClose() {
-  emit('close')
+  // 检查是否有输入内容
+  const hasContent = eventName.value.trim() || eventTypeId.value
+  if (hasContent && !props.isEditMode) {
+    // 新建模式下有内容，弹出确认
+    uni.showModal({
+      title: '提示',
+      content: '已输入的内容将会丢失，确定取消吗？',
+      confirmColor: '#6366F1',
+      success: (res) => {
+        if (res.confirm) {
+          emit('close')
+        }
+      }
+    })
+  } else {
+    emit('close')
+  }
 }
 </script>
 
@@ -253,10 +271,19 @@ function onClose() {
         padding: $spacing-md;
         border: 1px solid rgba(99, 102, 241, 0.1);
         transition: all $transition-fast;
+        display: flex;
+        align-items: center;
 
         &:focus-within {
           border-color: $accent-indigo;
           background: rgba(99, 102, 241, 0.08);
+        }
+
+        .char-count {
+          font-size: 24rpx;
+          color: $text-muted;
+          margin-left: $spacing-sm;
+          flex-shrink: 0;
         }
       }
 
@@ -269,6 +296,12 @@ function onClose() {
           padding: $spacing-md;
           border: 1px solid rgba(99, 102, 241, 0.1);
           gap: $spacing-md;
+          transition: all $transition-fast;
+
+          &:active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+          }
 
           .fa-solid {
             font-size: 20rpx;

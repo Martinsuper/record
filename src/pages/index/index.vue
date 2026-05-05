@@ -21,7 +21,7 @@
         <view class="btn-icon-bg">
           <text class="fa-solid">&#xf02b;</text>
         </view>
-        <text class="btn-text">类型</text>
+        <text class="btn-text">管理类型</text>
       </view>
     </view>
 
@@ -129,9 +129,9 @@
     <CustomTabBar />
 
     <!-- Type Manager Popup -->
-    <view v-if="showTypeManager" class="type-manager-overlay">
+    <u-popup :show="showTypeManager" mode="bottom" round="24" @close="showTypeManager = false">
       <TypeManager @close="showTypeManager = false" />
-    </view>
+    </u-popup>
   </view>
 </template>
 
@@ -308,25 +308,25 @@ function onReminderNavigate(_id: string) {
       z-index: 10;
 
       .btn-icon-bg {
-        width: 72rpx;
-        height: 72rpx;
+        width: 88rpx;
+        height: 88rpx;
         border-radius: $radius-lg;
         background: $gradient-primary;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.35);
+        box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.35), 0 0 0 4rpx rgba(99, 102, 241, 0.15);
 
         .fa-solid {
-          font-size: 32rpx;
+          font-size: 38rpx;
           color: #ffffff;
         }
       }
 
       .btn-text {
-        font-size: 22rpx;
+        font-size: 24rpx;
         color: $text-primary;
-        font-weight: 500;
+        font-weight: 600;
         text-shadow: 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
       }
 
@@ -597,7 +597,7 @@ function onReminderNavigate(_id: string) {
   .add-btn {
     position: fixed;
     right: $spacing-xl;
-    bottom: calc(120rpx + env(safe-area-inset-bottom) + $spacing-xl);
+    bottom: calc(140rpx + env(safe-area-inset-bottom) + $spacing-xl);
     width: 120rpx;
     height: 120rpx;
     border-radius: $radius-full;
@@ -620,14 +620,5 @@ function onReminderNavigate(_id: string) {
     }
   }
 
-  .type-manager-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.5);
   }
-}
 </style>

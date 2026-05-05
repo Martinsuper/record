@@ -25,6 +25,7 @@
       class="scroll-container"
       refresher-enabled
       :refresher-triggered="isRefreshing"
+      :scroll-top="scrollTop"
       @refresherrefresh="onRefresh"
       @scrolltolower="onLoadMore"
     >
@@ -49,7 +50,10 @@
                   <text class="fa-solid">&#xf005;</text>
                   <text class="type-name">{{ getTypeName(event.typeId) }}</text>
                 </view>
-                <text class="expand-icon" :class="{ 'rotated': expandedEventId === event.id }">&#xf107;</text>
+                <view class="header-right">
+                  <text v-if="expandedEventId !== event.id" class="action-hint">点击展开</text>
+                  <text class="expand-icon" :class="{ 'rotated': expandedEventId === event.id }">&#xf107;</text>
+                </view>
               </view>
 
               <text class="event-name">{{ event.name }}</text>
@@ -82,9 +86,10 @@
 
         <!-- 加载更多提示 -->
         <view v-if="isLoadingMore" class="loading-more">
+          <u-loading-icon mode="circle" size="20" color="#6366F1" />
           <text class="loading-more-text">加载中...</text>
         </view>
-        <view v-else-if="hasMore === false && filteredEvents.length > 0" class="no-more">
+        <view v-else-if="hasMore === false && filteredEvents.length > 0" class="no-more fade-in">
           <text class="no-more-text">- 没有更多了 -</text>
         </view>
       </view>
@@ -115,6 +120,9 @@ const hasMore = computed(() => eventStore.hasMoreEvents)
 // 加载状态
 const isRefreshing = ref(false)
 const isLoadingMore = ref(false)
+
+// 滚动位置
+const scrollTop = ref(0)
 
 // 展开状态
 const expandedEventId = ref<string | null>(null)
@@ -163,6 +171,7 @@ async function onRefresh() {
   // 模拟短暂延迟，让刷新动画更自然
   await new Promise(resolve => setTimeout(resolve, 300))
   isRefreshing.value = false
+  uni.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
 }
 
 // 上拉加载更多
@@ -182,13 +191,22 @@ function resetScroll() {
   eventStore.resetPagination()
   eventStore.refresh()
   expandedEventId.value = null
+  // 使用 scroll-top 实现平滑滚动到顶部
+  scrollTop.value = 0
 }
 
-// 监听筛选条件变化，重置分页
+// 监听筛选条件变化，重置分页并滚动到顶部
 watch(
   () => eventStore.filterType,
   () => {
     eventStore.resetPagination()
+    scrollTop.value = 0
+    expandedEventId.value = null
+    // 提示筛选结果
+    const count = eventStore.filteredEventsFull.length
+    if (eventStore.filterType) {
+      uni.showToast({ title: `筛选结果：${count}条`, icon: 'none', duration: 1500 })
+    }
   }
 )
 
@@ -196,6 +214,13 @@ watch(
   () => eventStore.filterTimeRange,
   () => {
     eventStore.resetPagination()
+    scrollTop.value = 0
+    expandedEventId.value = null
+    // 提示筛选结果
+    const count = eventStore.filteredEventsFull.length
+    if (eventStore.filterTimeRange !== 'all') {
+      uni.showToast({ title: `筛选结果：${count}条`, icon: 'none', duration: 1500 })
+    }
   }
 )
 
@@ -220,7 +245,7 @@ function handleEdit(event: typeof filteredEvents.value[number]) {
 function handleDelete(event: typeof filteredEvents.value[number]) {
   uni.showModal({
     title: '确认删除',
-    content: '确定要删除这个事件吗？',
+    content: `确定要删除「${event.name}」吗？删除后无法恢复。`,
     confirmColor: '#EF4444',
     success: (res) => {
       if (res.confirm) {
@@ -333,9 +358,10 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
       overflow: visible;
 
       &.expanded {
-        margin-bottom: 0;
+        margin-bottom: $spacing-md;
         z-index: 10;
         box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
 
         .event-card-inner {
           background: rgba(#ffffff, 0.95);
@@ -382,13 +408,24 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
               }
             }
 
-            .expand-icon {
-              font-size: 24rpx;
-              color: $text-secondary;
-              transition: transform 0.3s ease;
+            .header-right {
+              display: flex;
+              align-items: center;
+              gap: $spacing-xs;
 
-              &.rotated {
-                transform: rotate(180deg);
+              .action-hint {
+                font-size: 22rpx;
+                color: $text-muted;
+              }
+
+              .expand-icon {
+                font-size: 24rpx;
+                color: $text-secondary;
+                transition: transform 0.3s ease;
+
+                &.rotated {
+                  transform: rotate(180deg);
+                }
               }
             }
           }
@@ -493,6 +530,7 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: $spacing-sm;
       padding: $spacing-lg;
 
       .loading-more-text {
@@ -512,6 +550,10 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
         color: $text-muted;
       }
     }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
   }
 }
 
@@ -523,6 +565,15 @@ function handleDelete(event: typeof filteredEvents.value[number]) {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

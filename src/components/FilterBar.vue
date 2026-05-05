@@ -5,32 +5,32 @@
       <view
         class="filter-chip"
         :class="{ active: eventStore.filterType }"
-        @click="showTypePicker = true"
       >
         <text class="fa-solid" :class="{ active: eventStore.filterType }">&#xf02c;</text>
-        <text class="chip-text">{{ typeTitle }}</text>
-        <text class="fa-solid">&#xf078;</text>
+        <text class="chip-text" @click="showTypePicker = true">{{ typeTitle }}</text>
+        <text v-if="eventStore.filterType" class="fa-solid clear-icon" @click.stop="selectType(null)">&#xf00d;</text>
+        <text v-else class="fa-solid" @click="showTypePicker = true">&#xf078;</text>
       </view>
 
       <!-- Time range filter -->
       <view
         class="filter-chip"
         :class="{ active: eventStore.filterTimeRange !== 'all' }"
-        @click="showTimePicker = true"
       >
         <text class="fa-solid" :class="{ active: eventStore.filterTimeRange !== 'all' }">&#xf017;</text>
-        <text class="chip-text">{{ timeRangeTitle }}</text>
-        <text class="fa-solid">&#xf078;</text>
+        <text class="chip-text" @click="showTimePicker = true">{{ timeRangeTitle }}</text>
+        <text v-if="eventStore.filterTimeRange !== 'all'" class="fa-solid clear-icon" @click.stop="selectTimeRange('all')">&#xf00d;</text>
+        <text v-else class="fa-solid" @click="showTimePicker = true">&#xf078;</text>
       </view>
 
-      <!-- Clear filters -->
+      <!-- Clear all filters -->
       <view
         v-if="eventStore.filterType || eventStore.filterTimeRange !== 'all'"
         class="clear-btn"
         @click="clearFilters"
       >
         <text class="fa-solid">&#xf00d;</text>
-        <text class="clear-text">清除</text>
+        <text class="clear-text">清除全部</text>
       </view>
     </view>
 
@@ -49,7 +49,7 @@
             :class="{ selected: !eventStore.filterType }"
             @click="selectType(null)"
           >
-            <view class="type-color" style="background: $gradient-primary"></view>
+            <view class="type-color type-color-gradient"></view>
             <text class="picker-item-text">全部类型</text>
             <text v-if="!eventStore.filterType" class="fa-solid">&#xf00c;</text>
           </view>
@@ -196,6 +196,18 @@ function clearFilters() {
         color: $text-primary;
         font-weight: 500;
       }
+
+      .clear-icon {
+        font-size: 14rpx;
+        color: #ffffff;
+        padding: 4rpx;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+
+        &:active {
+          background: rgba(255, 255, 255, 0.5);
+        }
+      }
     }
 
     .clear-btn {
@@ -278,6 +290,10 @@ function clearFilters() {
           height: 36rpx;
           border-radius: $radius-sm;
           margin-right: $spacing-md;
+
+          &.type-color-gradient {
+            background: $gradient-primary;
+          }
         }
 
         .fa-solid {

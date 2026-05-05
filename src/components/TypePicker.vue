@@ -9,7 +9,10 @@
         <text class="type-name">{{ selectedTypeData.name }}</text>
       </view>
       <text v-else class="placeholder">请选择类型</text>
-      <text class="fa-solid arrow-icon">&#xf078;</text>
+      <view v-if="showClear && modelValue" class="clear-btn" @click.stop="clearSelection">
+        <text class="fa-solid">&#xf00d;</text>
+      </view>
+      <text v-else class="fa-solid arrow-icon">&#xf078;</text>
     </view>
 
     <!-- New type button -->
@@ -132,6 +135,10 @@ const props = defineProps({
   modelValue: {
     type: String as () => string | null,
     default: null
+  },
+  showClear: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -200,6 +207,12 @@ function selectColor(color: string) {
   newTypeColor.value = color
 }
 
+// Clear selection
+function clearSelection() {
+  emit('update:modelValue', null)
+  emit('change', null)
+}
+
 // Save new type
 function saveNewType() {
   if (!newTypeName.value.trim()) return
@@ -218,7 +231,9 @@ function saveNewType() {
     emit('change', addedType.id)
   }
 
-  closeNewTypePopup()
+  // 关闭新建弹窗，保持选择弹窗打开以便用户确认选择
+  showNewTypePopup.value = false
+  showPicker.value = true
   uni.showToast({ title: '类型已创建', icon: 'success' })
 }
 </script>
@@ -292,6 +307,27 @@ function saveNewType() {
       color: $text-secondary;
       flex-shrink: 0;
       margin-left: $spacing-xs;
+    }
+
+    .clear-btn {
+      width: 40rpx;
+      height: 40rpx;
+      border-radius: $radius-full;
+      background: rgba($uni-color-error, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: $spacing-xs;
+
+      .fa-solid {
+        font-size: 14rpx;
+        color: $uni-color-error;
+      }
+
+      &:active {
+        background: rgba($uni-color-error, 0.25);
+      }
     }
   }
 
