@@ -100,9 +100,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAnniversaryStore } from '@/store/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
+import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import AnniversaryCard from '@/components/AnniversaryCard.vue'
 import AnniversaryForm from '@/components/AnniversaryForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
@@ -136,23 +137,13 @@ function onFilterChange(categoryId: string | null) {
   anniversaryStore.setCategoryFilter(categoryId)
 }
 
-// 动态计算导航栏高度
-const navBarHeight = computed(() => {
-  const height = uni.getStorageSync('navBarHeight')
-  return height || 88
-})
-
+// 导航栏高度
+const { navBarHeight } = useNavBarHeight()
 
 // 表单状态
 const showForm = ref(false)
 const showEditForm = ref(false)
 const editingAnniversary = ref<{ id: string; name: string; date: number; repeatType: 'none' | 'year' | 'month' | 'week' | 'day'; mode: 'countdown' | 'elapsed'; categoryId: string } | null>(null)
-
-// 加载数据
-onMounted(() => {
-  anniversaryStore.loadFromStorage()
-  categoryStore.loadFromStorage()
-})
 
 function onCardClick(id: string) {
   const anniversary = anniversaryStore.getAnniversaryById(id)

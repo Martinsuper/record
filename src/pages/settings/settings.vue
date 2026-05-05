@@ -39,18 +39,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
+import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import type { MenuItemConfig } from '@/utils/storage'
 
 const menuConfigStore = useMenuConfigStore()
 
-// 动态计算导航栏高度
-const navBarHeight = computed(() => {
-  const height = uni.getStorageSync('navBarHeight')
-  return height || 88
-})
+// 导航栏高度
+const { navBarHeight } = useNavBarHeight()
 
 // 加载菜单配置
 onMounted(() => {

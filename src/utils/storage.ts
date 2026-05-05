@@ -16,8 +16,6 @@ export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
 
 /**
  * 获取存储数据
- * @param key 存储键名
- * @returns 存储的数据，不存在返回 null
  */
 export function getStorage<T = unknown>(key: string): T | null {
   try {
@@ -31,8 +29,6 @@ export function getStorage<T = unknown>(key: string): T | null {
 
 /**
  * 设置存储数据
- * @param key 存储键名
- * @param value 要存储的数据
  */
 export function setStorage<T = unknown>(key: string, value: T): void {
   try {
@@ -44,7 +40,6 @@ export function setStorage<T = unknown>(key: string, value: T): void {
 
 /**
  * 删除存储数据
- * @param key 存储键名
  */
 export function removeStorage(key: string): void {
   try {
@@ -65,115 +60,78 @@ export function clearAllStorage(): void {
   }
 }
 
-// 事件类型定义
+// ========== 事件相关类型 ==========
+
 export interface TimelineEvent {
   id: string
   name: string
-  description?: string
-  time: string
-  typeId?: string
-  createdAt: string
-  updatedAt: string
+  typeId: string
+  time: number
+  createdAt: number
+  updatedAt: number
   version: number
-  deleted: boolean
 }
 
 export interface EventType {
   id: string
   name: string
   color: string
-  icon?: string
-  createdAt?: number
+  createdAt: number
   version: number
-  deleted: boolean
 }
 
-/**
- * 获取事件列表
- * @returns 事件数组
- */
 export function getEvents(): TimelineEvent[] {
   return getStorage<TimelineEvent[]>(STORAGE_KEYS.EVENTS) || []
 }
 
-/**
- * 保存事件列表
- * @param events 事件数组
- */
 export function saveEvents(events: TimelineEvent[]): void {
   setStorage(STORAGE_KEYS.EVENTS, events)
 }
 
-/**
- * 获取事件类型列表
- * @returns 类型数组
- */
 export function getEventTypes(): EventType[] {
   return getStorage<EventType[]>(STORAGE_KEYS.EVENT_TYPES) || []
 }
 
-/**
- * 保存事件类型列表
- * @param types 类型数组
- */
 export function saveEventTypes(types: EventType[]): void {
   setStorage(STORAGE_KEYS.EVENT_TYPES, types)
 }
 
-// 纪念日类型定义
+// ========== 纪念日相关类型 ==========
+
 export interface AnniversaryData {
   id: string
   name: string
   date: number
   repeatType: 'none' | 'year' | 'month' | 'week' | 'day'
-  mode: 'countdown' | 'elapsed'  // 倒计时 | 正计时
+  mode: 'countdown' | 'elapsed'
   categoryId: string
   sortOrder: number
   createdAt: number
   updatedAt: number
   version: number
-  deleted: boolean
 }
 
-// 纪念日分类类型定义
 export interface AnniversaryCategory {
   id: string
   name: string
-  icon: string         // Font Awesome 图标编码
-  isPreset: boolean    // 是否为预设分类
-  sortOrder: number    // 排序权重
+  icon: string
+  isPreset: boolean
+  sortOrder: number
   version: number
-  deleted: boolean
 }
 
-/**
- * 获取纪念日列表
- * @returns 纪念日数组
- */
 export function getAnniversaries(): AnniversaryData[] {
   return getStorage<AnniversaryData[]>(STORAGE_KEYS.ANNIVERSARIES) || []
 }
 
-/**
- * 保存纪念日列表
- * @param anniversaries 纪念日数组
- */
 export function saveAnniversaries(anniversaries: AnniversaryData[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARIES, anniversaries)
 }
 
-/**
- * 获取纪念日分类列表
- * @returns 分类数组
- */
 export function getAnniversaryCategories(): AnniversaryCategory[] {
   return getStorage<AnniversaryCategory[]>(STORAGE_KEYS.ANNIVERSARY_CATEGORIES) || []
 }
 
-/**
- * 保存纪念日分类列表
- * @param categories 分类数组
- */
 export function saveAnniversaryCategories(categories: AnniversaryCategory[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARY_CATEGORIES, categories)
 }

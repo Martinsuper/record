@@ -137,12 +137,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import { getUpcomingAnniversaries } from '@/utils/anniversary'
+import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import FilterBar from '@/components/FilterBar.vue'
 import EventList from '@/components/EventList.vue'
 import EventForm from '@/components/EventForm.vue'
@@ -244,16 +244,8 @@ const upcomingAnniversaries = computed(() => {
 
 const showReminder = ref(true)
 
-// 页面加载时初始化数据
-onMounted(() => {
-  anniversaryStore.loadFromStorage()
-})
-
-// 动态计算导航栏高度
-const navBarHeight = computed(() => {
-  const height = uni.getStorageSync('navBarHeight')
-  return height || 88 // 默认值
-})
+// 导航栏高度
+const { navBarHeight } = useNavBarHeight()
 
 const eventListRef = ref<InstanceType<typeof EventList> | null>(null)
 

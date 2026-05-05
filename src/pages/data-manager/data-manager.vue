@@ -169,6 +169,7 @@ import { useEventTypeStore, type EventTypeData } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import type { AnniversaryData, AnniversaryCategory } from '@/utils/storage'
+import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 
 const eventStore = useEventStore()
@@ -176,11 +177,8 @@ const eventTypeStore = useEventTypeStore()
 const anniversaryStore = useAnniversaryStore()
 const categoryStore = useAnniversaryCategoryStore()
 
-// 动态计算导航栏高度
-const navBarHeight = computed(() => {
-  const height = uni.getStorageSync('navBarHeight')
-  return height || 88
-})
+// 导航栏高度
+const { navBarHeight } = useNavBarHeight()
 
 // 数据统计
 const totalEvents = computed(() => eventStore.totalCount)
