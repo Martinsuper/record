@@ -12,15 +12,20 @@
       </view>
     </view>
 
-    <!-- Data management entry -->
-    <view class="section-card glass-card" @click="goToDataManager">
+    <!-- Dynamic feature entries -->
+    <view
+      v-for="item in menuConfigStore.enabledPageItems"
+      :key="item.id"
+      class="section-card glass-card"
+      @click="navigateTo(item)"
+    >
       <view class="section-header">
-        <view class="section-icon gradient-data">
-          <text class="fa-solid">&#xf0e7;</text>
+        <view class="section-icon" :class="getIconClass(item.id)">
+          <text class="fa-solid">{{ item.icon }}</text>
         </view>
         <view class="section-info">
-          <text class="section-title">数据管理</text>
-          <text class="section-desc">导出或导入数据</text>
+          <text class="section-title">{{ item.name }}</text>
+          <text class="section-desc">{{ getDesc(item.id) }}</text>
         </view>
       </view>
       <view class="entry-arrow">
@@ -34,8 +39,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import { useMenuConfigStore } from '@/store/menuConfig'
+import type { MenuItemConfig } from '@/utils/storage'
+
+const menuConfigStore = useMenuConfigStore()
 
 // 动态计算导航栏高度
 const navBarHeight = computed(() => {
@@ -43,10 +52,45 @@ const navBarHeight = computed(() => {
   return height || 88
 })
 
-function goToDataManager() {
+// 加载菜单配置
+onMounted(() => {
+  menuConfigStore.loadFromStorage()
+})
+
+// 导航到页面
+function navigateTo(item: MenuItemConfig) {
+  if (item.path === 'popup') {
+    // 特殊处理：类型管理是弹窗
+    uni.showToast({
+      title: '类型管理请在事件页面操作',
+      icon: 'none',
+      duration: 2000
+    })
+    return
+  }
   uni.navigateTo({
-    url: '/pages/data-manager/data-manager'
+    url: item.path
   })
+}
+
+// 图标样式类
+function getIconClass(id: string): string {
+  const classes: Record<string, string> = {
+    'page_data_manager': 'gradient-data',
+    'page_menu_editor': 'gradient-menu',
+    'page_type_manager': 'gradient-type'
+  }
+  return classes[id] || 'gradient-data'
+}
+
+// 描述文本
+function getDesc(id: string): string {
+  const descs: Record<string, string> = {
+    'page_data_manager': '导出或导入数据',
+    'page_menu_editor': '自定义功能栏',
+    'page_type_manager': '管理事件类型'
+  }
+  return descs[id] || ''
 }
 </script>
 
@@ -136,6 +180,16 @@ function goToDataManager() {
         &.gradient-data {
           background: $gradient-warm;
           box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.3);
+        }
+
+        &.gradient-menu {
+          background: $gradient-aurora;
+          box-shadow: 0 8rpx 24rpx rgba(16, 185, 129, 0.3);
+        }
+
+        &.gradient-type {
+          background: $gradient-cool;
+          box-shadow: 0 8rpx 24rpx rgba(6, 182, 212, 0.3);
         }
       }
 

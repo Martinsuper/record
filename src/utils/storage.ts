@@ -7,7 +7,9 @@ export const STORAGE_KEYS = {
   EVENTS: 'events',
   EVENT_TYPES: 'eventTypes',
   ANNIVERSARIES: 'anniversaries',
-  ANNIVERSARY_CATEGORIES: 'anniversaryCategories'
+  ANNIVERSARY_CATEGORIES: 'anniversaryCategories',
+  MENU_CONFIG: 'menuConfig',
+  FIRST_LAUNCH: 'firstLaunch'
 } as const
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]
@@ -174,4 +176,33 @@ export function getAnniversaryCategories(): AnniversaryCategory[] {
  */
 export function saveAnniversaryCategories(categories: AnniversaryCategory[]): void {
   setStorage(STORAGE_KEYS.ANNIVERSARY_CATEGORIES, categories)
+}
+
+// 菜单配置类型定义
+export interface MenuItemConfig {
+  id: string                  // 唯一标识
+  name: string                // 显示名称
+  icon: string                // Font Awesome 图标 Unicode
+  path: string                // 跳转路径
+  type: 'tab' | 'page'        // tab-底部导航 | page-设置页入口
+  enabled: boolean            // 是否显示
+  sortOrder: number           // 排序权重
+  isPreset: boolean           // 是否预设项（不可删除）
+  version: number             // 数据版本
+}
+
+/**
+ * 获取菜单配置
+ * @returns 菜单配置数组
+ */
+export function getMenuConfig(): MenuItemConfig[] {
+  return getStorage<MenuItemConfig[]>(STORAGE_KEYS.MENU_CONFIG) || []
+}
+
+/**
+ * 保存菜单配置
+ * @param config 菜单配置数组
+ */
+export function saveMenuConfig(config: MenuItemConfig[]): void {
+  setStorage(STORAGE_KEYS.MENU_CONFIG, config)
 }

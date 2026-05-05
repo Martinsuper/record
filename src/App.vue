@@ -1,6 +1,7 @@
 <script>
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
+import { useMenuConfigStore } from '@/store/menuConfig'
 
 export default {
   onLaunch() {
@@ -8,8 +9,10 @@ export default {
     // 集中初始化 store 数据
     const eventStore = useEventStore()
     const eventTypeStore = useEventTypeStore()
+    const menuConfigStore = useMenuConfigStore()
     eventStore.loadFromStorage()
     eventTypeStore.loadFromStorage()
+    menuConfigStore.loadFromStorage()
 
     // 小程序环境：计算导航栏高度
     // #ifdef MP-WEIXIN

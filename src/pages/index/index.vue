@@ -137,9 +137,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
+import { useMenuConfigStore } from '@/store/menuConfig'
 import { getUpcomingAnniversaries } from '@/utils/anniversary'
 import FilterBar from '@/components/FilterBar.vue'
 import EventList from '@/components/EventList.vue'
@@ -151,6 +153,50 @@ import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
 const anniversaryStore = useAnniversaryStore()
+const menuConfigStore = useMenuConfigStore()
+
+// 首次启动检测：跳转到第一个启用的 Tab 菜单
+// 使用 onMounted 确保在 H5 和小程序端都能执行
+onMounted(() => {
+  // 确保 store 已加载
+  menuConfigStore.loadFromStorage()
+
+  // 检测首次启动标记
+  let isFirstLaunch: boolean | string = ''
+  try {
+    isFirstLaunch = uni.getStorageSync('firstLaunch')
+  } catch (e) {
+    console.error('getStorageSync error:', e)
+  }
+
+  if (isFirstLaunch === '' || isFirstLaunch === true || isFirstLaunch === 'true') {
+    // 标记已启动
+    try {
+      uni.setStorageSync('firstLaunch', false)
+    } catch (e) {
+      console.error('setStorageSync error:', e)
+    }
+
+    // 获取第一个启用的 Tab 菜单
+    const firstTab = menuConfigStore.firstEnabledTab
+    const currentPath = '/pages/index/index'
+
+    if (firstTab && firstTab.path && firstTab.path !== currentPath) {
+      // 第一个菜单不是事件页面，跳转过去
+      // #ifdef H5
+      // H5 端使用 replace 避免历史记录问题
+      uni.reLaunch({
+        url: firstTab.path
+      })
+      // #endif
+      // #ifdef MP-WEIXIN
+      uni.reLaunch({
+        url: firstTab.path
+      })
+      // #endif
+    }
+  }
+})
 
 // 统计展开状态
 const showStatsDetail = ref(false)

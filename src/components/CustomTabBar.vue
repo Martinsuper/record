@@ -1,73 +1,54 @@
 <template>
   <view class="custom-tabbar">
     <view
+      v-for="(item, index) in menuConfigStore.enabledTabItems"
+      :key="item.id"
       class="tab-item"
-      :class="{ active: currentIndex === 0 }"
-      @click="switchTab(0)"
+      :class="{ active: currentPath === item.path }"
+      @click="switchTab(item)"
     >
       <view class="tab-icon-wrap">
-        <text class="fa-solid">&#xf0ae;</text>
+        <text class="fa-solid">{{ item.icon }}</text>
       </view>
-      <text class="tab-text">事件</text>
-    </view>
-    <view
-      class="tab-item"
-      :class="{ active: currentIndex === 1 }"
-      @click="switchTab(1)"
-    >
-      <view class="tab-icon-wrap">
-        <text class="fa-solid">&#xf004;</text>
-      </view>
-      <text class="tab-text">纪念日</text>
-    </view>
-    <view
-      class="tab-item"
-      :class="{ active: currentIndex === 2 }"
-      @click="switchTab(2)"
-    >
-      <view class="tab-icon-wrap">
-        <text class="fa-solid">&#xf013;</text>
-      </view>
-      <text class="tab-text">设置</text>
+      <text class="tab-text">{{ item.name }}</text>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { useMenuConfigStore } from '@/store/menuConfig'
+import type { MenuItemConfig } from '@/utils/storage'
 
-const currentIndex = ref(0)
+const menuConfigStore = useMenuConfigStore()
+const currentPath = ref('')
 
-const pages = [
-  '/pages/index/index',
-  '/pages/anniversary/anniversary',
-  '/pages/settings/settings'
-]
+// 加载菜单配置
+onMounted(() => {
+  menuConfigStore.loadFromStorage()
+})
 
-function getCurrentPageIndex(): number {
+function getCurrentPath(): string {
   const pageStack = getCurrentPages()
-  if (pageStack.length === 0) return 0
+  if (pageStack.length === 0) return ''
   const currentPage = pageStack[pageStack.length - 1]
   const route = currentPage.route || ''
-
-  if (route === 'pages/anniversary/anniversary') return 1
-  if (route === 'pages/settings/settings') return 2
-  return 0
+  return '/' + route
 }
 
-// 初始化时获取当前页面索引
-currentIndex.value = getCurrentPageIndex()
+// 初始化时获取当前页面路径
+currentPath.value = getCurrentPath()
 
 // 每次页面显示时更新高亮状态
 onShow(() => {
-  currentIndex.value = getCurrentPageIndex()
+  currentPath.value = getCurrentPath()
 })
 
-function switchTab(index: number) {
-  currentIndex.value = index
+function switchTab(item: MenuItemConfig) {
+  currentPath.value = item.path
   uni.switchTab({
-    url: pages[index]
+    url: item.path
   })
 }
 </script>

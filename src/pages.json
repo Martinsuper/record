@@ -41,6 +41,15 @@
 				"navigationBarTextStyle": "black",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/menu-editor/menu-editor",
+			"style": {
+				"navigationBarTitleText": "编辑菜单",
+				"navigationBarBackgroundColor": "#FDF4FF",
+				"navigationBarTextStyle": "black",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {
