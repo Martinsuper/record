@@ -4,13 +4,13 @@ import { getMenuConfig, saveMenuConfig, type MenuItemConfig } from '@/utils/stor
 // 预设菜单项
 const PRESET_MENU_ITEMS: MenuItemConfig[] = [
   // Tab 类型（底部导航栏）
-  { id: 'tab_events', name: '事件', icon: '', path: '/pages/index/index', type: 'tab', enabled: true, sortOrder: 1, isPreset: true, version: 1 },
-  { id: 'tab_anniversary', name: '纪念日', icon: '', path: '/pages/anniversary/anniversary', type: 'tab', enabled: true, sortOrder: 2, isPreset: true, version: 1 },
-  { id: 'tab_settings', name: '设置', icon: '', path: '/pages/settings/settings', type: 'tab', enabled: true, sortOrder: 3, isPreset: true, version: 1 },
+  { id: 'tab_events', name: '事件', icon: 'list-check', path: '/pages/index/index', type: 'tab', enabled: true, sortOrder: 1, isPreset: true, version: 1 },
+  { id: 'tab_anniversary', name: '纪念日', icon: 'heart', path: '/pages/anniversary/anniversary', type: 'tab', enabled: true, sortOrder: 2, isPreset: true, version: 1 },
+  { id: 'tab_settings', name: '设置', icon: 'cog', path: '/pages/settings/settings', type: 'tab', enabled: true, sortOrder: 3, isPreset: true, version: 1 },
   // Page 类型（设置页入口）
-  { id: 'page_data_manager', name: '数据管理', icon: '', path: '/pages/data-manager/data-manager', type: 'page', enabled: true, sortOrder: 1, isPreset: true, version: 1 },
-  { id: 'page_menu_editor', name: '编辑菜单', icon: '', path: '/pages/menu-editor/menu-editor', type: 'page', enabled: true, sortOrder: 2, isPreset: true, version: 1 },
-  { id: 'page_type_manager', name: '类型管理', icon: '', path: 'popup', type: 'page', enabled: true, sortOrder: 3, isPreset: true, version: 1 }
+  { id: 'page_data_manager', name: '数据管理', icon: 'database', path: '/pages/data-manager/data-manager', type: 'page', enabled: true, sortOrder: 1, isPreset: true, version: 1 },
+  { id: 'page_menu_editor', name: '编辑菜单', icon: 'bars', path: '/pages/menu-editor/menu-editor', type: 'page', enabled: true, sortOrder: 2, isPreset: true, version: 1 },
+  { id: 'page_type_manager', name: '类型管理', icon: 'tag', path: 'popup', type: 'page', enabled: true, sortOrder: 3, isPreset: true, version: 1 }
 ]
 
 export const useMenuConfigStore = defineStore('menuConfig', {

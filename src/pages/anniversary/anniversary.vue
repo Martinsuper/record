@@ -4,14 +4,14 @@
     <view class="header">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid">&#xf004;</text>
+        <FaIcon name="heart" size="36rpx" />
         <view class="header-text">
           <text class="header-title">纪念日</text>
           <text class="header-subtitle">记录重要时刻</text>
         </view>
         <!-- 搜索按钮 -->
         <view class="search-btn" @click="toggleSearch">
-          <text class="fa-solid">{{ showSearch ? '&#xf00d;' : '&#xf002;' }}</text>
+          <FaIcon :name="showSearch ? 'times' : 'search'" size="18rpx" />
         </view>
       </view>
     </view>
@@ -19,8 +19,7 @@
     <!-- Search box -->
     <view v-if="showSearch" class="search-section">
       <view class="search-box glass-card">
-        <text class="fa-solid">&#xf002;</text>
-        <u-input
+        <FaIcon name="search" size="18rpx" />
           v-model="searchInput"
           placeholder="请输入纪念日名称"
           border="none"
@@ -53,7 +52,7 @@
     <!-- Anniversary list -->
     <view class="list-section">
       <view v-if="displayAnniversaries.length === 0" class="empty-state">
-        <text class="fa-solid">&#xf004;</text>
+        <FaIcon name="heart" size="36rpx" />
         <text class="empty-text">还没有纪念日</text>
         <text class="empty-hint">点击右下角按钮添加</text>
       </view>
@@ -75,7 +74,7 @@
 
     <!-- Floating add button -->
     <view class="add-btn pulse-glow" @click="showForm = true">
-      <text class="fa-solid">&#xf067;</text>
+      <FaIcon name="plus" size="44rpx" />
     </view>
 
     <!-- Anniversary form popup -->
@@ -107,6 +106,7 @@ import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import AnniversaryCard from '@/components/AnniversaryCard.vue'
 import AnniversaryForm from '@/components/AnniversaryForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 const anniversaryStore = useAnniversaryStore()
 const categoryStore = useAnniversaryCategoryStore()

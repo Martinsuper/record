@@ -6,10 +6,10 @@
         class="filter-chip"
         :class="{ active: eventStore.filterType }"
       >
-        <text class="fa-solid" :class="{ active: eventStore.filterType }">&#xf02c;</text>
+        <FaIcon name="tags" size="16rpx" />
         <text class="chip-text" @click="showTypePicker = true">{{ typeTitle }}</text>
-        <text v-if="eventStore.filterType" class="fa-solid clear-icon" @click.stop="selectType(null)">&#xf00d;</text>
-        <text v-else class="fa-solid" @click="showTypePicker = true">&#xf078;</text>
+        <FaIcon v-if="eventStore.filterType" name="times" size="14rpx" />
+        <FaIcon v-else name="chevron-down" size="16rpx" />
       </view>
 
       <!-- Time range filter -->
@@ -17,10 +17,10 @@
         class="filter-chip"
         :class="{ active: eventStore.filterTimeRange !== 'all' }"
       >
-        <text class="fa-solid" :class="{ active: eventStore.filterTimeRange !== 'all' }">&#xf017;</text>
+        <FaIcon name="clock" size="16rpx" />
         <text class="chip-text" @click="showTimePicker = true">{{ timeRangeTitle }}</text>
-        <text v-if="eventStore.filterTimeRange !== 'all'" class="fa-solid clear-icon" @click.stop="selectTimeRange('all')">&#xf00d;</text>
-        <text v-else class="fa-solid" @click="showTimePicker = true">&#xf078;</text>
+        <FaIcon v-if="eventStore.filterTimeRange !== 'all'" name="times" size="14rpx" />
+        <FaIcon v-else name="chevron-down" size="16rpx" />
       </view>
 
       <!-- Clear all filters -->
@@ -29,7 +29,7 @@
         class="clear-btn"
         @click="clearFilters"
       >
-        <text class="fa-solid">&#xf00d;</text>
+        <FaIcon name="times" size="16rpx" />
         <text class="clear-text">清除全部</text>
       </view>
     </view>
@@ -40,7 +40,7 @@
         <view class="picker-header">
           <text class="picker-title">选择类型</text>
           <view class="close-btn" @click="showTypePicker = false">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
           </view>
         </view>
         <scroll-view scroll-y class="picker-list">
@@ -51,7 +51,7 @@
           >
             <view class="type-color type-color-gradient"></view>
             <text class="picker-item-text">全部类型</text>
-            <text v-if="!eventStore.filterType" class="fa-solid">&#xf00c;</text>
+            <FaIcon v-if="!eventStore.filterType" name="check" size="18rpx" />
           </view>
           <view
             v-for="type in eventTypeStore.types"
@@ -62,7 +62,7 @@
           >
             <view class="type-color" :style="{ backgroundColor: type.color }"></view>
             <text class="picker-item-text">{{ type.name }}</text>
-            <text v-if="eventStore.filterType === type.id" class="fa-solid">&#xf00c;</text>
+            <FaIcon v-if="eventStore.filterType === type.id" name="check" size="18rpx" />
           </view>
         </scroll-view>
       </view>
@@ -74,7 +74,7 @@
         <view class="picker-header">
           <text class="picker-title">选择时间范围</text>
           <view class="close-btn" @click="showTimePicker = false">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
           </view>
         </view>
         <view class="picker-list">
@@ -85,9 +85,9 @@
             :class="{ selected: eventStore.filterTimeRange === option.value }"
             @click="selectTimeRange(option.value as TimeRangeFilter)"
           >
-            <text class="fa-solid">{{ option.iconUnicode }}</text>
+            <FaIcon :name="option.iconName" size="18rpx" />
             <text class="picker-item-text">{{ option.label }}</text>
-            <text v-if="eventStore.filterTimeRange === option.value" class="fa-solid">&#xf00c;</text>
+            <FaIcon v-if="eventStore.filterTimeRange === option.value" name="check" size="18rpx" />
           </view>
         </view>
       </view>
@@ -99,6 +99,7 @@
 import { ref, computed } from 'vue'
 import { useEventTypeStore } from '@/store/eventType'
 import { useEventStore, type TimeRangeFilter } from '@/store/event'
+import FaIcon from '@/components/FaIcon.vue'
 
 const eventTypeStore = useEventTypeStore()
 const eventStore = useEventStore()
@@ -106,14 +107,13 @@ const eventStore = useEventStore()
 const showTypePicker = ref(false)
 const showTimePicker = ref(false)
 
-// Time range options with Unicode icons
+// Time range options with FaIcon names
 const timeRangeOptions = [
-  { value: 'all', label: '全部', iconUnicode: '\uf133' },
-  { value: 'today', label: '今天', iconUnicode: '\uf185' },
-  { value: 'week', label: '本周', iconUnicode: '\uf784' },
-  { value: 'month', label: '本月', iconUnicode: '\uf073' }
+  { value: 'all', label: '全部', iconName: 'calendar' },
+  { value: 'today', label: '今天', iconName: 'clock' },
+  { value: 'week', label: '本周', iconName: 'clock' },
+  { value: 'month', label: '本月', iconName: 'calendar' }
 ]
-
 // Time range display mapping
 const timeRangeMap: Record<TimeRangeFilter, string> = {
   all: '全部',

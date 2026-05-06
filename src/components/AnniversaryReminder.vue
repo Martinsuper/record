@@ -2,11 +2,11 @@
   <view v-if="visible && upcomingList.length > 0" class="reminder-card glass-card">
     <view class="reminder-header">
       <view class="header-icon">
-        <text class="fa-solid">&#xf004;</text>
+        <FaIcon name="heart" size="22rpx" />
       </view>
       <text class="header-title">纪念日提醒</text>
       <view class="close-btn" @click="onClose">
-        <text class="fa-solid">&#xf00d;</text>
+        <FaIcon name="times" size="16rpx" />
       </view>
     </view>
 
@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import type { UpcomingAnniversary } from '@/utils/anniversary'
+import FaIcon from '@/components/FaIcon.vue'
 
 const props = defineProps<{
   visible: boolean

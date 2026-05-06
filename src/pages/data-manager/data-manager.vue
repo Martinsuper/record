@@ -4,7 +4,7 @@
     <view class="header">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid">&#xf1c0;</text>
+        <FaIcon name="database" size="32rpx" />
         <text class="header-title">数据管理</text>
       </view>
     </view>
@@ -13,7 +13,7 @@
     <view class="overview-section">
       <view class="stat-card gradient-primary">
         <view class="stat-icon">
-          <text class="fa-solid">&#xf5fd;</text>
+          <FaIcon name="layer-group" size="28rpx" />
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ totalEvents }}</text>
@@ -24,7 +24,7 @@
 
       <view class="stat-card gradient-cool">
         <view class="stat-icon">
-          <text class="fa-solid">&#xf02c;</text>
+          <FaIcon name="tags" size="28rpx" />
         </view>
         <view class="stat-content">
           <text class="stat-value">{{ totalTypes }}</text>
@@ -35,10 +35,7 @@
 
       <view class="stat-card gradient-warm">
         <view class="stat-icon">
-          <text class="fa-solid">&#xf004;</text>
-        </view>
-        <view class="stat-content">
-          <text class="stat-value">{{ totalAnniversaries }}</text>
+          <FaIcon name="heart" size="28rpx" />
           <text class="stat-label">纪念日</text>
         </view>
         <view class="stat-glow"></view>
@@ -48,12 +45,12 @@
     <!-- Export data section -->
     <view class="section-card glass-card">
       <view class="section-header">
-        <text class="fa-solid">&#xf56e;</text>
+        <FaIcon name="file-export" size="20rpx" />
         <text class="section-title">导出数据</text>
       </view>
       <text class="section-desc">将当前所有数据导出为 JSON 格式，并复制到剪贴板</text>
       <button class="action-btn gradient-btn" @click="handleExport">
-        <text class="fa-solid">&#xf093;</text>
+        <FaIcon name="upload" size="28rpx" />
         <text class="btn-text">导出数据</text>
       </button>
     </view>
@@ -61,12 +58,12 @@
     <!-- Import data section -->
     <view class="section-card glass-card">
       <view class="section-header">
-        <text class="fa-solid">&#xf56f;</text>
+        <FaIcon name="file-import" size="20rpx" />
         <text class="section-title">导入数据</text>
       </view>
       <text class="section-desc">从剪贴板导入 JSON 格式数据，将合并到现有数据中</text>
       <button class="action-btn gradient-btn" @click="handleImport">
-        <text class="fa-solid">&#xf093;</text>
+        <FaIcon name="upload" size="28rpx" />
         <text class="btn-text">导入数据</text>
       </button>
     </view>
@@ -74,12 +71,12 @@
     <!-- Export anniversary data section -->
     <view class="section-card glass-card">
       <view class="section-header">
-        <text class="fa-solid">&#xf004;</text>
+        <FaIcon name="heart" size="20rpx" />
         <text class="section-title">导出纪念日数据</text>
       </view>
       <text class="section-desc">将纪念日和分类数据导出为 JSON 格式，并复制到剪贴板</text>
       <button class="action-btn gradient-btn" @click="handleExportAnniversaries">
-        <text class="fa-solid">&#xf093;</text>
+        <FaIcon name="upload" size="28rpx" />
         <text class="btn-text">导出纪念日数据</text>
       </button>
     </view>
@@ -87,12 +84,12 @@
     <!-- Import anniversary data section -->
     <view class="section-card glass-card">
       <view class="section-header">
-        <text class="fa-solid">&#xf56f;</text>
+        <FaIcon name="file-import" size="20rpx" />
         <text class="section-title">导入纪念日数据</text>
       </view>
       <text class="section-desc">从剪贴板导入纪念日 JSON 数据，将合并到现有数据中</text>
       <button class="action-btn gradient-btn" @click="handleImportAnniversaries">
-        <text class="fa-solid">&#xf093;</text>
+        <FaIcon name="upload" size="28rpx" />
         <text class="btn-text">导入纪念日数据</text>
       </button>
     </view>
@@ -101,7 +98,7 @@
     <view v-if="showPreview" class="dialog-overlay" @click="closePreview">
       <view class="dialog-content" @click.stop>
         <view class="dialog-header">
-          <text class="fa-solid">&#xf06e;</text>
+          <FaIcon name="eye" size="28rpx" />
           <text class="dialog-title">导入预览</text>
         </view>
         <view class="dialog-body">
@@ -116,11 +113,11 @@
         </view>
         <view class="dialog-footer">
           <button class="dialog-btn dialog-btn-cancel" @click="closePreview">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
             <text class="btn-text">取消</text>
           </button>
           <button class="dialog-btn dialog-btn-confirm gradient-btn" @click="confirmImport">
-            <text class="fa-solid">&#xf00c;</text>
+            <FaIcon name="check" size="18rpx" />
             <text class="btn-text">确认导入</text>
           </button>
         </view>
@@ -131,7 +128,7 @@
     <view v-if="showAnniversaryPreview" class="dialog-overlay" @click="closeAnniversaryPreview">
       <view class="dialog-content" @click.stop>
         <view class="dialog-header">
-          <text class="fa-solid">&#xf06e;</text>
+          <FaIcon name="eye" size="28rpx" />
           <text class="dialog-title">纪念日导入预览</text>
         </view>
         <view class="dialog-body">
@@ -146,11 +143,11 @@
         </view>
         <view class="dialog-footer">
           <button class="dialog-btn dialog-btn-cancel" @click="closeAnniversaryPreview">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
             <text class="btn-text">取消</text>
           </button>
           <button class="dialog-btn dialog-btn-confirm gradient-btn" @click="confirmAnniversaryImport">
-            <text class="fa-solid">&#xf00c;</text>
+            <FaIcon name="check" size="18rpx" />
             <text class="btn-text">确认导入</text>
           </button>
         </view>
@@ -171,6 +168,7 @@ import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import type { AnniversaryData, AnniversaryCategory } from '@/utils/storage'
 import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()

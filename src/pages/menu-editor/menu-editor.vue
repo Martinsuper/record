@@ -4,7 +4,7 @@
     <view class="header">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid">&#xf0c9;</text>
+        <FaIcon name="bars" size="36rpx" />
         <view class="header-text">
           <text class="header-title">编辑菜单</text>
           <text class="header-subtitle">自定义你的功能栏</text>
@@ -14,14 +14,14 @@
 
     <!-- Tip -->
     <view class="tip-card glass-card">
-      <text class="fa-solid">&#xf05a;</text>
+      <FaIcon name="info-circle" size="24rpx" />
       <text class="tip-text">长按拖拽调整顺序，点击开关显示/隐藏</text>
     </view>
 
     <!-- Tab Menu Section -->
     <view class="menu-section">
       <view class="section-title">
-        <text class="fa-solid">&#xf0ae;</text>
+        <FaIcon name="list-check" size="24rpx" />
         <text>底部导航栏</text>
         <text class="section-count">{{ menuConfigStore.enabledTabCount }}/{{ menuConfigStore.allTabItems.length }}</text>
       </view>
@@ -36,11 +36,11 @@
           @touchend="onTouchEnd('tab')"
         >
           <view class="drag-handle">
-            <text class="fa-solid">&#xf0dc;</text>
+            <FaIcon name="grip-vertical" size="24rpx" />
           </view>
           <view class="item-content">
             <view class="item-icon" :class="getIconClass(item.id)">
-              <text class="fa-solid">{{ item.icon }}</text>
+              <FaIcon :name="item.icon" size="24rpx" />
             </view>
             <text class="item-name">{{ item.name }}</text>
           </view>
@@ -59,7 +59,7 @@
     <!-- Page Menu Section -->
     <view class="menu-section">
       <view class="section-title">
-        <text class="fa-solid">&#xf0e7;</text>
+        <FaIcon name="undo" size="24rpx" />
         <text>功能入口</text>
         <text class="section-count">{{ menuConfigStore.enabledPageItems.length }}/{{ menuConfigStore.allPageItems.length }}</text>
       </view>
@@ -74,11 +74,11 @@
           @touchend="onTouchEnd('page')"
         >
           <view class="drag-handle">
-            <text class="fa-solid">&#xf0dc;</text>
+            <FaIcon name="grip-vertical" size="24rpx" />
           </view>
           <view class="item-content">
             <view class="item-icon" :class="getIconClass(item.id)">
-              <text class="fa-solid">{{ item.icon }}</text>
+              <FaIcon :name="item.icon" size="24rpx" />
             </view>
             <text class="item-name">{{ item.name }}</text>
           </view>
@@ -94,7 +94,7 @@
     <!-- Reset Button -->
     <view class="action-section">
       <button class="reset-btn" @click="resetToDefault">
-        <text class="fa-solid">&#xf0e2;</text>
+        <FaIcon name="undo" size="28rpx" />
         <text>重置默认</text>
       </button>
     </view>
@@ -108,6 +108,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import CustomTabBar from '@/components/CustomTabBar.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 const menuConfigStore = useMenuConfigStore()
 

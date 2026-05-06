@@ -29,7 +29,21 @@ export default {
     const mpNavBarHeight = menuButton.bottom + (menuButton.top - statusBarHeight)
     console.log('导航栏高度:', mpNavBarHeight)
     uni.setStorageSync('navBarHeight', mpNavBarHeight)
-    // 注意：小程序不支持本地字体文件加载，使用 CSS unicode 方式显示图标（已在全局样式定义）
+
+    // 动态加载网络字体（Font Awesome）
+    // 注意：需要将字体文件上传到可访问的 CDN 或服务器
+    // 临时方案：使用 GitHub raw 文件（可能有访问限制）
+    uni.loadFontFace({
+      family: 'Font Awesome 6 Free',
+      source: 'url("https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/webfonts/fa-solid-900.ttf")',
+      success: () => {
+        console.log('Font Awesome 加载成功')
+      },
+      fail: (err) => {
+        console.error('Font Awesome 加载失败:', err)
+        // 备用方案：使用本地 CSS Unicode 映射（已在全局样式定义）
+      }
+    })
     // #endif
 
     // #ifdef H5
@@ -139,6 +153,66 @@ text {
 .fa-pen::before { content: '\f304'; }
 .fa-calendar::before { content: '\f133'; }
 .fa-sparkles::before { content: '\f896'; }
+
+/* 补充的图标映射 */
+.fa-search::before { content: '\f002'; }
+.fa-heart::before { content: '\f004'; }
+.fa-cog::before { content: '\f013'; }
+.fa-arrow-right::before { content: '\f061'; }
+.fa-arrow-left::before { content: '\f060'; }
+.fa-envelope::before { content: '\f0e0'; }
+.fa-edit::before { content: '\f044'; }
+.fa-trash::before { content: '\f2ed'; }
+.fa-trash-alt::before { content: '\f2ed'; }
+.fa-calendar-plus::before { content: '\f271'; }
+.fa-download::before { content: '\f019'; }
+.fa-upload::before { content: '\f093'; }
+.fa-bars::before { content: '\f0c9'; }
+.fa-sort::before { content: '\f0dc'; }
+.fa-undo::before { content: '\f0e2'; }
+.fa-magic::before { content: '\f0d0'; }
+.fa-database::before { content: '\f1c0'; }
+.fa-trash-restore::before { content: '\f829'; }
+.fa-archive::before { content: '\f187'; }
+.fa-box::before { content: '\f466'; }
+.fa-save::before { content: '\f0c7'; }
+.fa-file-export::before { content: '\f56e'; }
+.fa-file-import::before { content: '\f56f'; }
+.fa-ellipsis-v::before { content: '\f142'; }
+.fa-eye::before { content: '\f06e'; }
+.fa-eye-slash::before { content: '\f070'; }
+.fa-sync::before { content: '\f021'; }
+.fa-sync-alt::before { content: '\f2f1'; }
+.fa-plus-circle::before { content: '\f055'; }
+.fa-minus-circle::before { content: '\f056'; }
+.fa-times-circle::before { content: '\f057'; }
+.fa-check-circle::before { content: '\f058'; }
+.fa-question-circle::before { content: '\f059'; }
+.fa-info-circle::before { content: '\f05a'; }
+.fa-exclamation-circle::before { content: '\f06a'; }
+.fa-folder::before { content: '\f07b'; }
+.fa-folder-open::before { content: '\f07c'; }
+.fa-tag::before { content: '\f02b'; }
+.fa-copy::before { content: '\f0c5'; }
+.fa-paste::before { content: '\f0ea'; }
+.fa-clipboard::before { content: '\f328'; }
+.fa-filter::before { content: '\f0b0'; }
+.fa-columns::before { content: '\f0db'; }
+.fa-th-list::before { content: '\f00b'; }
+.fa-th-large::before { content: '\f009'; }
+.fa-th::before { content: '\f00a'; }
+.fa-expand::before { content: '\f065'; }
+.fa-compress::before { content: '\f066'; }
+.fa-expand-arrows-alt::before { content: '\f31e'; }
+.fa-compress-arrows-alt::before { content: '\f78c'; }
+.fa-angle-down::before { content: '\f107'; }
+.fa-angle-up::before { content: '\f106'; }
+.fa-angle-left::before { content: '\f104'; }
+.fa-angle-right::before { content: '\f105'; }
+.fa-caret-down::before { content: '\f0d7'; }
+.fa-caret-up::before { content: '\f0d8'; }
+.fa-caret-left::before { content: '\f0d9'; }
+.fa-caret-right::before { content: '\f0da'; }
 
 /* Glass card component */
 .glass-card {

@@ -7,7 +7,7 @@
 
     <view v-else-if="filteredEvents.length === 0" class="empty-state glass-card">
       <view class="empty-icon-wrap">
-        <text class="fa-solid">&#xf01c;</text>
+        <FaIcon name="inbox" size="48rpx" />
       </view>
       <text class="empty-title">暂无事件记录</text>
       <text class="empty-subtitle">点击右下角按钮添加新事件</text>
@@ -47,19 +47,19 @@
             <view class="event-content">
               <view class="event-header">
                 <view class="type-tag" :style="{ backgroundColor: getTypeColor(event.typeId) }">
-                  <text class="fa-solid">&#xf005;</text>
+                  <FaIcon name="star" size="14rpx" />
                   <text class="type-name">{{ getTypeName(event.typeId) }}</text>
                 </view>
                 <view class="header-right">
                   <text v-if="expandedEventId !== event.id" class="action-hint">点击展开</text>
-                  <text class="expand-icon" :class="{ 'rotated': expandedEventId === event.id }">&#xf107;</text>
+                  <FaIcon name="angle-down" size="24rpx" :class="{ 'rotated': expandedEventId === event.id }" />
                 </view>
               </view>
 
               <text class="event-name">{{ event.name }}</text>
 
               <view class="event-time">
-                <text class="fa-solid">&#xf017;</text>
+                <FaIcon name="clock" size="16rpx" />
                 <text class="time-text">{{ formatTime(event.time) }}</text>
               </view>
 
@@ -68,11 +68,11 @@
                 <view class="detail-divider"></view>
                 <view class="detail-actions">
                   <view class="action-btn edit" @click.stop="handleEdit(event)">
-                    <text class="fa-solid">&#xf044;</text>
+                    <FaIcon name="edit" size="28rpx" />
                     <text class="action-text">编辑</text>
                   </view>
                   <view class="action-btn delete" @click.stop="handleDelete(event)">
-                    <text class="fa-solid">&#xf1f8;</text>
+                    <FaIcon name="trash-restore" size="28rpx" />
                     <text class="action-text">删除</text>
                   </view>
                 </view>
@@ -102,6 +102,7 @@ import { computed, ref, watch } from 'vue'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { formatTime } from '@/utils/time'
+import FaIcon from '@/components/FaIcon.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
@@ -171,7 +172,6 @@ async function onRefresh() {
   // 模拟短暂延迟，让刷新动画更自然
   await new Promise(resolve => setTimeout(resolve, 300))
   isRefreshing.value = false
-  uni.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
 }
 
 // 上拉加载更多
@@ -202,10 +202,10 @@ watch(
     eventStore.resetPagination()
     scrollTop.value = 0
     expandedEventId.value = null
-    // 提示筛选结果
+    // 只在筛选结果为空时提示
     const count = eventStore.filteredEventsFull.length
-    if (eventStore.filterType) {
-      uni.showToast({ title: `筛选结果：${count}条`, icon: 'none', duration: 1500 })
+    if (eventStore.filterType && count === 0) {
+      uni.showToast({ title: '没有找到相关事件', icon: 'none', duration: 1500 })
     }
   }
 )
@@ -216,10 +216,10 @@ watch(
     eventStore.resetPagination()
     scrollTop.value = 0
     expandedEventId.value = null
-    // 提示筛选结果
+    // 只在筛选结果为空时提示
     const count = eventStore.filteredEventsFull.length
-    if (eventStore.filterTimeRange !== 'all') {
-      uni.showToast({ title: `筛选结果：${count}条`, icon: 'none', duration: 1500 })
+    if (eventStore.filterTimeRange !== 'all' && count === 0) {
+      uni.showToast({ title: '该时间段没有事件', icon: 'none', duration: 1500 })
     }
   }
 )

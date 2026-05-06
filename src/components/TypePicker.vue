@@ -4,20 +4,20 @@
     <view class="picker-trigger glass-card" @click="openPicker">
       <view v-if="selectedTypeData" class="selected-type">
         <view class="type-badge" :style="{ backgroundColor: selectedTypeData.color }">
-          <text class="fa-solid">&#xf005;</text>
+          <FaIcon name="star" size="18rpx" />
         </view>
         <text class="type-name">{{ selectedTypeData.name }}</text>
       </view>
       <text v-else class="placeholder">请选择类型</text>
       <view v-if="showClear && modelValue" class="clear-btn" @click.stop="clearSelection">
-        <text class="fa-solid">&#xf00d;</text>
+        <FaIcon name="times" size="14rpx" />
       </view>
-      <text v-else class="fa-solid arrow-icon">&#xf078;</text>
+      <FaIcon v-else name="chevron-down" size="16rpx" />
     </view>
 
     <!-- New type button -->
     <view class="new-type-btn" @click="openNewTypePopup">
-      <text class="fa-solid">&#xf067;</text>
+      <FaIcon name="plus" size="26rpx" />
     </view>
 
     <!-- Type picker popup -->
@@ -26,7 +26,7 @@
         <view class="picker-header">
           <text class="picker-title gradient-text">选择类型</text>
           <view class="close-btn" @click="closePicker">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
           </view>
         </view>
         <scroll-view class="picker-content" scroll-y>
@@ -38,19 +38,19 @@
             @click="selectType(type.id)"
           >
             <view class="type-badge" :style="{ backgroundColor: type.color }">
-              <text class="fa-solid">&#xf005;</text>
+              <FaIcon name="star" size="18rpx" />
             </view>
             <text class="type-name">{{ type.name }}</text>
-            <text v-if="modelValue === type.id" class="fa-solid">&#xf00c;</text>
+            <FaIcon v-if="modelValue === type.id" name="check" size="18rpx" />
           </view>
           <view v-if="eventTypeStore.types.length === 0" class="empty-tip">
-            <text class="fa-solid">&#xf01c;</text>
+            <FaIcon name="inbox" size="28rpx" />
             <text>暂无类型，请新建</text>
           </view>
         </scroll-view>
         <view class="picker-footer">
           <view class="add-new-btn" @click="openNewTypePopup">
-            <text class="fa-solid">&#xf067;</text>
+            <FaIcon name="plus" size="18rpx" />
             <text>新建类型</text>
           </view>
         </view>
@@ -62,11 +62,11 @@
       <view class="new-type-popup glass-card">
         <view class="popup-header">
           <view class="header-icon">
-            <text class="fa-solid">&#xf067;</text>
+            <FaIcon name="plus" size="28rpx" />
           </view>
           <text class="popup-title gradient-text">新建类型</text>
           <view class="close-btn" @click="closeNewTypePopup">
-            <text class="fa-solid">&#xf00d;</text>
+            <FaIcon name="times" size="18rpx" />
           </view>
         </view>
 
@@ -96,7 +96,7 @@
                 :style="{ backgroundColor: color.value }"
                 @click="selectColor(color.value)"
               >
-                <text v-if="newTypeColor === color.value" class="fa-solid">&#xf00c;</text>
+                <FaIcon v-if="newTypeColor === color.value" name="check" size="22rpx" />
               </view>
             </view>
           </view>
@@ -106,7 +106,7 @@
             <text class="form-label">预览效果</text>
             <view class="preview-card">
               <view class="type-tag" :style="{ backgroundColor: newTypeColor }">
-                <text class="fa-solid">&#xf005;</text>
+                <FaIcon name="star" size="14rpx" />
                 <text class="tag-name">{{ newTypeName || '类型名称' }}</text>
               </view>
             </view>
@@ -118,7 +118,7 @@
             <text>取消</text>
           </view>
           <view class="btn-save" :class="{ disabled: !newTypeName.trim() }" @click="saveNewType">
-            <text class="fa-solid">&#xf00c;</text>
+            <FaIcon name="check" size="20rpx" />
             <text>保存</text>
           </view>
         </view>
@@ -130,6 +130,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useEventTypeStore } from '@/store/eventType'
+import FaIcon from '@/components/FaIcon.vue'
 
 const props = defineProps({
   modelValue: {

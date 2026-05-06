@@ -5,7 +5,7 @@
       <view class="form-header">
         <text class="form-title">新建分类</text>
         <view class="close-btn" @click="onClose">
-          <text class="fa-solid">&#xf00d;</text>
+          <FaIcon name="times" size="16rpx" />
         </view>
       </view>
 
@@ -62,6 +62,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
+import FaIcon from '@/components/FaIcon.vue'
 
 const props = defineProps<{
   visible: boolean

@@ -8,7 +8,7 @@
       @click="switchTab(item)"
     >
       <view class="tab-icon-wrap">
-        <text class="fa-solid">{{ item.icon }}</text>
+        <FaIcon :name="item.icon" size="28rpx" />
       </view>
       <text class="tab-text">{{ item.name }}</text>
     </view>
@@ -20,6 +20,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import type { MenuItemConfig } from '@/utils/storage'
+import FaIcon from '@/components/FaIcon.vue'
 
 const menuConfigStore = useMenuConfigStore()
 const currentPath = ref('')
@@ -89,12 +90,6 @@ function switchTab(item: MenuItemConfig) {
       align-items: center;
       justify-content: center;
       transition: all $transition-normal;
-
-      .fa-solid {
-        font-size: 28rpx;
-        color: $text-muted;
-        transition: color $transition-fast;
-      }
     }
 
     .tab-text {

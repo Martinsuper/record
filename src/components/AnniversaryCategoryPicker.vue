@@ -5,7 +5,7 @@
       <view class="picker-header">
         <text class="picker-title">选择分类</text>
         <view class="close-btn" @click="onClose">
-          <text class="fa-solid">&#xf00d;</text>
+          <FaIcon name="times" size="16rpx" />
         </view>
       </view>
 
@@ -48,7 +48,7 @@
 
       <!-- Add button -->
       <view class="add-btn" @click="showCategoryForm = true">
-        <text class="fa-solid">&#xf067;</text>
+        <FaIcon name="plus" size="24rpx" />
         <text>新建分类</text>
       </view>
     </view>
@@ -66,6 +66,7 @@
 import { ref, computed, watch } from 'vue'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCategoryForm from './AnniversaryCategoryForm.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 const props = defineProps<{
   visible: boolean

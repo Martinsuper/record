@@ -4,14 +4,14 @@
     <view class="manager-header">
       <text class="manager-title gradient-text">类型管理</text>
       <view class="close-btn" @click="closeManager">
-        <text class="fa-solid">&#xf00d;</text>
+        <FaIcon name="times" size="20rpx" />
       </view>
     </view>
 
     <!-- Type List -->
     <scroll-view class="manager-content" scroll-y @click="closeActionMenu">
       <view v-if="eventTypeStore.types.length === 0" class="empty-tip">
-        <text class="fa-solid">&#xf01c;</text>
+        <FaIcon name="inbox" size="64rpx" />
         <text>暂无类型，请点击右下角新建</text>
       </view>
 
@@ -24,7 +24,7 @@
         @longpress.stop="confirmDelete(type)"
       >
         <view class="type-badge" :style="{ backgroundColor: type.color }">
-          <text class="fa-solid">&#xf005;</text>
+          <FaIcon name="star" size="20rpx" />
         </view>
         <view class="type-info">
           <text class="type-name">{{ type.name }}</text>
@@ -32,15 +32,15 @@
         </view>
         <view class="type-actions">
           <view class="more-btn" @click.stop="toggleActionMenu(type.id)">
-            <text class="fa-solid">&#xf142;</text>
+            <FaIcon name="ellipsis-v" size="20rpx" />
           </view>
           <view v-if="activeActionMenuId === type.id" class="action-menu">
             <view class="menu-item edit" @click="openEditDialog(type)">
-              <text class="fa-solid">&#xf044;</text>
+              <FaIcon name="edit" size="20rpx" />
               <text>编辑</text>
             </view>
             <view class="menu-item delete" @click="confirmDelete(type)">
-              <text class="fa-solid">&#xf2ed;</text>
+              <FaIcon name="trash" size="20rpx" />
               <text>删除</text>
             </view>
           </view>
@@ -51,7 +51,7 @@
     <!-- Footer -->
     <view class="manager-footer">
       <view class="add-btn" @click="openCreateDialog">
-        <text class="fa-solid">&#xf067;</text>
+        <FaIcon name="plus" size="20rpx" />
         <text>新建类型</text>
       </view>
     </view>
@@ -96,7 +96,7 @@
                 :style="{ backgroundColor: color.value }"
                 @click="selectColor(color.value)"
               >
-                <text v-if="formData.color === color.value" class="fa-solid">&#xf00c;</text>
+                <FaIcon v-if="formData.color === color.value" name="check" size="22rpx" />
               </view>
             </view>
           </view>
@@ -106,7 +106,7 @@
             <text class="form-label">预览效果</text>
             <view class="preview-card">
               <view class="type-tag" :style="{ backgroundColor: formData.color }">
-                <text class="fa-solid">&#xf005;</text>
+                <FaIcon name="star" size="16rpx" />
                 <text class="tag-name">{{ formData.name || '类型名称' }}</text>
               </view>
             </view>
@@ -118,7 +118,7 @@
             <text>取消</text>
           </view>
           <view class="btn-save" :class="{ disabled: !formData.name.trim() }" @click="saveType">
-            <text class="fa-solid">&#xf00c;</text>
+            <FaIcon name="check" size="20rpx" />
             <text>保存</text>
           </view>
         </view>
@@ -136,7 +136,7 @@
     >
       <view class="delete-dialog-card">
         <view class="delete-icon-wrapper">
-          <text class="fa-solid">&#xf1f8;</text>
+          <FaIcon name="trash" size="32rpx" />
         </view>
         <text class="delete-title">确认删除</text>
         <text class="delete-desc">
@@ -150,7 +150,7 @@
             <text>取消</text>
           </view>
           <view class="btn-delete" @click="executeDelete">
-            <text class="fa-solid">&#xf2ed;</text>
+            <FaIcon name="trash" size="20rpx" />
             <text>删除</text>
           </view>
         </view>
@@ -163,6 +163,7 @@
 import { ref, computed } from 'vue'
 import { useEventTypeStore } from '@/store/eventType'
 import { useEventStore } from '@/store/event'
+import FaIcon from '@/components/FaIcon.vue'
 
 // 导航栏高度（小程序端需要从胶囊按钮下方开始）
 // 使用同步方式获取，确保渲染前已有正确值
@@ -346,15 +347,7 @@ function executeDelete() {
   box-sizing: border-box;
   background: #ffffff;
   padding-bottom: env(safe-area-inset-bottom);
-
-  /* #ifdef MP-WEIXIN */
-  padding-top: var(--nav-bar-height);
-  height: calc(100vh - var(--nav-bar-height));
-  /* #endif */
-
-  /* #ifndef MP-WEIXIN */
-  height: 100vh;
-  /* #endif */
+  max-height: 80vh;
 }
 
 .manager-header {
@@ -391,6 +384,7 @@ function executeDelete() {
   box-sizing: border-box;
   overflow-y: auto;
   padding: $spacing-lg $spacing-xl;
+  max-height: calc(80vh - 160rpx);
 
   .empty-tip {
     display: flex;

@@ -4,12 +4,12 @@
       <!-- Header -->
       <view class="form-header">
         <view class="header-icon">
-          <text v-if="isEditMode" class="fa-solid">&#xf044;</text>
-          <text v-else class="fa-solid">&#xf067;</text>
+          <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
+          <FaIcon v-else name="plus" size="28rpx" />
         </view>
         <text class="form-title gradient-text">{{ isEditMode ? '编辑纪念日' : '添加纪念日' }}</text>
         <view class="close-btn" @click="onClose">
-          <text class="fa-solid">&#xf00d;</text>
+          <FaIcon name="times" size="18rpx" />
         </view>
       </view>
 
@@ -18,7 +18,7 @@
         <!-- Name -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf304;</text>
+            <FaIcon name="pen" size="16rpx" />
             <text>纪念日名称</text>
           </view>
           <view class="input-wrapper">
@@ -35,19 +35,19 @@
         <!-- Category -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf02b;</text>
+            <FaIcon name="tag" size="16rpx" />
             <text>分类</text>
           </view>
           <view class="category-select" @click="showCategoryPicker = true">
             <text class="category-text">{{ selectedCategoryDisplay }}</text>
-            <text class="fa-solid">&#xf054;</text>
+            <FaIcon name="chevron-right" size="16rpx" />
           </view>
         </view>
 
         <!-- Date -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf133;</text>
+            <FaIcon name="calendar" size="16rpx" />
             <text>目标日期</text>
           </view>
           <view class="date-picker-row">
@@ -61,9 +61,9 @@
               @close="showDatePicker = false"
             />
             <view class="date-display" @click="showDatePicker = true">
-              <text class="fa-solid">&#xf073;</text>
+              <FaIcon name="calendar" size="20rpx" />
               <text class="date-text">{{ formattedDate }}</text>
-              <text class="fa-solid">&#xf054;</text>
+              <FaIcon name="chevron-right" size="20rpx" />
             </view>
           </view>
         </view>
@@ -71,7 +71,7 @@
         <!-- Repeat type -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf01e;</text>
+            <FaIcon name="undo" size="20rpx" />
             <text>重复方式</text>
           </view>
           <view class="repeat-options">
@@ -120,7 +120,7 @@
         <!-- Display mode -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf017;</text>
+            <FaIcon name="clock" size="16rpx" />
             <text>显示模式</text>
           </view>
           <view class="mode-options">
@@ -129,7 +129,7 @@
               :class="{ active: displayMode === 'countdown' }"
               @click="displayMode = 'countdown'"
             >
-              <text class="fa-solid">&#xf061;</text>
+              <FaIcon name="arrow-right" size="16rpx" />
               <text>倒计时</text>
             </view>
             <view
@@ -137,7 +137,7 @@
               :class="{ active: displayMode === 'elapsed' }"
               @click="displayMode = 'elapsed'"
             >
-              <text class="fa-solid">&#xf060;</text>
+              <FaIcon name="arrow-left" size="16rpx" />
               <text>正计时</text>
             </view>
           </view>
@@ -147,14 +147,14 @@
       <!-- Footer -->
       <view class="form-footer">
         <view v-if="isEditMode" class="btn-delete" @click="onDelete">
-          <text class="fa-solid">&#xf2ed;</text>
+          <FaIcon name="trash" size="20rpx" />
           <text>删除</text>
         </view>
         <view class="btn-cancel" @click="onClose">
           <text>取消</text>
         </view>
         <view class="btn-save" @click="onSave">
-          <text class="fa-solid">&#xf00c;</text>
+          <FaIcon name="check" size="20rpx" />
           <text>保存</text>
         </view>
       </view>
@@ -186,6 +186,7 @@ import { useAnniversaryStore } from '@/store/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
 import AnniversaryCategoryPicker from './AnniversaryCategoryPicker.vue'
 import { formatAnniversaryDate } from '@/utils/anniversary'
+import FaIcon from '@/components/FaIcon.vue'
 
 interface EditData {
   id: string

@@ -4,7 +4,7 @@
     <view class="header">
       <view class="header-bg"></view>
       <view class="header-content glass-card">
-        <text class="fa-solid">&#xf013;</text>
+        <FaIcon name="cog" size="36rpx" />
         <view class="header-text">
           <text class="header-title">设置</text>
           <text class="header-subtitle">个性化配置</text>
@@ -21,7 +21,7 @@
     >
       <view class="section-header">
         <view class="section-icon" :class="getIconClass(item.id)">
-          <text class="fa-solid">{{ item.icon }}</text>
+          <FaIcon :name="item.icon" size="24rpx" />
         </view>
         <view class="section-info">
           <text class="section-title">{{ item.name }}</text>
@@ -29,7 +29,7 @@
         </view>
       </view>
       <view class="entry-arrow">
-        <text class="fa-solid">&#xf054;</text>
+        <FaIcon name="chevron-right" size="20rpx" />
       </view>
     </view>
 
@@ -44,6 +44,7 @@ import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import type { MenuItemConfig } from '@/utils/storage'
+import FaIcon from '@/components/FaIcon.vue'
 
 const menuConfigStore = useMenuConfigStore()
 

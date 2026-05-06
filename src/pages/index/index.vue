@@ -4,7 +4,7 @@
     <view class="header glass-card">
       <view class="header-content">
         <view class="header-icon-wrap">
-          <text class="fa-solid">&#xf896;</text>
+          <FaIcon name="sparkles" size="36rpx" />
         </view>
         <view class="header-text">
           <text class="header-title gradient-text">记录时光</text>
@@ -19,7 +19,7 @@
       <!-- Type management entry -->
       <view class="type-manage-btn" @click="showTypeManager = true">
         <view class="btn-icon-bg">
-          <text class="fa-solid">&#xf02b;</text>
+          <FaIcon name="tag" size="38rpx" />
         </view>
         <text class="btn-text">管理类型</text>
       </view>
@@ -46,7 +46,7 @@
             </view>
           </view>
           <view class="stats-toggle">
-            <text class="fa-solid">{{ showStatsDetail ? '&#xf077;' : '&#xf078;' }}</text>
+            <FaIcon :name="showStatsDetail ? 'chevron-up' : 'chevron-down'" size="16rpx" />
           </view>
         </view>
 
@@ -106,7 +106,7 @@
 
     <!-- Floating gradient add button -->
     <view class="add-btn pulse-glow" @click="showEventForm = true">
-      <text class="fa-solid">&#xf067;</text>
+      <FaIcon name="plus" size="44rpx" />
     </view>
 
     <!-- Event form popup -->
@@ -149,6 +149,7 @@ import EventForm from '@/components/EventForm.vue'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import TypeManager from '@/components/TypeManager.vue'
 import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 const eventStore = useEventStore()
 const eventTypeStore = useEventTypeStore()
@@ -304,7 +305,7 @@ function onReminderNavigate(_id: string) {
       flex-direction: column;
       align-items: center;
       gap: 6rpx;
-      padding: $spacing-sm $spacing-md;
+      padding: $spacing-sm $spacing-sm;
       z-index: 10;
 
       .btn-icon-bg {
@@ -328,6 +329,7 @@ function onReminderNavigate(_id: string) {
         color: $text-primary;
         font-weight: 600;
         text-shadow: 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
+        white-space: nowrap;
       }
 
       &:active {

@@ -15,7 +15,7 @@
         <text class="milestone-text">{{ milestoneText }}</text>
       </view>
       <view class="card-date">
-        <text class="fa-solid">&#xf133;</text>
+        <FaIcon name="calendar" size="20rpx" />
         <text class="date-text">{{ formattedDate }}</text>
       </view>
     </view>
@@ -26,6 +26,7 @@
 import { computed } from 'vue'
 import { calculateAnniversary, formatAnniversaryDate, getMilestone } from '@/utils/anniversary'
 import { useAnniversaryCategoryStore } from '@/store/anniversaryCategory'
+import FaIcon from '@/components/FaIcon.vue'
 
 const props = defineProps({
   id: {

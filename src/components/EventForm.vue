@@ -4,12 +4,12 @@
       <!-- Header -->
       <view class="form-header">
         <view class="header-icon">
-          <text v-if="isEditMode" class="fa-solid">&#xf044;</text>
-          <text v-else class="fa-solid">&#xf067;</text>
+          <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
+          <FaIcon v-else name="plus" size="28rpx" />
         </view>
         <text class="form-title gradient-text">{{ isEditMode ? '编辑事件' : '添加事件' }}</text>
         <view class="close-btn" @click="onClose">
-          <text class="fa-solid">&#xf00d;</text>
+          <FaIcon name="times" size="18rpx" />
         </view>
       </view>
 
@@ -18,7 +18,7 @@
         <!-- Event name -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf304;</text>
+            <FaIcon name="pen" size="16rpx" />
             <text>事件名称</text>
           </view>
           <view class="input-wrapper">
@@ -37,7 +37,7 @@
         <!-- Type picker -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf02c;</text>
+            <FaIcon name="tags" size="16rpx" />
             <text>事件类型</text>
           </view>
           <TypePicker v-model="eventTypeId" :showClear="isEditMode" />
@@ -46,7 +46,7 @@
         <!-- Time picker -->
         <view class="form-item">
           <view class="form-label">
-            <text class="fa-solid">&#xf017;</text>
+            <FaIcon name="clock" size="16rpx" />
             <text>事件时间</text>
           </view>
           <view class="time-picker-row">
@@ -60,9 +60,9 @@
               @close="showTimePicker = false"
             />
             <view class="time-display" @click="showTimePicker = true">
-              <text class="fa-solid">&#xf133;</text>
+              <FaIcon name="calendar" size="20rpx" />
               <text class="time-text">{{ formattedTime }}</text>
-              <text class="fa-solid">&#xf054;</text>
+              <FaIcon name="chevron-right" size="20rpx" />
             </view>
           </view>
         </view>
@@ -74,7 +74,7 @@
           <text>取消</text>
         </view>
         <view class="btn-save" @click="onSave">
-          <text class="fa-solid">&#xf00c;</text>
+          <FaIcon name="check" size="20rpx" />
           <text>保存</text>
         </view>
       </view>
@@ -86,6 +86,7 @@
 import { ref, watch, computed } from 'vue'
 import { useEventStore } from '@/store/event'
 import TypePicker from './TypePicker.vue'
+import FaIcon from '@/components/FaIcon.vue'
 
 interface EditData {
   id: string
