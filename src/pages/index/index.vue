@@ -25,67 +25,6 @@
       </view>
     </view>
 
-    <!-- Stats Overview Card (Collapsible) -->
-    <view class="stats-section">
-      <view class="stats-card glass-card" :class="{ expanded: showStatsDetail }">
-        <view class="stats-header" @click="toggleStats">
-          <view class="stats-summary">
-            <view class="stat-item-mini">
-              <text class="stat-value-mini">{{ totalCount }}</text>
-              <text class="stat-label-mini">总计</text>
-            </view>
-            <view class="stat-divider"></view>
-            <view class="stat-item-mini">
-              <text class="stat-value-mini">{{ monthCount }}</text>
-              <text class="stat-label-mini">本月</text>
-            </view>
-            <view class="stat-divider"></view>
-            <view class="stat-item-mini">
-              <text class="stat-value-mini">{{ typeStats.length }}</text>
-              <text class="stat-label-mini">类型</text>
-            </view>
-          </view>
-          <view class="stats-toggle">
-            <FaIcon :name="showStatsDetail ? 'chevron-up' : 'chevron-down'" size="16rpx" />
-          </view>
-        </view>
-
-        <!-- Expanded Stats Detail -->
-        <view v-if="showStatsDetail" class="stats-detail">
-          <!-- Type distribution -->
-          <view class="type-stats-section">
-            <text class="stats-subtitle">类型分布</text>
-            <view v-if="typeStats.length === 0" class="empty-stats">
-              <text class="empty-text">暂无数据</text>
-            </view>
-            <view v-else class="type-stats-mini">
-              <view v-for="stat in typeStats.slice(0, 5)" :key="stat.typeId" class="type-stat-row">
-                <view class="type-badge" :style="{ backgroundColor: stat.color }"></view>
-                <text class="type-name-mini">{{ stat.name }}</text>
-                <view class="stat-bar-mini">
-                  <view class="stat-bar-fill" :style="{ width: stat.percent + '%', backgroundColor: stat.color }"></view>
-                </view>
-                <text class="type-count-mini">{{ stat.count }}</text>
-              </view>
-            </view>
-          </view>
-
-          <!-- Recent 7 days -->
-          <view class="trend-section">
-            <text class="stats-subtitle">近7天</text>
-            <view class="trend-mini-chart">
-              <view v-for="(day, index) in recentStats" :key="index" class="trend-bar-item">
-                <view class="trend-bar" :style="{ height: getBarHeight(day.count) + 'px' }">
-                  <text v-if="day.count > 0" class="bar-count">{{ day.count }}</text>
-                </view>
-                <text class="trend-label">{{ day.label }}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-
     <!-- Anniversary Reminder -->
     <AnniversaryReminder
       :visible="showReminder"
@@ -101,7 +40,7 @@
 
     <!-- Event list -->
     <view class="list-section">
-      <EventList ref="eventListRef" @edit="onEditEvent" />
+      <EventList ref="eventListRef" @edit="onEditEvent" @loadMore="onLoadMore" />
     </view>
 
     <!-- Floating gradient add button -->
@@ -137,6 +76,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
+import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { useEventStore } from '@/store/event'
 import { useEventTypeStore } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
@@ -157,12 +97,9 @@ const anniversaryStore = useAnniversaryStore()
 const menuConfigStore = useMenuConfigStore()
 
 // 首次启动检测：跳转到第一个启用的 Tab 菜单
-// 使用 onMounted 确保在 H5 和小程序端都能执行
 onMounted(() => {
-  // 确保 store 已加载
   menuConfigStore.loadFromStorage()
 
-  // 检测首次启动标记
   let isFirstLaunch: boolean | string = ''
   try {
     isFirstLaunch = uni.getStorageSync('firstLaunch')
@@ -171,72 +108,20 @@ onMounted(() => {
   }
 
   if (isFirstLaunch === '' || isFirstLaunch === true || isFirstLaunch === 'true') {
-    // 标记已启动
     try {
       uni.setStorageSync('firstLaunch', false)
     } catch (e) {
       console.error('setStorageSync error:', e)
     }
 
-    // 获取第一个启用的 Tab 菜单
     const firstTab = menuConfigStore.firstEnabledTab
     const currentPath = '/pages/index/index'
 
     if (firstTab && firstTab.path && firstTab.path !== currentPath) {
-      // 第一个菜单不是事件页面，跳转过去
-      // #ifdef H5
-      // H5 端使用 replace 避免历史记录问题
-      uni.reLaunch({
-        url: firstTab.path
-      })
-      // #endif
-      // #ifdef MP-WEIXIN
-      uni.reLaunch({
-        url: firstTab.path
-      })
-      // #endif
+      uni.reLaunch({ url: firstTab.path })
     }
   }
 })
-
-// 统计展开状态
-const showStatsDetail = ref(false)
-
-function toggleStats() {
-  showStatsDetail.value = !showStatsDetail.value
-}
-
-// 统计数据
-const totalCount = computed(() => eventStore.totalCount)
-const monthCount = computed(() => eventStore.monthCount)
-const recentStats = computed(() => eventStore.recentDaysStats)
-
-// 类型统计
-const typeStats = computed(() => {
-  const stats = eventStore.statsByType
-  const total = eventStore.totalCount
-
-  return Object.entries(stats)
-    .map(([typeId, count]) => {
-      const type = eventTypeStore.types.find(t => t.id === typeId)
-      return {
-        typeId,
-        name: type?.name || '未分类',
-        color: type?.color || '#999999',
-        count,
-        percent: total > 0 ? Math.round((count / total) * 100) : 0
-      }
-    })
-    .sort((a, b) => b.count - a.count)
-})
-
-// 柱状图高度计算
-const maxCount = computed(() => Math.max(...recentStats.value.map(d => d.count), 1))
-
-function getBarHeight(count: number): number {
-  if (maxCount.value === 0) return 0
-  return Math.round((count / maxCount.value) * 32)
-}
 
 // 即将到来的纪念日列表
 const upcomingAnniversaries = computed(() => {
@@ -255,12 +140,26 @@ const showEditForm = ref(false)
 const showTypeManager = ref(false)
 const editingEvent = ref<{ id: string; name: string; typeId: string; time: number } | null>(null)
 
+// 页面下拉刷新
+onPullDownRefresh(() => {
+  eventStore.resetPagination()
+  eventStore.refresh()
+  setTimeout(() => {
+    uni.stopPullDownRefresh()
+  }, 300)
+})
+
+// 页面上拉加载更多
+onReachBottom(() => {
+  if (eventStore.hasMoreEvents) {
+    eventStore.loadMore()
+  }
+})
+
 function onEventSaved() {
   showEventForm.value = false
   showEditForm.value = false
   editingEvent.value = null
-  // 新增事件后滚动到顶部
-  eventListRef.value?.resetScroll()
 }
 
 function onEditEvent(event: { id: string; name: string; typeId: string; time: number }) {
@@ -274,16 +173,18 @@ function onReminderClose() {
 
 function onReminderNavigate(_id: string) {
   showReminder.value = false
-  uni.switchTab({
-    url: '/pages/anniversary/anniversary'
-  })
+  uni.switchTab({ url: '/pages/anniversary/anniversary' })
+}
+
+function onLoadMore() {
+  eventStore.loadMore()
 }
 </script>
 
 <style lang="scss" scoped>
 .page-index {
   min-height: 100vh;
-  padding-bottom: calc(120rpx + env(safe-area-inset-bottom) + $spacing-lg);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom) + $spacing-xl);
 
   .header {
     margin: $spacing-lg $spacing-md;
@@ -305,7 +206,7 @@ function onReminderNavigate(_id: string) {
       flex-direction: column;
       align-items: center;
       gap: 6rpx;
-      padding: $spacing-sm $spacing-sm;
+      padding: $spacing-sm;
       z-index: 10;
 
       .btn-icon-bg {
@@ -316,19 +217,13 @@ function onReminderNavigate(_id: string) {
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.35), 0 0 0 4rpx rgba(99, 102, 241, 0.15);
-
-        .fa-solid {
-          font-size: 38rpx;
-          color: #ffffff;
-        }
+        box-shadow: 0 8rpx 24rpx rgba(99, 102, 241, 0.35);
       }
 
       .btn-text {
         font-size: 24rpx;
         color: $text-primary;
         font-weight: 600;
-        text-shadow: 0 1rpx 2rpx rgba(255, 255, 255, 0.8);
         white-space: nowrap;
       }
 
@@ -353,11 +248,6 @@ function onReminderNavigate(_id: string) {
         align-items: center;
         justify-content: center;
         box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.3);
-
-        .fa-solid {
-          font-size: 36rpx;
-          color: #ffffff;
-        }
       }
 
       .header-text {
@@ -415,179 +305,6 @@ function onReminderNavigate(_id: string) {
     }
   }
 
-  // 统计卡片
-  .stats-section {
-    padding: $spacing-sm $spacing-md;
-
-    .stats-card {
-      padding: $spacing-md;
-      transition: all $transition-normal;
-
-      .stats-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-
-        .stats-summary {
-          display: flex;
-          align-items: center;
-          gap: $spacing-sm;
-
-          .stat-item-mini {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-
-            .stat-value-mini {
-              font-size: 32rpx;
-              font-weight: 700;
-              color: $accent-indigo;
-            }
-
-            .stat-label-mini {
-              font-size: 22rpx;
-              color: $text-muted;
-            }
-          }
-
-          .stat-divider {
-            width: 1px;
-            height: 40rpx;
-            background: $border-color;
-          }
-        }
-
-        .stats-toggle {
-          width: 40rpx;
-          height: 40rpx;
-          border-radius: $radius-full;
-          background: rgba(99, 102, 241, 0.1);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .fa-solid {
-            font-size: 16rpx;
-            color: $text-secondary;
-          }
-        }
-      }
-
-      .stats-detail {
-        margin-top: $spacing-md;
-        padding-top: $spacing-md;
-        border-top: 1px solid $border-color;
-
-        .stats-subtitle {
-          font-size: 26rpx;
-          font-weight: 600;
-          color: $text-primary;
-          margin-bottom: $spacing-sm;
-          display: block;
-        }
-
-        .type-stats-section {
-          margin-bottom: $spacing-md;
-
-          .empty-stats {
-            padding: $spacing-sm;
-            text-align: center;
-
-            .empty-text {
-              font-size: 24rpx;
-              color: $text-muted;
-            }
-          }
-
-          .type-stats-mini {
-            .type-stat-row {
-              display: flex;
-              align-items: center;
-              gap: $spacing-sm;
-              margin-bottom: $spacing-xs;
-
-              .type-badge {
-                width: 24rpx;
-                height: 24rpx;
-                border-radius: $radius-sm;
-              }
-
-              .type-name-mini {
-                font-size: 24rpx;
-                color: $text-secondary;
-                min-width: 80rpx;
-              }
-
-              .stat-bar-mini {
-                flex: 1;
-                height: 12rpx;
-                background: rgba(99, 102, 241, 0.1);
-                border-radius: $radius-full;
-                overflow: hidden;
-
-                .stat-bar-fill {
-                  height: 100%;
-                  border-radius: $radius-full;
-                  transition: width $transition-slow;
-                }
-              }
-
-              .type-count-mini {
-                font-size: 24rpx;
-                font-weight: 600;
-                color: $accent-indigo;
-                min-width: 40rpx;
-                text-align: right;
-              }
-            }
-          }
-        }
-
-        .trend-section {
-          .trend-mini-chart {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            height: 60px;
-            padding-top: $spacing-sm;
-
-            .trend-bar-item {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-
-              .trend-bar {
-                width: 24rpx;
-                min-height: 4px;
-                background: $gradient-cool;
-                border-radius: $radius-xs $radius-xs 0 0;
-                display: flex;
-                align-items: flex-start;
-                justify-content: center;
-                position: relative;
-
-                .bar-count {
-                  font-size: 18rpx;
-                  font-weight: 600;
-                  color: $text-primary;
-                  position: absolute;
-                  top: -20rpx;
-                }
-              }
-
-              .trend-label {
-                font-size: 20rpx;
-                color: $text-muted;
-                margin-top: 6rpx;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
   .filter-section {
     padding: $spacing-sm $spacing-md;
   }
@@ -611,16 +328,10 @@ function onReminderNavigate(_id: string) {
     transition: all $transition-normal;
     z-index: 1000;
 
-    .fa-solid {
-      font-size: 44rpx;
-      color: #ffffff;
-    }
-
     &:active {
       transform: scale(0.92);
       box-shadow: 0 0 30rpx rgba(255, 107, 107, 0.4);
     }
   }
-
-  }
+}
 </style>

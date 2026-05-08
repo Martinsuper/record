@@ -12,7 +12,9 @@
 				"navigationBarTitleText": "我的事件记录",
 				"navigationBarBackgroundColor": "#FDF4FF",
 				"navigationBarTextStyle": "black",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"backgroundTextStyle": "dark"
 			}
 		},
 		{
