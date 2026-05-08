@@ -56,11 +56,40 @@ const iconMap: Record<string, string> = {
   'grip-vertical': '/static/icons/grip-vertical.svg',
   'trash-restore': '/static/icons/trash.svg',
   'list-check': '/static/icons/list-check.svg',
-  'bars': '/static/icons/bars.svg'
+  'bars': '/static/icons/bars.svg',
+  // 分类相关图标
+  'cake': '/static/icons/cake.svg',
+  'cake-candles': '/static/icons/cake-candles.svg',
+  'ring': '/static/icons/ring.svg',
+  'party-horn': '/static/icons/party-horn.svg',
+  'briefcase': '/static/icons/briefcase.svg',
+  'heart-circle-check': '/static/icons/heart-circle-check.svg',
+  'bookmark': '/static/icons/bookmark.svg',
+  'bell': '/static/icons/bell.svg',
+  'gift': '/static/icons/gift.svg',
+  'house': '/static/icons/house.svg'
+}
+
+// Unicode 到图标名称的转换映射（兼容旧数据）
+const unicodeToName: Record<string, string> = {
+  '': 'cake',           // 生日蛋糕
+  '': 'heart',          // 心形
+  '': 'ring',           // 戒指
+  '': 'party-horn',     // 庆祝
+  '': 'briefcase',      // 公文包
+  '': 'calendar',       // 日历
+  '': 'heart-circle-check', // 心形确认
+  '': 'bookmark',       // 书签
+  '': 'star',           // 星星
+  '': 'bell',           // 铃铛
+  '': 'gift',           // 礼物
+  '': 'house'           // 房子
 }
 
 const iconSrc = computed(() => {
-  return iconMap[props.name] || ''
+  // 处理 Unicode 字符（旧数据兼容）
+  const iconName = unicodeToName[props.name] || props.name
+  return iconMap[iconName] || ''
 })
 </script>
 

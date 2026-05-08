@@ -5,14 +5,14 @@ import type { AnniversaryCategory } from '@/utils/storage'
 export type AnniversaryCategoryItem = AnniversaryCategory
 
 const PRESET_CATEGORIES: AnniversaryCategoryItem[] = [
-  { id: 'birthday', name: '生日', icon: '', isPreset: true, sortOrder: 1, version: 1 },
-  { id: 'love', name: '恋爱', icon: '', isPreset: true, sortOrder: 2, version: 1 },
-  { id: 'wedding', name: '结婚', icon: '', isPreset: true, sortOrder: 3, version: 1 },
-  { id: 'festival', name: '节日', icon: '', isPreset: true, sortOrder: 4, version: 1 },
-  { id: 'work', name: '工作', icon: '', isPreset: true, sortOrder: 5, version: 1 },
-  { id: 'onboard', name: '入职', icon: '', isPreset: true, sortOrder: 6, version: 1 },
-  { id: 'memorial', name: '纪念日', icon: '', isPreset: true, sortOrder: 7, version: 1 },
-  { id: 'other', name: '其他', icon: '', isPreset: true, sortOrder: 8, version: 1 }
+  { id: 'birthday', name: '生日', icon: 'cake', isPreset: true, sortOrder: 1, version: 1 },
+  { id: 'love', name: '恋爱', icon: 'heart', isPreset: true, sortOrder: 2, version: 1 },
+  { id: 'wedding', name: '结婚', icon: 'ring', isPreset: true, sortOrder: 3, version: 1 },
+  { id: 'festival', name: '节日', icon: 'party-horn', isPreset: true, sortOrder: 4, version: 1 },
+  { id: 'work', name: '工作', icon: 'briefcase', isPreset: true, sortOrder: 5, version: 1 },
+  { id: 'onboard', name: '入职', icon: 'calendar', isPreset: true, sortOrder: 6, version: 1 },
+  { id: 'memorial', name: '纪念日', icon: 'heart-circle-check', isPreset: true, sortOrder: 7, version: 1 },
+  { id: 'other', name: '其他', icon: 'bookmark', isPreset: true, sortOrder: 8, version: 1 }
 ]
 
 export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {

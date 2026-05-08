@@ -40,7 +40,7 @@
               :class="{ active: selectedIcon === icon.code }"
               @click="selectedIcon = icon.code"
             >
-              <text class="fa-solid">{{ icon.code }}</text>
+              <FaIcon :name="icon.code" size="28rpx" />
             </view>
           </view>
         </view>
@@ -76,29 +76,29 @@ const emit = defineEmits<{
 const categoryStore = useAnniversaryCategoryStore()
 
 const categoryName = ref('')
-const selectedIcon = ref('\uf02d') // 默认书签图标
+const selectedIcon = ref('bookmark') // 默认书签图标
 
 // 可选图标列表
 const availableIcons = [
-  { code: '\uf1fd', name: '生日蛋糕' },
-  { code: '\uf004', name: '心形' },
-  { code: '\uf802', name: '戒指' },
-  { code: '\uf56b', name: '庆祝' },
-  { code: '\uf0b1', name: '公文包' },
-  { code: '\uf073', name: '日历' },
-  { code: '\uf4e3', name: '心形确认' },
-  { code: '\uf02d', name: '书签' },
-  { code: '\uf005', name: '星星' },
-  { code: '\uf0f3', name: '铃铛' },
-  { code: '\uf06b', name: '礼物' },
-  { code: '\uf015', name: '房子' }
+  { code: 'cake', name: '生日蛋糕' },
+  { code: 'heart', name: '心形' },
+  { code: 'ring', name: '戒指' },
+  { code: 'party-horn', name: '庆祝' },
+  { code: 'briefcase', name: '公文包' },
+  { code: 'calendar', name: '日历' },
+  { code: 'heart-circle-check', name: '心形确认' },
+  { code: 'bookmark', name: '书签' },
+  { code: 'star', name: '星星' },
+  { code: 'bell', name: '铃铛' },
+  { code: 'gift', name: '礼物' },
+  { code: 'house', name: '房子' }
 ]
 
 // Reset form when visible changes
 watch(() => props.visible, (val) => {
   if (val) {
     categoryName.value = ''
-    selectedIcon.value = '\uf02d'
+    selectedIcon.value = 'bookmark'
   }
 })
 
@@ -160,11 +160,6 @@ function onSave() {
       display: flex;
       align-items: center;
       justify-content: center;
-
-      .fa-solid {
-        font-size: 16rpx;
-        color: $text-secondary;
-      }
     }
   }
 
@@ -202,18 +197,9 @@ function onSave() {
           justify-content: center;
           transition: all $transition-fast;
 
-          .fa-solid {
-            font-size: 28rpx;
-            color: $text-secondary;
-          }
-
           &.active {
             background: $gradient-cool;
             border-color: transparent;
-
-            .fa-solid {
-              color: #ffffff;
-            }
           }
 
           &:active {

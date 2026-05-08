@@ -11,7 +11,7 @@
         </view>
         <!-- 搜索按钮 -->
         <view class="search-btn" @click="toggleSearch">
-          <FaIcon :name="showSearch ? 'times' : 'search'" size="18rpx" />
+          <FaIcon :name="showSearch ? 'times' : 'search'" size="28rpx" />
         </view>
       </view>
     </view>
@@ -19,7 +19,7 @@
     <!-- Search box -->
     <view v-if="showSearch" class="search-section">
       <view class="search-box glass-card">
-        <FaIcon name="search" size="18rpx" />
+        <FaIcon name="search" size="28rpx" />
           v-model="searchInput"
           placeholder="请输入纪念日名称"
           border="none"
@@ -43,7 +43,7 @@
           :class="{ active: anniversaryStore.selectedCategoryId === category.id }"
           @click="onFilterChange(category.id)"
         >
-          <text class="fa-solid">{{ category.icon }}</text>
+          <FaIcon :name="category.icon" size="28rpx" />
           <text>{{ category.name }}</text>
         </view>
       </scroll-view>

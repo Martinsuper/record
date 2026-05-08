@@ -20,7 +20,7 @@
             :class="{ active: selectedId === category.id }"
             @click="onSelect(category.id)"
           >
-            <text class="fa-solid">{{ category.icon }}</text>
+            <FaIcon :name="category.icon" size="32rpx" />
             <text class="category-name">{{ category.name }}</text>
           </view>
         </view>
@@ -40,7 +40,7 @@
             :class="{ active: selectedId === category.id }"
             @click="onSelect(category.id)"
           >
-            <text class="fa-solid">{{ category.icon }}</text>
+            <FaIcon :name="category.icon" size="32rpx" />
             <text class="category-name">{{ category.name }}</text>
           </view>
         </view>

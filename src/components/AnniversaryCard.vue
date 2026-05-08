@@ -3,7 +3,7 @@
     <view class="card-content">
       <view class="card-header">
         <text class="card-name">{{ name }}</text>
-        <text v-if="categoryIcon" class="fa-solid category-icon">{{ categoryIcon }}</text>
+        <FaIcon v-if="categoryIcon" :name="categoryIcon" size="24rpx" class="category-icon" />
       </view>
       <view class="card-time">
         <text class="time-text" :class="{ 'countdown': isCountdown, 'elapsed': !isCountdown }">
