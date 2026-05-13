@@ -213,6 +213,8 @@ text {
 .fa-caret-up::before { content: '\f0d8'; }
 .fa-caret-left::before { content: '\f0d9'; }
 .fa-caret-right::before { content: '\f0da'; }
+.fa-grip-vertical::before { content: '\f58e'; }
+.fa-bookmark::before { content: '\f02e'; }
 
 /* Glass card component */
 .glass-card {

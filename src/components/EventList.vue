@@ -37,7 +37,10 @@
       </view>
 
       <!-- 加载更多提示 -->
-      <view v-if="!hasMore && filteredEvents.length > 0" class="no-more">
+      <view v-if="hasMore && filteredEvents.length > 0" class="load-more-hint">
+        <text class="load-more-text">上拉加载更多</text>
+      </view>
+      <view v-else-if="!hasMore && filteredEvents.length > 0" class="no-more">
         <text class="no-more-text">- 没有更多了 -</text>
       </view>
     </view>
@@ -243,6 +246,18 @@ function handleEdit(event: typeof filteredEvents.value[number]) {
       padding-bottom: calc($spacing-lg + env(safe-area-inset-bottom));
 
       .no-more-text {
+        font-size: 24rpx;
+        color: $text-muted;
+      }
+    }
+
+    .load-more-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: $spacing-lg;
+
+      .load-more-text {
         font-size: 24rpx;
         color: $text-muted;
       }

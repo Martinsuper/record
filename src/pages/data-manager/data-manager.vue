@@ -36,7 +36,10 @@
       <view class="stat-card gradient-warm">
         <view class="stat-icon">
           <FaIcon name="heart" size="28rpx" />
-          <text class="stat-label">纪念日</text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{ totalAnniversaries }}</text>
+          <text class="stat-label">纪念日总数</text>
         </view>
         <view class="stat-glow"></view>
       </view>
@@ -63,7 +66,7 @@
       </view>
       <text class="section-desc">从剪贴板导入 JSON 格式数据，将合并到现有数据中</text>
       <button class="action-btn gradient-btn" @click="handleImport">
-        <FaIcon name="upload" size="28rpx" />
+        <FaIcon name="download" size="28rpx" />
         <text class="btn-text">导入数据</text>
       </button>
     </view>
@@ -89,7 +92,7 @@
       </view>
       <text class="section-desc">从剪贴板导入纪念日 JSON 数据，将合并到现有数据中</text>
       <button class="action-btn gradient-btn" @click="handleImportAnniversaries">
-        <FaIcon name="upload" size="28rpx" />
+        <FaIcon name="download" size="28rpx" />
         <text class="btn-text">导入纪念日数据</text>
       </button>
     </view>

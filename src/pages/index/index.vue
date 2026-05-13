@@ -98,8 +98,6 @@ const menuConfigStore = useMenuConfigStore()
 
 // 首次启动检测：跳转到第一个启用的 Tab 菜单
 onMounted(() => {
-  menuConfigStore.loadFromStorage()
-
   let isFirstLaunch: boolean | string = ''
   try {
     isFirstLaunch = uni.getStorageSync('firstLaunch')

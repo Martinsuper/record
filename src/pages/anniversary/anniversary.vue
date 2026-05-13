@@ -20,6 +20,7 @@
     <view v-if="showSearch" class="search-section">
       <view class="search-box glass-card">
         <FaIcon name="search" size="28rpx" />
+        <u-input
           v-model="searchInput"
           placeholder="请输入纪念日名称"
           border="none"
@@ -339,11 +340,11 @@ function onFormSaved() {
     width: 120rpx;
     height: 120rpx;
     border-radius: $radius-full;
-    background: $gradient-warm;
+    background: $gradient-primary;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8rpx 32rpx rgba(249, 115, 22, 0.4);
+    box-shadow: $shadow-glow;
     transition: all $transition-normal;
     z-index: 1000;
 
@@ -354,7 +355,7 @@ function onFormSaved() {
 
     &:active {
       transform: scale(0.92);
-      box-shadow: 0 0 30rpx rgba(249, 115, 22, 0.5);
+      box-shadow: 0 0 30rpx rgba(255, 107, 107, 0.4);
     }
   }
 }

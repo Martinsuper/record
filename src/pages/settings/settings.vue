@@ -39,7 +39,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import { useMenuConfigStore } from '@/store/menuConfig'
@@ -51,22 +50,8 @@ const menuConfigStore = useMenuConfigStore()
 // 导航栏高度
 const { navBarHeight } = useNavBarHeight()
 
-// 加载菜单配置
-onMounted(() => {
-  menuConfigStore.loadFromStorage()
-})
-
-// 导航到页面
+// 加载菜单配置（已由 App.vue onLaunch 初始化）
 function navigateTo(item: MenuItemConfig) {
-  if (item.path === 'popup') {
-    // 特殊处理：类型管理是弹窗
-    uni.showToast({
-      title: '类型管理请在事件页面操作',
-      icon: 'none',
-      duration: 2000
-    })
-    return
-  }
   uni.navigateTo({
     url: item.path
   })
@@ -76,8 +61,7 @@ function navigateTo(item: MenuItemConfig) {
 function getIconClass(id: string): string {
   const classes: Record<string, string> = {
     'page_data_manager': 'gradient-data',
-    'page_menu_editor': 'gradient-menu',
-    'page_type_manager': 'gradient-type'
+    'page_menu_editor': 'gradient-menu'
   }
   return classes[id] || 'gradient-data'
 }
@@ -86,8 +70,7 @@ function getIconClass(id: string): string {
 function getDesc(id: string): string {
   const descs: Record<string, string> = {
     'page_data_manager': '导出或导入数据',
-    'page_menu_editor': '自定义功能栏',
-    'page_type_manager': '管理事件类型'
+    'page_menu_editor': '自定义功能栏'
   }
   return descs[id] || ''
 }
@@ -184,11 +167,6 @@ function getDesc(id: string): string {
         &.gradient-menu {
           background: $gradient-aurora;
           box-shadow: 0 8rpx 24rpx rgba(16, 185, 129, 0.3);
-        }
-
-        &.gradient-type {
-          background: $gradient-cool;
-          box-shadow: 0 8rpx 24rpx rgba(6, 182, 212, 0.3);
         }
       }
 

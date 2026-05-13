@@ -1,56 +1,59 @@
 <template>
   <u-popup :show="visible" mode="bottom" round="24" @close="onClose">
-    <view class="anniversary-form glass-card">
-      <!-- Header -->
-      <view class="form-header">
-        <view class="header-icon">
-          <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
-          <FaIcon v-else name="plus" size="28rpx" />
-        </view>
-        <text class="form-title gradient-text">{{ isEditMode ? '编辑纪念日' : '添加纪念日' }}</text>
-        <view class="close-btn" @click="onClose">
-          <FaIcon name="times" size="18rpx" />
-        </view>
-      </view>
-
-      <!-- Form body -->
-      <view class="form-body">
-        <!-- Name -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="pen" size="16rpx" />
-            <text>纪念日名称</text>
+    <scroll-view scroll-y class="form-scroll">
+      <view class="anniversary-form glass-card">
+        <!-- Header -->
+        <view class="form-header">
+          <view class="header-icon">
+            <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
+            <FaIcon v-else name="plus" size="28rpx" />
           </view>
-          <view class="input-wrapper">
-            <u-input
-              v-model="anniversaryName"
-              placeholder="请输入纪念日名称"
-              border="none"
-              :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
-              :placeholderStyle="{ color: '#9CA3AF' }"
-            />
+          <text class="form-title gradient-text">{{ isEditMode ? '编辑纪念日' : '添加纪念日' }}</text>
+          <view class="close-btn" @click="onClose">
+            <FaIcon name="times" size="20rpx" />
           </view>
         </view>
 
-        <!-- Category -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="tag" size="16rpx" />
-            <text>分类</text>
+        <!-- Form body -->
+        <view class="form-body">
+          <!-- Name -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="pen" size="16rpx" />
+              <text>纪念日名称</text>
+            </view>
+            <view class="input-wrapper">
+              <u-input
+                v-model="anniversaryName"
+                placeholder="请输入纪念日名称"
+                border="none"
+                :maxlength="50"
+                :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
+                :placeholderStyle="{ color: '#9CA3AF' }"
+              />
+              <text class="char-count">{{ anniversaryName.length }}/50</text>
+            </view>
           </view>
-          <view class="category-select" @click="showCategoryPicker = true">
-            <text class="category-text">{{ selectedCategoryDisplay }}</text>
-            <FaIcon name="chevron-right" size="16rpx" />
-          </view>
-        </view>
 
-        <!-- Date -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="calendar" size="16rpx" />
-            <text>目标日期</text>
+          <!-- Category -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="tag" size="16rpx" />
+              <text>分类</text>
+            </view>
+            <view class="category-select" @click="showCategoryPicker = true">
+              <FaIcon :name="selectedCategoryIcon" size="24rpx" />
+              <text class="category-text">{{ selectedCategoryName }}</text>
+              <FaIcon name="chevron-right" size="20rpx" />
+            </view>
           </view>
-          <view class="date-picker-row">
+
+          <!-- Date -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="calendar" size="16rpx" />
+              <text>目标日期</text>
+            </view>
             <u-datetime-picker
               :show="showDatePicker"
               v-model="anniversaryDate"
@@ -66,48 +69,37 @@
               <FaIcon name="chevron-right" size="20rpx" />
             </view>
           </view>
-        </view>
 
-        <!-- Repeat type -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="undo" size="20rpx" />
-            <text>重复方式</text>
-          </view>
-          <view class="repeat-options">
-            <view class="repeat-row">
+          <!-- Repeat type -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="undo" size="16rpx" />
+              <text>重复方式</text>
+            </view>
+            <view class="option-grid">
               <view
-                class="repeat-option"
+                class="option-btn"
                 :class="{ active: repeatType === 'year' }"
                 @click="repeatType = 'year'"
               >
                 <text>每年</text>
               </view>
               <view
-                class="repeat-option"
+                class="option-btn"
                 :class="{ active: repeatType === 'month' }"
                 @click="repeatType = 'month'"
               >
                 <text>每月</text>
               </view>
               <view
-                class="repeat-option"
+                class="option-btn"
                 :class="{ active: repeatType === 'week' }"
                 @click="repeatType = 'week'"
               >
                 <text>每周</text>
               </view>
               <view
-                class="repeat-option"
-                :class="{ active: repeatType === 'day' }"
-                @click="repeatType = 'day'"
-              >
-                <text>每天</text>
-              </view>
-            </view>
-            <view class="repeat-row">
-              <view
-                class="repeat-option full-width"
+                class="option-btn"
                 :class="{ active: repeatType === 'none' }"
                 @click="repeatType = 'none'"
               >
@@ -115,50 +107,48 @@
               </view>
             </view>
           </view>
-        </view>
 
-        <!-- Display mode -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="clock" size="16rpx" />
-            <text>显示模式</text>
-          </view>
-          <view class="mode-options">
-            <view
-              class="mode-option"
-              :class="{ active: displayMode === 'countdown' }"
-              @click="displayMode = 'countdown'"
-            >
-              <FaIcon name="arrow-right" size="16rpx" />
-              <text>倒计时</text>
+          <!-- Display mode -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="clock" size="16rpx" />
+              <text>显示模式</text>
             </view>
-            <view
-              class="mode-option"
-              :class="{ active: displayMode === 'elapsed' }"
-              @click="displayMode = 'elapsed'"
-            >
-              <FaIcon name="arrow-left" size="16rpx" />
-              <text>正计时</text>
+            <view class="option-row">
+              <view
+                class="option-btn"
+                :class="{ active: displayMode === 'countdown' }"
+                @click="displayMode = 'countdown'"
+              >
+                <text>倒计时</text>
+              </view>
+              <view
+                class="option-btn"
+                :class="{ active: displayMode === 'elapsed' }"
+                @click="displayMode = 'elapsed'"
+              >
+                <text>正计时</text>
+              </view>
             </view>
           </view>
         </view>
-      </view>
 
-      <!-- Footer -->
-      <view class="form-footer">
-        <view v-if="isEditMode" class="btn-delete" @click="onDelete">
-          <FaIcon name="trash" size="20rpx" />
-          <text>删除</text>
-        </view>
-        <view class="btn-cancel" @click="onClose">
-          <text>取消</text>
-        </view>
-        <view class="btn-save" @click="onSave">
-          <FaIcon name="check" size="20rpx" />
-          <text>保存</text>
+        <!-- Footer -->
+        <view class="form-footer">
+          <view v-if="isEditMode" class="btn-delete" @click="onDelete">
+            <FaIcon name="trash" size="20rpx" />
+            <text>删除</text>
+          </view>
+          <view class="btn-cancel" @click="onClose">
+            <text>取消</text>
+          </view>
+          <view class="btn-save" @click="onSave">
+            <FaIcon name="check" size="20rpx" />
+            <text>保存</text>
+          </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
   </u-popup>
 
   <!-- Category Picker -->
@@ -217,17 +207,14 @@ const showDeleteConfirm = ref(false)
 
 // Category state
 const showCategoryPicker = ref(false)
-const selectedCategoryId = ref('other')
+const selectedCategoryId = ref<string | null>(null)
 
-// Get category display text
-const selectedCategoryDisplay = computed(() => {
-  const category = categoryStore.getCategoryById(selectedCategoryId.value)
-  return category ? `${category.icon} ${category.name}` : '选择分类'
-})
+// Get category info
+const selectedCategory = computed(() => categoryStore.getCategoryById(selectedCategoryId.value ?? ''))
+const selectedCategoryName = computed(() => selectedCategory.value?.name || '选择分类')
+const selectedCategoryIcon = computed(() => selectedCategory.value?.icon || 'bookmark')
 
-const formattedDate = computed(() => {
-  return formatAnniversaryDate(anniversaryDate.value)
-})
+const formattedDate = computed(() => formatAnniversaryDate(anniversaryDate.value))
 
 // Reset form when visible changes
 watch(() => props.visible, (val) => {
@@ -236,15 +223,14 @@ watch(() => props.visible, (val) => {
     anniversaryDate.value = Date.now()
     repeatType.value = 'year'
     displayMode.value = 'countdown'
-    selectedCategoryId.value = 'other'
+    selectedCategoryId.value = null
 
-    // 编辑模式填充数据
     if (props.isEditMode && props.editData) {
       anniversaryName.value = props.editData.name
       anniversaryDate.value = props.editData.date
       repeatType.value = props.editData.repeatType
       displayMode.value = props.editData.mode
-      selectedCategoryId.value = props.editData.categoryId || 'other'
+      selectedCategoryId.value = props.editData.categoryId || null
     }
   }
 })
@@ -260,14 +246,12 @@ function onCategorySelect(id: string) {
 }
 
 function onSave() {
-  // Validate
   if (!anniversaryName.value.trim()) {
     uni.showToast({ title: '请输入纪念日名称', icon: 'none' })
     return
   }
 
   if (props.isEditMode && props.editData) {
-    // 更新
     anniversaryStore.updateAnniversary(props.editData.id, {
       name: anniversaryName.value.trim(),
       date: anniversaryDate.value,
@@ -277,7 +261,6 @@ function onSave() {
     })
     uni.showToast({ title: '纪念日已更新', icon: 'success' })
   } else {
-    // 新增
     anniversaryStore.addAnniversary({
       name: anniversaryName.value.trim(),
       date: anniversaryDate.value,
@@ -312,6 +295,10 @@ function onClose() {
 </script>
 
 <style lang="scss" scoped>
+.form-scroll {
+  max-height: 85vh;
+}
+
 .anniversary-form {
   border-radius: $radius-xl $radius-xl 0 0;
   padding: $spacing-lg;
@@ -326,16 +313,11 @@ function onClose() {
       width: 64rpx;
       height: 64rpx;
       border-radius: $radius-lg;
-      background: $gradient-warm;
+      background: $gradient-primary;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-right: $spacing-md;
-
-      .fa-solid {
-        font-size: 28rpx;
-        color: #ffffff;
-      }
     }
 
     .form-title {
@@ -352,11 +334,6 @@ function onClose() {
       display: flex;
       align-items: center;
       justify-content: center;
-
-      .fa-solid {
-        font-size: 18rpx;
-        color: $text-secondary;
-      }
     }
   }
 
@@ -370,11 +347,6 @@ function onClose() {
         gap: $spacing-xs;
         margin-bottom: $spacing-md;
 
-        .fa-solid {
-          font-size: 16rpx;
-          color: $accent-indigo;
-        }
-
         text {
           font-size: 28rpx;
           font-weight: 600;
@@ -387,122 +359,98 @@ function onClose() {
         border-radius: $radius-lg;
         padding: $spacing-md;
         border: 1px solid rgba(99, 102, 241, 0.1);
+        display: flex;
+        align-items: center;
         transition: all $transition-fast;
 
         &:focus-within {
           border-color: $accent-indigo;
           background: rgba(99, 102, 241, 0.08);
         }
-      }
 
-      .date-picker-row {
-        .date-display {
-          display: flex;
-          align-items: center;
-          background: rgba(99, 102, 241, 0.05);
-          border-radius: $radius-lg;
-          padding: $spacing-md;
-          border: 1px solid rgba(99, 102, 241, 0.1);
-          gap: $spacing-md;
-
-          .fa-solid {
-            font-size: 20rpx;
-            color: $accent-indigo;
-          }
-
-          .date-text {
-            flex: 1;
-            font-size: 32rpx;
-            color: $text-primary;
-            font-weight: 500;
-          }
+        .char-count {
+          font-size: 24rpx;
+          color: $text-muted;
+          margin-left: $spacing-sm;
+          flex-shrink: 0;
         }
       }
 
-      .category-select {
+      .category-select,
+      .date-display {
         display: flex;
         align-items: center;
         background: rgba(99, 102, 241, 0.05);
         border-radius: $radius-lg;
         padding: $spacing-md;
         border: 1px solid rgba(99, 102, 241, 0.1);
-        gap: $spacing-md;
+        gap: $spacing-sm;
+        transition: all $transition-fast;
 
-        .category-text {
+        &:active {
+          background: rgba(99, 102, 241, 0.1);
+          border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .category-text,
+        .date-text {
           flex: 1;
           font-size: 32rpx;
           color: $text-primary;
           font-weight: 500;
         }
-
-        .fa-solid {
-          font-size: 16rpx;
-          color: $text-muted;
-        }
       }
 
-      .repeat-options {
-        display: flex;
-        flex-direction: column;
+      .option-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: $spacing-md;
 
-        .repeat-row {
-          display: flex;
-          gap: $spacing-md;
-
-          .repeat-option {
-            flex: 1;
-            padding: $spacing-md $spacing-lg;
-            border-radius: $radius-lg;
-            background: rgba(99, 102, 241, 0.05);
-            border: 1px solid rgba(99, 102, 241, 0.1);
-            transition: all $transition-fast;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            text {
-              font-size: 28rpx;
-              color: $text-secondary;
-            }
-
-            &.active {
-              background: $gradient-cool;
-              border-color: transparent;
-
-              text {
-                color: #ffffff;
-                font-weight: 600;
-              }
-            }
-
-            &.full-width {
-              flex: 1;
-            }
-          }
-        }
-      }
-
-      .mode-options {
-        display: flex;
-        gap: $spacing-md;
-
-        .mode-option {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: $spacing-sm;
+        .option-btn {
           padding: $spacing-md $spacing-lg;
           border-radius: $radius-lg;
           background: rgba(99, 102, 241, 0.05);
           border: 1px solid rgba(99, 102, 241, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: all $transition-fast;
 
-          .fa-solid {
-            font-size: 16rpx;
+          text {
+            font-size: 28rpx;
             color: $text-secondary;
           }
+
+          &.active {
+            background: $gradient-primary;
+            border-color: transparent;
+
+            text {
+              color: #ffffff;
+              font-weight: 600;
+            }
+          }
+
+          &:active {
+            transform: scale(0.96);
+          }
+        }
+      }
+
+      .option-row {
+        display: flex;
+        gap: $spacing-md;
+
+        .option-btn {
+          flex: 1;
+          padding: $spacing-md $spacing-lg;
+          border-radius: $radius-lg;
+          background: rgba(99, 102, 241, 0.05);
+          border: 1px solid rgba(99, 102, 241, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all $transition-fast;
 
           text {
             font-size: 28rpx;
@@ -513,14 +461,14 @@ function onClose() {
             background: $gradient-warm;
             border-color: transparent;
 
-            .fa-solid {
-              color: #ffffff;
-            }
-
             text {
               color: #ffffff;
               font-weight: 600;
             }
+          }
+
+          &:active {
+            transform: scale(0.96);
           }
         }
       }
@@ -552,17 +500,12 @@ function onClose() {
       flex: 2;
       height: 88rpx;
       border-radius: $radius-lg;
-      background: $gradient-warm;
+      background: $gradient-primary;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: $spacing-sm;
       box-shadow: $shadow-glow;
-
-      .fa-solid {
-        font-size: 20rpx;
-        color: #ffffff;
-      }
 
       text {
         font-size: 32rpx;
@@ -580,11 +523,6 @@ function onClose() {
       align-items: center;
       justify-content: center;
       gap: $spacing-xs;
-
-      .fa-solid {
-        font-size: 20rpx;
-        color: #EF4444;
-      }
 
       text {
         font-size: 28rpx;

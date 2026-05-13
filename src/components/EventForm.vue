@@ -1,55 +1,55 @@
 <template>
   <u-popup :show="visible" mode="bottom" round="24" @close="onClose">
-    <view class="event-form glass-card">
-      <!-- Header -->
-      <view class="form-header">
-        <view class="header-icon">
-          <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
-          <FaIcon v-else name="plus" size="28rpx" />
-        </view>
-        <text class="form-title gradient-text">{{ isEditMode ? '编辑事件' : '添加事件' }}</text>
-        <view class="close-btn" @click="onClose">
-          <FaIcon name="times" size="18rpx" />
-        </view>
-      </view>
-
-      <!-- Form body -->
-      <view class="form-body">
-        <!-- Event name -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="pen" size="16rpx" />
-            <text>事件名称</text>
+    <scroll-view scroll-y class="form-scroll">
+      <view class="event-form glass-card">
+        <!-- Header -->
+        <view class="form-header">
+          <view class="header-icon">
+            <FaIcon v-if="isEditMode" name="edit" size="28rpx" />
+            <FaIcon v-else name="plus" size="28rpx" />
           </view>
-          <view class="input-wrapper">
-            <u-input
-              v-model="eventName"
-              placeholder="请输入事件名称"
-              border="none"
-              :maxlength="50"
-              :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
-              :placeholderStyle="{ color: '#9CA3AF' }"
-            />
-            <text class="char-count">{{ eventName.length }}/50</text>
+          <text class="form-title gradient-text">{{ isEditMode ? '编辑事件' : '添加事件' }}</text>
+          <view class="close-btn" @click="onClose">
+            <FaIcon name="times" size="20rpx" />
           </view>
         </view>
 
-        <!-- Type picker -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="tags" size="16rpx" />
-            <text>事件类型</text>
+        <!-- Form body -->
+        <view class="form-body">
+          <!-- Event name -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="pen" size="16rpx" />
+              <text>事件名称</text>
+            </view>
+            <view class="input-wrapper">
+              <u-input
+                v-model="eventName"
+                placeholder="请输入事件名称"
+                border="none"
+                :maxlength="50"
+                :customStyle="{ fontSize: '32rpx', color: '#1E1B4B' }"
+                :placeholderStyle="{ color: '#9CA3AF' }"
+              />
+              <text class="char-count">{{ eventName.length }}/50</text>
+            </view>
           </view>
-          <TypePicker v-model="eventTypeId" :showClear="isEditMode" />
-        </view>
 
-        <!-- Time picker -->
-        <view class="form-item">
-          <view class="form-label">
-            <FaIcon name="clock" size="16rpx" />
-            <text>事件时间</text>
+          <!-- Type picker -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="tag" size="16rpx" />
+              <text>事件类型</text>
+            </view>
+            <TypePicker v-model="eventTypeId" :showClear="isEditMode" />
           </view>
-          <view class="time-picker-row">
+
+          <!-- Time picker -->
+          <view class="form-item">
+            <view class="form-label">
+              <FaIcon name="clock" size="16rpx" />
+              <text>事件时间</text>
+            </view>
             <u-datetime-picker
               :show="showTimePicker"
               v-model="eventTime"
@@ -66,20 +66,34 @@
             </view>
           </view>
         </view>
-      </view>
 
-      <!-- Footer -->
-      <view class="form-footer">
-        <view class="btn-cancel" @click="onClose">
-          <text>取消</text>
-        </view>
-        <view class="btn-save" @click="onSave">
-          <FaIcon name="check" size="20rpx" />
-          <text>保存</text>
+        <!-- Footer -->
+        <view class="form-footer">
+          <view v-if="isEditMode" class="btn-delete" @click="onDelete">
+            <FaIcon name="trash" size="20rpx" />
+            <text>删除</text>
+          </view>
+          <view class="btn-cancel" @click="onClose">
+            <text>取消</text>
+          </view>
+          <view class="btn-save" @click="onSave">
+            <FaIcon name="check" size="20rpx" />
+            <text>保存</text>
+          </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
   </u-popup>
+
+  <!-- Delete confirm modal -->
+  <u-modal
+    :show="showDeleteConfirm"
+    title="确认删除"
+    content="确定要删除这个事件吗？"
+    showCancelButton
+    @confirm="confirmDelete"
+    @cancel="showDeleteConfirm = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -109,6 +123,7 @@ const eventName = ref('')
 const eventTypeId = ref<string | null>(null)
 const eventTime = ref(Date.now())
 const showTimePicker = ref(false)
+const showDeleteConfirm = ref(false)
 
 const formattedTime = computed(() => {
   const date = new Date(eventTime.value)
@@ -127,7 +142,6 @@ watch(() => props.visible, (val) => {
     eventTypeId.value = null
     eventTime.value = Date.now()
 
-    // 如果是编辑模式，填充现有数据
     if (props.isEditMode && props.editData) {
       eventName.value = props.editData.name
       eventTypeId.value = props.editData.typeId
@@ -142,7 +156,6 @@ function onTimeConfirm(e: { value: number }) {
 }
 
 function onSave() {
-  // Validate
   if (!eventName.value.trim()) {
     uni.showToast({ title: '请输入事件名称', icon: 'none' })
     return
@@ -153,7 +166,6 @@ function onSave() {
   }
 
   if (props.isEditMode && props.editData) {
-    // 更新现有事件
     eventStore.updateEvent(props.editData.id, {
       name: eventName.value.trim(),
       typeId: eventTypeId.value,
@@ -161,7 +173,6 @@ function onSave() {
     })
     uni.showToast({ title: '事件已更新', icon: 'success' })
   } else {
-    // 添加新事件
     eventStore.addEvent({
       name: eventName.value.trim(),
       typeId: eventTypeId.value,
@@ -174,28 +185,30 @@ function onSave() {
   emit('close')
 }
 
-function onClose() {
-  // 检查是否有输入内容
-  const hasContent = eventName.value.trim() || eventTypeId.value
-  if (hasContent && !props.isEditMode) {
-    // 新建模式下有内容，弹出确认
-    uni.showModal({
-      title: '提示',
-      content: '已输入的内容将会丢失，确定取消吗？',
-      confirmColor: '#6366F1',
-      success: (res) => {
-        if (res.confirm) {
-          emit('close')
-        }
-      }
-    })
-  } else {
+function onDelete() {
+  showDeleteConfirm.value = true
+}
+
+function confirmDelete() {
+  if (props.isEditMode && props.editData) {
+    eventStore.deleteEvent(props.editData.id)
+    uni.showToast({ title: '事件已删除', icon: 'success' })
+    emit('save')
     emit('close')
   }
+  showDeleteConfirm.value = false
+}
+
+function onClose() {
+  emit('close')
 }
 </script>
 
 <style lang="scss" scoped>
+.form-scroll {
+  max-height: 85vh;
+}
+
 .event-form {
   border-radius: $radius-xl $radius-xl 0 0;
   padding: $spacing-lg;
@@ -210,16 +223,11 @@ function onClose() {
       width: 64rpx;
       height: 64rpx;
       border-radius: $radius-lg;
-      background: $gradient-aurora;
+      background: $gradient-primary;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-right: $spacing-md;
-
-      .fa-solid {
-        font-size: 28rpx;
-        color: #ffffff;
-      }
     }
 
     .form-title {
@@ -236,11 +244,6 @@ function onClose() {
       display: flex;
       align-items: center;
       justify-content: center;
-
-      .fa-solid {
-        font-size: 18rpx;
-        color: $text-secondary;
-      }
     }
   }
 
@@ -254,11 +257,6 @@ function onClose() {
         gap: $spacing-xs;
         margin-bottom: $spacing-md;
 
-        .fa-solid {
-          font-size: 16rpx;
-          color: $accent-indigo;
-        }
-
         text {
           font-size: 28rpx;
           font-weight: 600;
@@ -271,9 +269,9 @@ function onClose() {
         border-radius: $radius-lg;
         padding: $spacing-md;
         border: 1px solid rgba(99, 102, 241, 0.1);
-        transition: all $transition-fast;
         display: flex;
         align-items: center;
+        transition: all $transition-fast;
 
         &:focus-within {
           border-color: $accent-indigo;
@@ -288,33 +286,26 @@ function onClose() {
         }
       }
 
-      .time-picker-row {
-        .time-display {
-          display: flex;
-          align-items: center;
-          background: rgba(99, 102, 241, 0.05);
-          border-radius: $radius-lg;
-          padding: $spacing-md;
-          border: 1px solid rgba(99, 102, 241, 0.1);
-          gap: $spacing-md;
-          transition: all $transition-fast;
+      .time-display {
+        display: flex;
+        align-items: center;
+        background: rgba(99, 102, 241, 0.05);
+        border-radius: $radius-lg;
+        padding: $spacing-md;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        gap: $spacing-sm;
+        transition: all $transition-fast;
 
-          &:active {
-            background: rgba(99, 102, 241, 0.1);
-            border-color: rgba(99, 102, 241, 0.3);
-          }
+        &:active {
+          background: rgba(99, 102, 241, 0.1);
+          border-color: rgba(99, 102, 241, 0.3);
+        }
 
-          .fa-solid {
-            font-size: 20rpx;
-            color: $accent-indigo;
-          }
-
-          .time-text {
-            flex: 1;
-            font-size: 32rpx;
-            color: $text-primary;
-            font-weight: 500;
-          }
+        .time-text {
+          flex: 1;
+          font-size: 32rpx;
+          color: $text-primary;
+          font-weight: 500;
         }
       }
     }
@@ -352,15 +343,27 @@ function onClose() {
       gap: $spacing-sm;
       box-shadow: $shadow-glow;
 
-      .fa-solid {
-        font-size: 20rpx;
-        color: #ffffff;
-      }
-
       text {
         font-size: 32rpx;
         font-weight: 600;
         color: #ffffff;
+      }
+    }
+
+    .btn-delete {
+      height: 88rpx;
+      padding: 0 $spacing-lg;
+      border-radius: $radius-lg;
+      background: rgba(239, 68, 68, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-xs;
+
+      text {
+        font-size: 28rpx;
+        font-weight: 600;
+        color: #EF4444;
       }
     }
   }
