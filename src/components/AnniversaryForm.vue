@@ -257,7 +257,7 @@ function onSave() {
       date: anniversaryDate.value,
       repeatType: repeatType.value,
       mode: displayMode.value,
-      categoryId: selectedCategoryId.value
+      categoryId: selectedCategoryId.value ?? ''
     })
     uni.showToast({ title: '纪念日已更新', icon: 'success' })
   } else {
@@ -266,7 +266,7 @@ function onSave() {
       date: anniversaryDate.value,
       repeatType: repeatType.value,
       mode: displayMode.value,
-      categoryId: selectedCategoryId.value
+      categoryId: selectedCategoryId.value ?? ''
     })
     uni.showToast({ title: '纪念日已添加', icon: 'success' })
   }

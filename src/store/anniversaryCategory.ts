@@ -107,7 +107,9 @@ export const useAnniversaryCategoryStore = defineStore('anniversaryCategory', {
         }
       }
 
-      this.saveToStorage()
+      if (added > 0) {
+        this.saveToStorage()
+      }
       return { added, skipped }
     }
   }

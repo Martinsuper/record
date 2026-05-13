@@ -86,14 +86,12 @@ export const useEventTypeStore = defineStore('eventType', {
         this.types.splice(index, 1)
         this.saveToStorage()
 
-        // 更新关联事件的 typeId 为空字符串
+        // 清除关联事件的 typeId
         const eventStore = useEventStore()
-        eventStore.events.forEach(event => {
-          if (event.typeId === id) {
-            event.typeId = ''
-          }
+        const eventsToClear = eventStore.events.filter(e => e.typeId === id)
+        eventsToClear.forEach(event => {
+          eventStore.updateEvent(event.id, { typeId: '' })
         })
-        eventStore.saveToStorage()
       }
     },
 
@@ -113,8 +111,8 @@ export const useEventTypeStore = defineStore('eventType', {
         const existing = this.types.find(t => t.id === imported.id)
 
         if (existing) {
-          existing.name = imported.name || existing.name
-          existing.color = imported.color || existing.color
+          existing.name = imported.name ?? existing.name
+          existing.color = imported.color ?? existing.color
           updated++
         } else {
           this.types.push({

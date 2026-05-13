@@ -75,12 +75,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { useEventStore } from '@/store/event'
-import { useEventTypeStore } from '@/store/eventType'
 import { useAnniversaryStore } from '@/store/anniversary'
-import { useMenuConfigStore } from '@/store/menuConfig'
 import { getUpcomingAnniversaries } from '@/utils/anniversary'
 import { useNavBarHeight } from '@/utils/useNavBarHeight'
 import FilterBar from '@/components/FilterBar.vue'
@@ -92,36 +90,8 @@ import AnniversaryReminder from '@/components/AnniversaryReminder.vue'
 import FaIcon from '@/components/FaIcon.vue'
 
 const eventStore = useEventStore()
-const eventTypeStore = useEventTypeStore()
 const anniversaryStore = useAnniversaryStore()
-const menuConfigStore = useMenuConfigStore()
 
-// 首次启动检测：跳转到第一个启用的 Tab 菜单
-onMounted(() => {
-  let isFirstLaunch: boolean | string = ''
-  try {
-    isFirstLaunch = uni.getStorageSync('firstLaunch')
-  } catch (e) {
-    console.error('getStorageSync error:', e)
-  }
-
-  if (isFirstLaunch === '' || isFirstLaunch === true || isFirstLaunch === 'true') {
-    try {
-      uni.setStorageSync('firstLaunch', false)
-    } catch (e) {
-      console.error('setStorageSync error:', e)
-    }
-
-    const firstTab = menuConfigStore.firstEnabledTab
-    const currentPath = '/pages/index/index'
-
-    if (firstTab && firstTab.path && firstTab.path !== currentPath) {
-      uni.reLaunch({ url: firstTab.path })
-    }
-  }
-})
-
-// 即将到来的纪念日列表
 const upcomingAnniversaries = computed(() => {
   return getUpcomingAnniversaries(anniversaryStore.anniversaries, 3)
 })

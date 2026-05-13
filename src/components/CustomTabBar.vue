@@ -25,9 +25,9 @@ import FaIcon from '@/components/FaIcon.vue'
 const menuConfigStore = useMenuConfigStore()
 const currentPath = ref('')
 
-// 加载菜单配置
+// 初始化当前页面路径（App.vue onLaunch 已加载菜单配置）
 onMounted(() => {
-  menuConfigStore.loadFromStorage()
+  currentPath.value = getCurrentPath()
 })
 
 function getCurrentPath(): string {
@@ -37,9 +37,6 @@ function getCurrentPath(): string {
   const route = currentPage.route || ''
   return '/' + route
 }
-
-// 初始化时获取当前页面路径
-currentPath.value = getCurrentPath()
 
 // 每次页面显示时更新高亮状态
 onShow(() => {

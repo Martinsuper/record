@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useMenuConfigStore } from '@/store/menuConfig'
 import CustomTabBar from '@/components/CustomTabBar.vue'
 import FaIcon from '@/components/FaIcon.vue'
@@ -128,11 +128,6 @@ const dragStartIndex = ref<number>(0)
 const dragCurrentIndex = ref<number>(0)
 const startY = ref<number>(0)
 const longPressTimer = ref<number | null>(null)
-
-// 加载菜单配置
-onMounted(() => {
-  menuConfigStore.loadFromStorage()
-})
 
 // 触摸开始
 function onTouchStart(e: TouchEvent, id: string, type: 'tab' | 'page', index: number) {

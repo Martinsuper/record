@@ -254,7 +254,7 @@ export const useEventStore = defineStore('event', {
      * 重置分页状态
      */
     resetPagination(): void {
-      this.loadedCount = 0
+      this.loadedCount = this.pageSize
     },
 
     /**
@@ -285,9 +285,9 @@ export const useEventStore = defineStore('event', {
         const existing = this.events.find((e) => e.id === imported.id)
 
         if (existing) {
-          existing.name = imported.name || existing.name
-          existing.typeId = imported.typeId || existing.typeId
-          existing.time = imported.time || existing.time
+          existing.name = imported.name ?? existing.name
+          existing.typeId = imported.typeId ?? existing.typeId
+          existing.time = imported.time ?? existing.time
           updated++
         } else {
           this.events.push({

@@ -22,7 +22,7 @@
         <view class="card-content">
           <view class="card-header">
             <text class="card-name">{{ event.name }}</text>
-            <view v-if="typeName" class="type-indicator" :style="{ backgroundColor: getTypeColor(event.typeId) }">
+            <view v-if="typeName(event.typeId)" class="type-indicator" :style="{ backgroundColor: getTypeColor(event.typeId) }">
               <text class="type-text">{{ typeName(event.typeId) }}</text>
             </view>
           </view>
@@ -55,17 +55,10 @@ import { formatTime } from '@/utils/time'
 import FaIcon from '@/components/FaIcon.vue'
 
 const eventStore = useEventStore()
-const eventTypeStore = useEventTypeStore()
 
 const emit = defineEmits(['edit', 'loadMore'])
 
-// 监听事件类型变化
-const typeVersion = computed(() => eventTypeStore.types.length)
-
-const filteredEvents = computed(() => {
-  void typeVersion.value
-  return eventStore.filteredEvents
-})
+const filteredEvents = computed(() => eventStore.filteredEvents)
 
 // 是否有更多数据
 const hasMore = computed(() => eventStore.hasMoreEvents)

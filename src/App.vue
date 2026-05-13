@@ -21,6 +21,17 @@ export default {
     anniversaryCategoryStore.loadFromStorage()
     menuConfigStore.loadFromStorage()
 
+    // 默认页面跳转：确保每次启动都进入用户配置的第一个 Tab
+    const firstTab = menuConfigStore.firstEnabledTab
+    const defaultPath = firstTab?.path || '/pages/index/index'
+    const savedDefault = uni.getStorageSync('defaultTabPath') || ''
+
+    if (savedDefault !== defaultPath) {
+      // 菜单配置发生变化，更新默认路径并跳转
+      uni.setStorageSync('defaultTabPath', defaultPath)
+      uni.reLaunch({ url: defaultPath })
+    }
+
     // 小程序环境：计算导航栏高度
     // #ifdef MP-WEIXIN
     // 计算导航栏高度（胶囊按钮底部 + 胶囊按钮距状态栏的间距）

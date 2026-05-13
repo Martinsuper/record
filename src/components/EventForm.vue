@@ -168,14 +168,14 @@ function onSave() {
   if (props.isEditMode && props.editData) {
     eventStore.updateEvent(props.editData.id, {
       name: eventName.value.trim(),
-      typeId: eventTypeId.value,
+      typeId: eventTypeId.value ?? '',
       time: eventTime.value
     })
     uni.showToast({ title: '事件已更新', icon: 'success' })
   } else {
     eventStore.addEvent({
       name: eventName.value.trim(),
-      typeId: eventTypeId.value,
+      typeId: eventTypeId.value ?? '',
       time: eventTime.value
     })
     uni.showToast({ title: '事件已添加', icon: 'success' })
